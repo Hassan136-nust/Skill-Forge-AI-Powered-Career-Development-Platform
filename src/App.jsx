@@ -13,6 +13,7 @@ import CosmicCatGuide from './components/CosmicCatGuide'
 import AuthModal from './components/AuthModal'
 import StudentDashboard from './components/StudentDashboard'
 import FullRoadmapPage from './components/FullRoadmapPage'
+import AiMentorPage from './components/AiMentorPage'
 import Footer from './components/Footer'
 import './App.css'
 
@@ -23,7 +24,7 @@ export default function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isAuthOpen, setIsAuthOpen] = useState(false)
-  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard' | 'roadmap'
+  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard' | 'roadmap' | 'mentor'
   const [currentUser, setCurrentUser] = useState(null)
 
   const getDashboardPathForUser = (user) => {
@@ -38,12 +39,21 @@ export default function App() {
     return `/${encodeURIComponent(identifier)}/roadmap`
   }
 
+  const getMentorPathForUser = (user) => {
+    if (!user) return '/mentor'
+    const identifier = user._id || (user.email ? user.email.split('@')[0] : 'scholar')
+    return `/${encodeURIComponent(identifier)}/mentor`
+  }
+
   const syncViewFromUrl = () => {
     const path = window.location.pathname
+    const isMentorRoute = path.endsWith('/mentor') || path.includes('/mentor')
     const isRoadmapRoute = path.endsWith('/roadmap') || path.includes('/roadmap')
     const isDashboardRoute = path.endsWith('/dashboard') || path.includes('/dashboard')
     
-    if (isRoadmapRoute) {
+    if (isMentorRoute) {
+      setCurrentView('mentor')
+    } else if (isRoadmapRoute) {
       setCurrentView('roadmap')
     } else if (isDashboardRoute) {
       setCurrentView('dashboard')
@@ -292,6 +302,21 @@ export default function App() {
     )
   }
 
+  // If in Dedicated AI Mentor View, render the full-context chat cockpit with login.webm
+  if (currentView === 'mentor') {
+    return (
+      <AiMentorPage
+        currentUser={currentUser}
+        onBackToDashboard={() => {
+          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getDashboardPathForUser(user)
+          window.history.pushState({}, '', targetUrl)
+          setCurrentView('dashboard')
+        }}
+      />
+    )
+  }
+
   // If in Dashboard View, render the Student Dashboard
   if (currentView === 'dashboard') {
     return (
@@ -311,6 +336,12 @@ export default function App() {
           const targetUrl = getRoadmapPathForUser(user)
           window.history.pushState({}, '', targetUrl)
           setCurrentView('roadmap')
+        }}
+        onOpenAiMentor={() => {
+          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getMentorPathForUser(user)
+          window.history.pushState({}, '', targetUrl)
+          setCurrentView('mentor')
         }}
       />
     )

@@ -45,14 +45,6 @@ const ProfileSchema = new mongoose.Schema(
     certifications: [{ type: String }],
     careerGoal: {
       type: String,
-      enum: [
-        'AI Engineer',
-        'Backend Developer',
-        'Frontend Developer',
-        'Full-Stack Developer',
-        'DevOps Engineer',
-        'Data Scientist',
-      ],
       default: 'AI Engineer',
     },
     completedTasks: [{ type: String }],

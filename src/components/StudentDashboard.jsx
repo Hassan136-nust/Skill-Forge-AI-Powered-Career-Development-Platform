@@ -382,7 +382,7 @@ const getQuizForSkill = (skillName) => {
   }
 }
 
-export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap }) {
+export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, onOpenAiMentor }) {
   const DEFAULT_AVATAR = 'https://imgs.search.brave.com/en8GueUwEke4A7ecDjpRnIpFR8Y-WWOEbjzD2xCNTu0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn'
 
   const [studentProfile, setStudentProfile] = useState(() => {
@@ -1368,6 +1368,30 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
         </nav>
 
         <div className="navbar-right-actions">
+          <button
+            className="navbar-item-btn"
+            style={{
+              color: '#FFD166',
+              border: '1px solid rgba(255, 209, 102, 0.4)',
+              backgroundColor: 'rgba(255, 209, 102, 0.08)',
+              borderRadius: '20px',
+              padding: '0.45rem 1rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              cursor: 'pointer',
+            }}
+            onClick={() => {
+              if (onOpenAiMentor) onOpenAiMentor()
+              else setIsAiChatOpen(true)
+            }}
+            title="Open Dedicated AI Mentor Page"
+          >
+            <Bot size={14} color="#FFD166" />
+            <span>AI Mentor</span>
+          </button>
+
           <button
             className="navbar-item-btn"
             style={{
@@ -3668,7 +3692,13 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
             whileTap={{ scale: 0.95 }}
             animate={{ y: [0, -8, 0] }}
             transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            onClick={() => setIsAiChatOpen(true)}
+            onClick={() => {
+              if (onOpenAiMentor) {
+                onOpenAiMentor()
+              } else {
+                setIsAiChatOpen(true)
+              }
+            }}
             style={{
               display: 'flex',
               flexDirection: 'column',

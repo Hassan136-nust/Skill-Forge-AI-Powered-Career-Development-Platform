@@ -1,0 +1,786 @@
+/* =========================================================================
+   SKILLFORGE AI MENTOR COCKPIT — LUXURY COSMIC GLASSMORPHISM THEME
+   ========================================================================= */
+
+.mentor-root-container {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: #FFF7E8;
+  background-color: #030408;
+  overflow-x: hidden;
+  font-family: var(--font-sans, 'Inter', sans-serif);
+}
+
+/* 🌌 Space Video Background (login.webm) — Bright & High Definition */
+.mentor-bg-video-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.mentor-bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.92;
+  filter: brightness(0.98) contrast(1.05);
+}
+
+.mentor-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 25%, rgba(4, 6, 15, 0.2) 0%, rgba(2, 3, 8, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* 🛸 Main Two-Column Mentorship Cockpit */
+.mentor-cockpit-layout {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.2rem;
+  width: 96%;
+  max-width: 1560px;
+  margin: 0.8rem auto 1.2rem;
+  height: calc(100vh - 95px);
+  min-height: 560px;
+}
+
+@media (max-width: 992px) {
+  .mentor-cockpit-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: calc(100vh - 100px);
+  }
+}
+
+/* 📁 Left Sidebar: Translucent Frosted Glass */
+.mentor-sidebar-panel {
+  background: rgba(8, 12, 24, 0.52);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 209, 102, 0.16);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  height: 100%;
+  overflow: hidden;
+}
+
+.mentor-new-chat-btn {
+  background: linear-gradient(135deg, #FFD166 0%, #FFB703 100%);
+  color: #05060A;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 0.95rem;
+  font-family: var(--font-bungee, 'Bungee', cursive);
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.28);
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-bottom: 0.8rem;
+}
+
+.mentor-new-chat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(255, 209, 102, 0.4);
+  filter: brightness(1.06);
+}
+
+.mentor-search-box {
+  background: rgba(4, 7, 16, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.8rem;
+}
+
+.mentor-search-input {
+  background: transparent;
+  border: none;
+  color: #FFF7E8;
+  font-size: 0.8rem;
+  width: 100%;
+  outline: none;
+}
+
+.mentor-search-input::placeholder {
+  color: #64748B;
+}
+
+.mentor-sessions-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-right: 0.2rem;
+  margin-bottom: 0.8rem;
+}
+
+/* Slim Custom Scrollbars (No Giant Yellow Blocks) */
+.mentor-sessions-list::-webkit-scrollbar,
+.mentor-chat-stream::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mentor-sessions-list::-webkit-scrollbar-track,
+.mentor-chat-stream::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mentor-sessions-list::-webkit-scrollbar-thumb,
+.mentor-chat-stream::-webkit-scrollbar-thumb {
+  background: rgba(255, 209, 102, 0.25);
+  border-radius: 4px;
+}
+
+.mentor-sessions-list::-webkit-scrollbar-thumb:hover,
+.mentor-chat-stream::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 209, 102, 0.55);
+}
+
+.mentor-session-item {
+  background: rgba(12, 16, 30, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mentor-session-item:hover {
+  background: rgba(255, 209, 102, 0.08);
+  border-color: rgba(255, 209, 102, 0.25);
+}
+
+.mentor-session-item.active {
+  background: rgba(255, 209, 102, 0.12);
+  border-color: #FFD166;
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.12);
+}
+
+.mentor-session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  overflow: hidden;
+  flex: 1;
+}
+
+.mentor-session-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #FFF7E8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mentor-session-meta {
+  font-size: 0.65rem;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.mentor-session-delete {
+  background: none;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  opacity: 0.5;
+  transition: all 0.18s ease;
+}
+
+.mentor-session-delete:hover {
+  opacity: 1;
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* 👨‍🚀 Student Mini Dossier Status Pill (Sidebar Footer) */
+.mentor-student-dossier {
+  background: rgba(4, 7, 16, 0.65);
+  border: 1px solid rgba(255, 209, 102, 0.15);
+  border-radius: 10px;
+  padding: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mentor-student-initial-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.2) 0%, rgba(255, 183, 3, 0.2) 100%);
+  border: 1px solid #FFD166;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFD166;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.mentor-student-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  overflow: hidden;
+}
+
+.mentor-student-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #FFF7E8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mentor-student-tag {
+  font-size: 0.64rem;
+  color: #FFD166;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* 💬 Main Chat Stage Arena */
+.mentor-arena-panel {
+  background: rgba(8, 12, 24, 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 209, 102, 0.18);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Arena Header */
+.mentor-arena-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 209, 102, 0.12);
+  background: rgba(12, 16, 32, 0.45);
+}
+
+.mentor-arena-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.mentor-avatar-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1.5px solid rgba(255, 209, 102, 0.4);
+  background: rgba(4, 6, 14, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.2);
+  overflow: hidden;
+  padding: 2px;
+}
+
+.mentor-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+}
+
+.mentor-arena-headline {
+  font-family: var(--font-bungee, 'Bungee', cursive);
+  font-size: 0.88rem;
+  color: #FFD166;
+  margin: 0;
+  letter-spacing: 0.25px;
+}
+
+.mentor-context-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  color: #94A3B8;
+  margin-top: 0.1rem;
+}
+
+.mentor-context-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #27C93F;
+  box-shadow: 0 0 5px #27C93F;
+}
+
+/* Chat Stream */
+.mentor-chat-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* Welcome Empty State */
+.mentor-welcome-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  margin: auto;
+  max-width: 740px;
+}
+
+.mentor-hero-core-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.12) 0%, rgba(255, 183, 3, 0.2) 100%);
+  border: 1px solid rgba(255, 209, 102, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.2);
+  margin-bottom: 0.85rem;
+  animation: float 4s ease-in-out infinite;
+}
+
+.mentor-hero-title {
+  font-family: var(--font-bungee, 'Bungee', cursive);
+  font-size: 1.15rem;
+  color: #FFD166;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.3px;
+}
+
+.mentor-hero-dossier-pill {
+  background: rgba(255, 209, 102, 0.05);
+  border: 1px solid rgba(255, 209, 102, 0.18);
+  border-radius: 14px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  color: #CBD5E1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Suggestion Prompt Grid */
+.mentor-suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.7rem;
+}
+
+@media (max-width: 650px) {
+  .mentor-suggestions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mentor-suggestion-card {
+  background: rgba(12, 16, 32, 0.45);
+  border: 1px solid rgba(255, 209, 102, 0.12);
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.mentor-suggestion-card:hover {
+  background: rgba(255, 209, 102, 0.08);
+  border-color: rgba(255, 209, 102, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 16px rgba(255, 209, 102, 0.12);
+}
+
+.mentor-suggestion-icon-wrap {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 209, 102, 0.06);
+  border: 1px solid rgba(255, 209, 102, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mentor-suggestion-text {
+  font-size: 0.76rem;
+  color: #94A3B8;
+  line-height: 1.38;
+}
+
+/* =========================================================================
+   CHAT BUBBLE STYLES & LUXURIOUS MARKDOWN FORMATTING
+   ========================================================================= */
+
+.mentor-bubble-row {
+  display: flex;
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.mentor-bubble-row.user {
+  justify-content: flex-end;
+}
+
+.mentor-chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 209, 102, 0.4);
+  background: rgba(4, 6, 14, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  overflow: hidden;
+  padding: 1.5px;
+  box-shadow: 0 0 8px rgba(255, 209, 102, 0.15);
+}
+
+.mentor-chat-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mentor-bubble-content {
+  max-width: 88%;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  position: relative;
+  word-break: break-word;
+}
+
+.mentor-bubble-row.user .mentor-bubble-content {
+  background: rgba(255, 209, 102, 0.12);
+  border: 1px solid rgba(255, 209, 102, 0.32);
+  color: #FFF7E8;
+  border-bottom-right-radius: 2px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+}
+
+.mentor-bubble-row.assistant .mentor-bubble-content {
+  background: rgba(10, 15, 28, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #F1F5F9;
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+}
+
+/* 🎨 Enhanced Markdown Styling (Crisp, High-Tech, Professional) */
+.mentor-bubble-content p {
+  margin-bottom: 0.65rem;
+}
+
+.mentor-bubble-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Clean Professional Headings (No bulky distorted Bungee fonts) */
+.mentor-bubble-content h1,
+.mentor-bubble-content h2,
+.mentor-bubble-content h3,
+.mentor-bubble-content h4 {
+  font-family: var(--font-sans, 'Inter', sans-serif);
+  font-weight: 700;
+  color: #FFD166;
+  margin: 1.1rem 0 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: -0.2px;
+}
+
+.mentor-bubble-content h1 { font-size: 1.15rem; }
+.mentor-bubble-content h2 { font-size: 1.05rem; }
+.mentor-bubble-content h3 { font-size: 0.96rem; }
+.mentor-bubble-content h4 { font-size: 0.88rem; }
+
+.mentor-bubble-content strong,
+.mentor-bubble-content b {
+  color: #FFD166;
+  font-weight: 700;
+}
+
+.mentor-bubble-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 209, 102, 0.35), transparent);
+  margin: 1.2rem 0;
+}
+
+.mentor-bubble-content ul,
+.mentor-bubble-content ol {
+  padding-left: 1.3rem;
+  margin: 0.6rem 0 0.8rem;
+}
+
+.mentor-bubble-content li {
+  margin-bottom: 0.35rem;
+  color: #E2E8F0;
+}
+
+.mentor-bubble-content blockquote {
+  border-left: 3px solid #FFD166;
+  background: rgba(255, 209, 102, 0.05);
+  padding: 0.5rem 0.9rem;
+  border-radius: 0 8px 8px 0;
+  margin: 0.8rem 0;
+  color: #CBD5E1;
+  font-style: italic;
+}
+
+/* 📊 Luxurious Glassmorphic Markdown Tables */
+.mentor-bubble-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0.9rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 209, 102, 0.2);
+  background: rgba(4, 7, 16, 0.65);
+}
+
+.mentor-bubble-content th {
+  background: rgba(255, 209, 102, 0.12);
+  color: #FFD166;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 209, 102, 0.22);
+}
+
+.mentor-bubble-content td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.82rem;
+  color: #E2E8F0;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.mentor-bubble-content tr:last-child td {
+  border-bottom: none;
+}
+
+.mentor-bubble-content tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.mentor-bubble-content tr:hover td {
+  background: rgba(255, 209, 102, 0.04);
+}
+
+/* 💻 Sleek Code & Terminal Tags */
+.mentor-bubble-content code:not(pre code) {
+  background: rgba(255, 209, 102, 0.1);
+  color: #FFD166;
+  border: 1px solid rgba(255, 209, 102, 0.25);
+  border-radius: 5px;
+  padding: 0.12rem 0.38rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.mentor-bubble-content pre {
+  background: rgba(3, 5, 12, 0.92);
+  border: 1px solid rgba(255, 209, 102, 0.2);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0.85rem 0;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.mentor-bubble-sources {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(255, 209, 102, 0.15);
+  font-size: 0.66rem;
+  color: #FFD166;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+/* Typing Indicator */
+.mentor-typing-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #FFD166;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.mentor-typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.mentor-typing-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #FFD166;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+.mentor-typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.mentor-typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ⌨️ Bottom Input Cockpit Bar */
+.mentor-input-dock {
+  padding: 0.75rem 1.2rem;
+  background: rgba(8, 12, 24, 0.65);
+  border-top: 1px solid rgba(255, 209, 102, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mentor-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.65rem;
+  background: rgba(4, 7, 16, 0.65);
+  border: 1px solid rgba(255, 209, 102, 0.22);
+  border-radius: 12px;
+  padding: 0.45rem 0.7rem 0.45rem 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.mentor-input-row:focus-within {
+  border-color: #FFD166;
+  box-shadow: 0 0 15px rgba(255, 209, 102, 0.15);
+}
+
+.mentor-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #FFF7E8;
+  font-size: 0.88rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  min-height: 22px;
+  max-height: 110px;
+  line-height: 1.4;
+}
+
+.mentor-textarea::placeholder {
+  color: #64748B;
+}
+
+.mentor-send-btn {
+  background: linear-gradient(135deg, #FFD166 0%, #FFB703 100%);
+  color: #05060A;
+  border: none;
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(255, 209, 102, 0.25);
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.mentor-send-btn:hover:not(:disabled) {
+  transform: scale(1.04);
+  box-shadow: 0 4px 15px rgba(255, 209, 102, 0.4);
+}
+
+.mentor-send-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.mentor-input-footer-hint {
+  font-size: 0.66rem;
+  color: #64748B;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}

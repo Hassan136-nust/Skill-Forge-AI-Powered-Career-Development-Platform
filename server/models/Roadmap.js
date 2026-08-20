@@ -14,14 +14,7 @@ const RoadmapSchema = new mongoose.Schema(
     careerGoal: {
       type: String,
       required: true,
-      enum: [
-        'AI Engineer',
-        'Backend Developer',
-        'Frontend Developer',
-        'Full-Stack Developer',
-        'DevOps Engineer',
-        'Data Scientist',
-      ],
+      default: 'AI Engineer',
     },
     gaps: [
       {

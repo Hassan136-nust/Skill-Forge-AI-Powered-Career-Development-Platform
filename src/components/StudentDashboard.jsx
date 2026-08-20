@@ -370,6 +370,8 @@ const getQuizForSkill = (skillName) => {
 }
 
 export default function StudentDashboard({ onExitDashboard }) {
+  const DEFAULT_AVATAR = 'https://imgs.search.brave.com/en8GueUwEke4A7ecDjpRnIpFR8Y-WWOEbjzD2xCNTu0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn'
+
   const [studentProfile, setStudentProfile] = useState({
     name: 'Scholar Student',
     email: 'student@nust.edu.pk',
@@ -378,6 +380,7 @@ export default function StudentDashboard({ onExitDashboard }) {
     yearOfStudy: 3,
     experienceLevel: 'intermediate',
     careerGoal: 'AI Engineer',
+    avatar: DEFAULT_AVATAR,
     githubUser: '',
     reposCount: 0,
     skills: [],
@@ -405,6 +408,7 @@ export default function StudentDashboard({ onExitDashboard }) {
           ...prev,
           name: storedUser.name,
           email: storedUser.email || prev.email,
+          avatar: storedUser.avatar || prev.avatar || DEFAULT_AVATAR,
         }))
       }
 
@@ -420,6 +424,7 @@ export default function StudentDashboard({ onExitDashboard }) {
             yearOfStudy: p.yearOfStudy || prev.yearOfStudy,
             experienceLevel: p.experienceLevel || prev.experienceLevel,
             careerGoal: p.careerGoal || prev.careerGoal,
+            avatar: p.userId?.avatar || p.avatar || prev.avatar || DEFAULT_AVATAR,
             skills: p.skills || [],
             projects: p.projects || [],
             reposCount: p.projects?.length || 0,
@@ -801,7 +806,11 @@ export default function StudentDashboard({ onExitDashboard }) {
         >
           <div className="profile-hero-left">
             <div className="profile-avatar-wrapper">
-              <img src="/man.png" alt="Scholar" className="profile-avatar-img" />
+              <img
+                src={studentProfile.avatar || DEFAULT_AVATAR}
+                alt="Scholar Avatar"
+                className="profile-avatar-img"
+              />
             </div>
 
             <div className="profile-info-block">

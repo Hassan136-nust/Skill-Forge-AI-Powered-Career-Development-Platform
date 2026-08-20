@@ -1,4 +1,6 @@
-/* Futuristic Auth Modal / Experience — Vibrant Video Background & Sliding Panels */
+/* =========================================================================
+   SKILLFORGE GUARDIANS ONBOARDING & AUTH GATEWAY — LUXURY CYBER DESIGN
+   ========================================================================= */
 
 .auth-modal-backdrop {
   position: fixed;
@@ -8,8 +10,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: rgba(2, 3, 8, 0.6);
-  padding: 1.5rem;
+  background-color: rgba(2, 3, 8, 0.75);
+  padding: 1rem;
 }
 
 /* Looping Video Background — Bright & Clearly Visible */
@@ -32,18 +34,18 @@
 .auth-video-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(7, 9, 16, 0.2) 0%, rgba(2, 3, 8, 0.65) 100%);
+  background: radial-gradient(circle at center, rgba(7, 9, 16, 0.2) 0%, rgba(2, 3, 8, 0.75) 100%);
   pointer-events: none;
 }
 
 /* Close Button */
 .auth-close-btn {
   position: absolute;
-  top: 1.8rem;
-  right: 2.2rem;
-  z-index: 50;
-  width: 42px;
-  height: 42px;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 90;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background-color: rgba(7, 9, 16, 0.85);
   border: 1.5px solid #FFD166;
@@ -54,7 +56,7 @@
   cursor: pointer;
   backdrop-filter: blur(12px);
   transition: all 0.25s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
 .auth-close-btn:hover {
@@ -63,25 +65,42 @@
   transform: rotate(90deg) scale(1.08);
 }
 
-/* Main Two-Panel Sliding Glass Panel */
+/* =========================================================================
+   COMMAND CENTER WRAPPER
+   ========================================================================= */
+.guardians-squad-wrapper {
+  position: relative;
+  width: 98%;
+  max-width: 1400px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main Luxury Command Glass Viewport */
 .auth-sliding-viewport {
   position: relative;
-  z-index: 20;
-  width: 94%;
-  max-width: 1080px;
+  width: 100%;
   height: 640px;
-  max-height: 92vh;
-  background: rgba(7, 9, 16, 0.7);
+  max-height: 94vh;
+  background: rgba(7, 9, 16, 0.82);
   border: 1.5px solid rgba(255, 209, 102, 0.35);
-  border-radius: 24px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 209, 102, 0.15);
+  border-radius: 26px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 35px 110px rgba(0, 0, 0, 0.95), 0 0 70px rgba(255, 209, 102, 0.15);
   overflow: hidden;
   display: flex;
 }
 
-/* Sliding Panels (50% Width Each) */
+.auth-sliding-viewport.setup-fullwidth {
+  height: 85vh;
+  max-height: 840px;
+  min-height: 580px;
+}
+
+/* Sliding Panels (50% Width Each for Login/Signup) */
 .auth-half-panel {
   width: 50%;
   height: 100%;
@@ -96,7 +115,87 @@
   scrollbar-color: #222638 transparent;
 }
 
-/* Image Panel */
+/* 3-Column Cockpit Deck inside Card for Profile Setup */
+.auth-3col-cockpit {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 240px 1fr 240px;
+  gap: 1.8rem;
+  padding: 1.8rem 2.2rem;
+  z-index: 10;
+  background: radial-gradient(circle at center, rgba(255, 209, 102, 0.04) 0%, rgba(7, 9, 16, 0.85) 100%);
+  overflow: hidden;
+}
+
+/* Inner Character Columns */
+.cockpit-char-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(13, 16, 26, 0.6) 0%, rgba(5, 6, 10, 0.85) 100%);
+  border: 1px solid #1c2030;
+  border-radius: 20px;
+  padding: 1.2rem 0.8rem;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.cockpit-char-img {
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+  max-height: 480px;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.95));
+  user-select: none;
+}
+
+.cockpit-char-badge {
+  margin-top: 1rem;
+  background-color: rgba(7, 9, 16, 0.95);
+  border: 1px solid #FFD166;
+  border-radius: 16px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.64rem;
+  color: #FFD166;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+}
+
+/* Center Form Column — Fully Scrollable with Smooth Scrollbar */
+.cockpit-center-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.8rem;
+  scrollbar-width: thin;
+  scrollbar-color: #FFD166 #111420;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+.cockpit-center-form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cockpit-center-form::-webkit-scrollbar-track {
+  background: #0d101a;
+  border-radius: 4px;
+}
+
+.cockpit-center-form::-webkit-scrollbar-thumb {
+  background: #FFD166;
+  border-radius: 4px;
+}
+
+/* Image Panel (For Login View) */
 .auth-image-panel {
   display: flex;
   flex-direction: column;
@@ -110,9 +209,9 @@
 
 .auth-character-img {
   width: 100%;
-  max-width: 300px;
+  max-width: 290px;
   height: auto;
-  max-height: 400px;
+  max-height: 390px;
   object-fit: contain;
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.95));
   user-select: none;
@@ -130,9 +229,9 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
 }
 
-/* Form Panel */
+/* Form Panel (For Login View) */
 .auth-form-panel {
-  padding: 2.2rem 2.8rem;
+  padding: 2.4rem 3rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -142,7 +241,7 @@
 }
 
 .auth-form-header {
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.6rem;
 }
 
 .auth-title {
@@ -151,25 +250,59 @@
   color: #FFF7E8;
   letter-spacing: 1.5px;
   line-height: 1.2;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
 }
 
 .auth-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   color: #B8B3C7;
   line-height: 1.4;
+}
+
+/* Cyber Modular Section Card */
+.cyber-section-card {
+  background: rgba(13, 16, 26, 0.8);
+  border: 1px solid #222638;
+  border-radius: 14px;
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: all 0.25s ease;
+}
+
+.cyber-section-card:hover {
+  border-color: rgba(255, 209, 102, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.cyber-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1c2030;
+  padding-bottom: 0.5rem;
+}
+
+.cyber-card-title {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: #FFD166;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 /* Google OAuth Button */
 .auth-google-btn {
   width: 100%;
-  padding: 0.75rem 1.2rem;
+  padding: 0.8rem 1.2rem;
   border-radius: 10px;
   background-color: #0d101a;
   border: 1.5px solid #222638;
   color: #FFF7E8;
   font-family: var(--font-sans);
-  font-size: 0.84rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -218,7 +351,7 @@
   border-radius: 8px;
   font-size: 0.76rem;
   line-height: 1.35;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.6rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -236,18 +369,23 @@
   color: #FFD166;
 }
 
-/* Input Fields Stack */
+/* Inputs Stack */
 .auth-inputs-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
 }
 
 .auth-inputs-grid-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 0.8rem;
+}
+
+.auth-inputs-grid-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.8rem;
 }
 
 .auth-field-wrapper {
@@ -257,7 +395,7 @@
 }
 
 .auth-label {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   letter-spacing: 0.8px;
   color: #FFD166;
 }
@@ -268,7 +406,7 @@
   gap: 0.65rem;
   background-color: rgba(5, 6, 10, 0.85);
   border: 1.5px solid #222638;
-  border-radius: 9px;
+  border-radius: 8px;
   padding: 0.65rem 0.85rem;
   transition: all 0.2s ease;
 }
@@ -309,6 +447,208 @@
   color: #FFF7E8;
 }
 
+/* =========================================================================
+   GITHUB AUTO-SYNC REPOSITORIES PREVIEW
+   ========================================================================= */
+.github-sync-box {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.github-sync-btn {
+  padding: 0.65rem 1.1rem;
+  background-color: #1C2030;
+  border: 1px solid #FFD166;
+  border-radius: 8px;
+  color: #FFF7E8;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.github-sync-btn:hover:not(:disabled) {
+  background-color: #FFD166;
+  color: #05060A;
+}
+
+.github-repos-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  max-height: 140px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+  scrollbar-width: thin;
+  scrollbar-color: #222638 transparent;
+}
+
+.github-repo-item {
+  background-color: rgba(7, 9, 16, 0.9);
+  border: 1px solid #222638;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.github-repo-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #FFF7E8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.github-repo-lang-tag {
+  font-size: 0.62rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background-color: rgba(255, 209, 102, 0.2);
+  color: #FFD166;
+  border: 1px solid rgba(255, 209, 102, 0.4);
+}
+
+/* =========================================================================
+   LUXURY SKILLS MATRIX & PROFICIENCY INTERACTION
+   ========================================================================= */
+.skills-empty-state {
+  padding: 1.2rem;
+  text-align: center;
+  background: rgba(5, 6, 10, 0.6);
+  border: 1px dashed #222638;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.skills-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0.6rem;
+  background-color: rgba(5, 6, 10, 0.85);
+  border: 1.5px solid #222638;
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #222638 transparent;
+}
+
+.skill-chip-luxury {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background-color: #0d101a;
+  border: 1.5px solid #33394f;
+  font-size: 0.76rem;
+  color: #FFF7E8;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.skill-chip-luxury:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+.skill-chip-luxury.level-advanced {
+  border-color: #27C93F;
+  background: linear-gradient(135deg, rgba(39, 201, 63, 0.15) 0%, rgba(5, 6, 10, 0.85) 100%);
+  color: #FFF7E8;
+}
+
+.skill-chip-luxury.level-intermediate {
+  border-color: #FFD166;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.15) 0%, rgba(5, 6, 10, 0.85) 100%);
+  color: #FFF7E8;
+}
+
+.skill-chip-luxury.level-beginner {
+  border-color: #38BDF8;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(5, 6, 10, 0.85) 100%);
+  color: #FFF7E8;
+}
+
+.skill-chip-name {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* Interactive Level Selector Dropdown on Chip */
+.skill-level-select-pill {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.62rem;
+  color: #FFD166;
+  cursor: pointer;
+  outline: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.skill-level-select-pill:hover {
+  border-color: #FFD166;
+}
+
+.skill-level-select-pill option {
+  background-color: #070910;
+  color: #FFF7E8;
+}
+
+.skill-chip-remove-btn {
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.skill-chip-remove-btn:hover {
+  color: #E5243B;
+  background-color: rgba(229, 36, 59, 0.15);
+}
+
+/* Add Skill Row with Level Selector */
+.add-skill-cockpit-bar {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.add-skill-level-select {
+  width: 140px;
+  background-color: rgba(5, 6, 10, 0.85);
+  border: 1.5px solid #222638;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: #FFD166;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.add-skill-level-select option {
+  background-color: #070910;
+  color: #FFF7E8;
+}
+
 /* OTP 6-Digit Grid */
 .otp-digit-grid {
   display: grid;
@@ -319,7 +659,7 @@
 
 .otp-digit-input {
   width: 100%;
-  height: 50px;
+  height: 52px;
   text-align: center;
   font-family: "Bungee", cursive, sans-serif;
   font-size: 1.3rem;
@@ -340,12 +680,12 @@
 /* Submit Action Button */
 .auth-submit-btn {
   width: 100%;
-  padding: 0.85rem 1.4rem;
+  padding: 0.95rem 1.4rem;
   border-radius: 10px;
   background-color: #FFD166;
   border: 1px solid #FFD166;
   color: #05060A;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   letter-spacing: 1px;
   cursor: pointer;
   display: flex;
@@ -353,14 +693,15 @@
   justify-content: center;
   gap: 0.6rem;
   transition: all 0.2s ease;
-  box-shadow: 0 6px 20px rgba(255, 209, 102, 0.3);
-  margin-top: 0.2rem;
+  box-shadow: 0 6px 25px rgba(255, 209, 102, 0.3);
+  margin-top: 0.4rem;
+  flex-shrink: 0;
 }
 
 .auth-submit-btn:hover:not(:disabled) {
   background-color: #FFF7E8;
   border-color: #FFF7E8;
-  box-shadow: 0 8px 30px rgba(255, 247, 232, 0.6);
+  box-shadow: 0 8px 35px rgba(255, 247, 232, 0.6);
   transform: translateY(-2px);
 }
 
@@ -376,7 +717,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: #B8B3C7;
 }
 
@@ -392,7 +733,21 @@
   color: #FFF7E8;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
+  .auth-3col-cockpit {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+  .cockpit-char-col {
+    display: none;
+  }
+  .auth-inputs-grid-3col {
+    grid-template-columns: 1fr;
+  }
+  .github-repos-grid-2col {
+    grid-template-columns: 1fr;
+  }
   .auth-sliding-viewport {
     flex-direction: column;
     height: auto;
@@ -410,8 +765,5 @@
   }
   .auth-form-panel {
     padding: 2rem 1.4rem;
-  }
-  .auth-inputs-grid-2col {
-    grid-template-columns: 1fr;
   }
 }

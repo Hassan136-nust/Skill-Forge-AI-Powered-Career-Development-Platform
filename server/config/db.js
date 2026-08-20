@@ -6,14 +6,12 @@ dotenv.config()
 export const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 8000,
+      serverSelectionTimeoutMS: 15000,
     })
     console.log(`[MongoDB Atlas] Connected to database: ${conn.connection.host} (${conn.connection.name})`)
   } catch (error) {
-    console.error(`[MongoDB Atlas] Connection Error: ${error.message}`)
-    // Do not crash the server in dev mode if offline
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1)
-    }
+    console.error(`[MongoDB Atlas] Connection Warning: ${error.message}`)
+    console.log('[MongoDB Atlas] Retrying connection in 5 seconds...')
+    setTimeout(connectDB, 5000)
   }
 }

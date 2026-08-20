@@ -233,6 +233,28 @@ SkillForge/
 
 ---
 
+## 🐧 Linux Shell Automation Suite
+
+SkillForge includes dedicated bash scripts in `scripts/` to bootstrap, run, and audit all microservices in a single command:
+
+| Script | Command | Purpose |
+|---|---|---|
+| **🚀 One-Command Launcher** | `./scripts/setup.sh` | Installs Python & Node dependencies, seeds `.env`, and launches all 3 tiers with live hot-reload |
+| **🔍 Health & Connectivity Audit** | `./scripts/test_services.sh` | Audits Express Gateway (3001), FastAPI Service (8000), and Frontend (5173) connectivity |
+
+```bash
+# Make scripts executable
+chmod +x scripts/*.sh
+
+# Option A: One-command full-stack boot
+./scripts/setup.sh
+
+# Option B: Audit running microservice health
+./scripts/test_services.sh
+```
+
+---
+
 ## 🛠️ Installation & Local Setup
 
 ### 1. Prerequisites

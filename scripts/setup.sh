@@ -16,20 +16,23 @@ echo -e "${CYAN}====================================================${NC}"
 echo -e "${CYAN}   🪐 SKILLFORGE — AI CAREER PLATFORM LAUNCHER     ${NC}"
 echo -e "${CYAN}====================================================${NC}"
 
-# Check .env file
+# 1. Check .env file
 if [ ! -f ".env" ]; then
     echo -e "${YELLOW}[!] .env file not found. Copying from .env.example...${NC}"
     cp .env.example .env
 fi
 
-# Ensure Python dependencies installed
+# 2. Ensure Python dependencies installed
 echo -e "${MAGENTA}[1/3] Checking Python AI Microservice dependencies...${NC}"
-python3 -m pip install -q fastapi uvicorn pydantic groq requests --break-system-packages 2>/dev/null || true
+cd python_service
+python3 -m pip install -q -r requirements.txt --break-system-packages 2>/dev/null || python3 -m pip install -q -r requirements.txt || true
+cd ..
 
-# Ensure Node dependencies installed
+# 3. Ensure Node dependencies installed
 echo -e "${GREEN}[2/3] Checking Node.js dependencies...${NC}"
 npm install --silent
 
+# 4. Announce Service URLs
 echo -e "${CYAN}[3/3] Launching Full-Stack Services with Concurrently...${NC}"
 echo -e "  ✦ Frontend:        ${GREEN}http://localhost:5173/${NC}"
 echo -e "  ✦ Express Backend: ${GREEN}http://localhost:3001/${NC}"

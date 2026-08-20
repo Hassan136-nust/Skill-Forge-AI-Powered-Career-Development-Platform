@@ -11,7 +11,9 @@ from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
 
-load_dotenv("/home/hassan/Downloads/my-app/.env")
+env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+if os.path.exists(env_path):
+    load_dotenv(env_path)
 load_dotenv()
 
 from skill_analyzer import SkillAnalyzer

@@ -127,8 +127,11 @@ export default function AuthModal({
     setIsSuccess(true)
     setTimeout(() => {
       setIsSuccess(false)
+      if (onAuthSuccess) {
+        onAuthSuccess(user)
+      }
       onClose()
-    }, 1500)
+    }, 1000)
   }
 
   // Live GitHub Auto-Sync Fetch with Deduplication

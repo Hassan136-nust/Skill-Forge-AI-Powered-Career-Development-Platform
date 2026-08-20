@@ -84,9 +84,6 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, currentUs
             </button>
           </>
         )}
-        <button className="theme-toggle-btn" title="Theme Settings">
-          <Sun size={18} />
-        </button>
       </div>
     </header>
   )

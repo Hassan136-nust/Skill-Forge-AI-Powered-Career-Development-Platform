@@ -111,6 +111,8 @@ export default function App() {
 
   // Scroll Scrubbing & Video Setup
   useEffect(() => {
+    if (currentView !== 'landing') return
+
     let animationFrameId = null
     let blobUrl = null
     let isCancelled = false
@@ -237,7 +239,7 @@ export default function App() {
       if (video) video.removeEventListener('loadedmetadata', onLoadedMetadata)
       if (blobUrl) URL.revokeObjectURL(blobUrl)
     }
-  }, [])
+  }, [currentView])
 
   // Smooth scroll helper using Lenis
   const scrollToVideoProgress = (prog) => {
@@ -323,6 +325,8 @@ export default function App() {
       <StudentDashboard
         onExitDashboard={() => {
           window.history.pushState({}, '', '/')
+          window.scrollTo(0, 0)
+          setScrollProgress(0)
           setCurrentView('landing')
           const token = localStorage.getItem('skillforge_token')
           const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')

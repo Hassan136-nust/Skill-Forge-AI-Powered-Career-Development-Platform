@@ -1414,24 +1414,42 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             <span>Edit Profile</span>
           </button>
 
-          <button className="theme-toggle-btn" title="Theme Settings">
-            <Sun size={18} />
-          </button>
-
           <button
-            className="get-started-btn bungee-regular"
+            className="navbar-item-btn"
             style={{
-              background: 'linear-gradient(135deg, #FF6B81 0%, #E5243B 100%)',
-              color: '#FFF7E8',
-              boxShadow: '0 4px 15px rgba(229, 36, 59, 0.3)',
+              color: '#F87171',
+              border: '1px solid rgba(239, 68, 68, 0.35)',
+              backgroundColor: 'rgba(239, 68, 68, 0.08)',
+              borderRadius: '20px',
+              padding: '0.45rem 1.1rem',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.18)'
+              e.currentTarget.style.borderColor = '#EF4444'
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 4px 14px rgba(239, 68, 68, 0.25)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)'
+              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = 'none'
             }}
             onClick={() => {
               localStorage.removeItem('skillforge_token')
               localStorage.removeItem('skillforge_user')
               if (onExitDashboard) onExitDashboard()
             }}
+            title="Sign Out of Session"
           >
-            <LogOut size={14} />
+            <LogOut size={14} color="#F87171" strokeWidth={2.2} />
             <span>Sign Out</span>
           </button>
         </div>

@@ -36,109 +36,6 @@
   background: radial-gradient(circle at center, rgba(7, 9, 16, 0.4) 0%, rgba(2, 3, 8, 0.85) 100%);
 }
 
-/* Top Navbar */
-.dashboard-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.9rem 2.5rem;
-  background: rgba(7, 9, 16, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1.5px solid rgba(255, 209, 102, 0.2);
-}
-
-.dashboard-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-family: "Bungee", cursive, sans-serif;
-  font-size: 1.3rem;
-  color: #FFF7E8;
-  letter-spacing: 1px;
-  cursor: pointer;
-}
-
-.dashboard-brand-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #FFD166 0%, #E5A824 100%);
-  color: #05060A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  box-shadow: 0 0 15px rgba(255, 209, 102, 0.4);
-}
-
-.dashboard-nav-tabs {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(13, 16, 26, 0.8);
-  border: 1px solid #222638;
-  border-radius: 12px;
-  padding: 0.3rem;
-}
-
-.dashboard-tab-btn {
-  padding: 0.5rem 1.1rem;
-  border-radius: 8px;
-  background: transparent;
-  border: none;
-  color: #B8B3C7;
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.dashboard-tab-btn:hover {
-  color: #FFF7E8;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.dashboard-tab-btn.active {
-  background: #FFD166;
-  color: #05060A;
-  font-weight: 700;
-  box-shadow: 0 4px 15px rgba(255, 209, 102, 0.3);
-}
-
-.dashboard-user-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dashboard-nav-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  background: #1c2030;
-  border: 1px solid #33394f;
-  color: #FFF7E8;
-  font-size: 0.8rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: all 0.2s ease;
-}
-
-.dashboard-nav-btn:hover {
-  background: #252b42;
-  border-color: #FFD166;
-  color: #FFD166;
-}
-
 /* Main Container */
 .dashboard-main-container {
   position: relative;
@@ -317,7 +214,7 @@
 }
 
 /* =========================================================================
-   2. SKILL ASSESSMENT HUB (6 PRD CATEGORIES)
+   2. SKILL ASSESSMENT HUB & GLASS PANELS
    ========================================================================= */
 .dashboard-grid-2col {
   display: grid;
@@ -334,7 +231,7 @@
   padding: 1.6rem 1.8rem;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.4rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
 }
 
@@ -483,62 +380,231 @@
 }
 
 /* =========================================================================
-   4. AI CAREER ROADMAP TIMELINE
+   4. ALTERNATING (UP-DOWN-UP-DOWN) 3D ROADMAP STAGE WITH SIDE COSMIC CAT
    ========================================================================= */
-.roadmap-timeline-deck {
+.roadmap-side-by-side-layout {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.2rem;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1rem 0;
 }
 
-.roadmap-milestone-card {
-  background: rgba(13, 16, 26, 0.85);
-  border: 1px solid #222638;
-  border-radius: 14px;
-  padding: 1.2rem 1.1rem;
+/* Cosmic Cat standing FREELY on the left side */
+.roadmap-side-cat-companion {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  align-items: center;
   position: relative;
-  transition: all 0.25s ease;
 }
 
-.roadmap-milestone-card:hover {
+.cat-free-dialog-bubble {
+  background: rgba(13, 16, 26, 0.95);
+  border: 1.5px solid #FFD166;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 209, 102, 0.2);
+  margin-bottom: 0.75rem;
+  position: relative;
+  text-align: center;
+}
+
+.cat-free-dialog-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0;
+  border-style: solid;
+  border-color: #FFD166 transparent;
+  display: block;
+  width: 0;
+}
+
+.cat-free-standing-img {
+  width: 160px;
+  height: 190px;
+  object-fit: contain;
+}
+
+/* Alternating Up-Down 3D Pathway Stage */
+.roadmap-3d-zigzag-stage {
+  position: relative;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  perspective: 1000px;
+}
+
+/* Horizontal Center Laser Line (Hidden for clean card visibility) */
+.roadmap-zigzag-laser-line {
+  display: none;
+}
+
+.roadmap-zigzag-deck {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.1rem;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  transform-style: preserve-3d;
+}
+
+/* Individual Card Container for Up/Down Alternating Placement */
+.zigzag-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* UP Placement: Card sits ABOVE center laser line */
+.zigzag-card-wrapper.position-up {
+  margin-bottom: 90px;
+}
+
+/* DOWN Placement: Card sits BELOW center laser line */
+.zigzag-card-wrapper.position-down {
+  margin-top: 90px;
+}
+
+/* Glowing Node Dot on the center laser line */
+.zigzag-laser-node-dot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #070910;
+  border: 3px solid #222638;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.6rem;
+  color: #B8B3C7;
+  z-index: 5;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.9);
+}
+
+.zigzag-card-wrapper.position-up .zigzag-laser-node-dot {
+  bottom: -45px;
+}
+
+.zigzag-card-wrapper.position-down .zigzag-laser-node-dot {
+  top: -45px;
+}
+
+.zigzag-card-wrapper.completed .zigzag-laser-node-dot {
+  border-color: #27C93F;
+  background: #27C93F;
+  color: #05060A;
+  box-shadow: 0 0 20px rgba(39, 201, 63, 0.7);
+}
+
+.zigzag-card-wrapper.active .zigzag-laser-node-dot {
   border-color: #FFD166;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  background: #FFD166;
+  color: #05060A;
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.9);
 }
 
-.roadmap-milestone-card.active {
+/* Stem line connecting card to node dot */
+.zigzag-connector-stem {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: #33394f;
+  z-index: 2;
+}
+
+.zigzag-card-wrapper.position-up .zigzag-connector-stem {
+  bottom: -35px;
+  height: 35px;
+}
+
+.zigzag-card-wrapper.position-down .zigzag-connector-stem {
+  top: -35px;
+  height: 35px;
+}
+
+.zigzag-card-wrapper.completed .zigzag-connector-stem {
+  background: #27C93F;
+  box-shadow: 0 0 8px #27C93F;
+}
+
+.zigzag-card-wrapper.active .zigzag-connector-stem {
+  background: #FFD166;
+  box-shadow: 0 0 10px #FFD166;
+}
+
+/* Alternating 3D Card */
+.zigzag-3d-card {
+  width: 100%;
+  background: rgba(13, 16, 26, 0.92);
+  border: 1.5px solid #222638;
+  border-radius: 16px;
+  padding: 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: perspective(800px) rotateX(4deg) translateZ(0px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.zigzag-3d-card:hover {
   border-color: #FFD166;
-  background: linear-gradient(180deg, rgba(255, 209, 102, 0.08) 0%, rgba(13, 16, 26, 0.9) 100%);
-  box-shadow: 0 0 25px rgba(255, 209, 102, 0.15);
+  transform: perspective(800px) rotateX(0deg) translateZ(18px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 209, 102, 0.3);
 }
 
-.milestone-badge {
+.zigzag-card-wrapper.completed .zigzag-3d-card {
+  border-color: #27C93F;
+  background: linear-gradient(180deg, rgba(39, 201, 63, 0.12) 0%, rgba(13, 16, 26, 0.95) 100%);
+}
+
+.zigzag-card-wrapper.active .zigzag-3d-card {
+  border-color: #FFD166;
+  background: linear-gradient(180deg, rgba(255, 209, 102, 0.15) 0%, rgba(13, 16, 26, 0.95) 100%);
+  box-shadow: 0 12px 35px rgba(255, 209, 102, 0.25);
+  transform: perspective(800px) rotateX(0deg) translateZ(10px);
+}
+
+.step-card-num-badge {
+  font-family: "Press Start 2P", monospace;
   font-size: 0.62rem;
-  letter-spacing: 1px;
   color: #FFD166;
 }
 
-.milestone-title {
+.step-card-title {
   font-family: "Bungee", cursive, sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #FFF7E8;
   line-height: 1.2;
 }
 
-.milestone-project-box {
+.step-card-desc {
+  font-size: 0.74rem;
+  color: #B8B3C7;
+  line-height: 1.35;
+}
+
+.step-capstone-pill {
   background: rgba(7, 9, 16, 0.9);
   border: 1px solid #222638;
   border-radius: 8px;
-  padding: 0.65rem 0.8rem;
-  font-size: 0.72rem;
-}
-
-.milestone-project-title {
+  padding: 0.45rem 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #FFD166;
-  margin-bottom: 0.2rem;
 }
 
 /* =========================================================================
@@ -627,8 +693,19 @@
   .dashboard-grid-2col {
     grid-template-columns: 1fr;
   }
-  .roadmap-timeline-deck {
+  .roadmap-side-by-side-layout {
+    grid-template-columns: 1fr;
+  }
+  .roadmap-zigzag-deck {
     grid-template-columns: 1fr 1fr;
+  }
+  .zigzag-card-wrapper.position-up,
+  .zigzag-card-wrapper.position-down {
+    margin: 0;
+  }
+  .zigzag-connector-stem,
+  .zigzag-laser-node-dot {
+    display: none;
   }
 }
 
@@ -649,7 +726,7 @@
   .gap-columns-grid {
     grid-template-columns: 1fr;
   }
-  .roadmap-timeline-deck {
+  .roadmap-zigzag-deck {
     grid-template-columns: 1fr;
   }
 }

@@ -21,6 +21,7 @@ import {
   LogOut,
   X,
   Star,
+  Zap,
   Plus,
   ExternalLink,
   ChevronDown,
@@ -41,7 +42,7 @@ const ROLE_BENCHMARKS = {
   'Data Scientist': ['Python', 'SQL', 'PyTorch', 'Pandas', 'NumPy', 'Git', 'Scikit-Learn']
 }
 
-// Real Diagnostic Questions Generator for Any Technology
+// Real Diagnostic Questions Generator for Any Technology across all Track Benchmarks
 const SKILL_QUIZ_BANK = {
   'python': {
     question: 'Which method in Python is used to customize developer object string representation?',
@@ -49,22 +50,10 @@ const SKILL_QUIZ_BANK = {
     options: ['__str__()', '__repr__()', '__format__()', '__init__()'],
     correctIndex: 1,
   },
-  'typescript': {
-    question: 'Which TypeScript utility type constructs a type with all properties set to optional?',
-    code: `interface Scholar {\n  name: string;\n  score: number;\n}\n\ntype PartialScholar = Partial<Scholar>;`,
-    options: ['Required<T>', 'Partial<T>', 'Readonly<T>', 'Record<K, T>'],
-    correctIndex: 1,
-  },
-  'javascript': {
-    question: 'Which array method creates a new array populated with the results of calling a provided function on every element?',
-    code: `const scores = [80, 90, 95];\nconst boosted = scores.map(s => s + 5);`,
-    options: ['forEach()', 'map()', 'filter()', 'reduce()'],
-    correctIndex: 1,
-  },
-  'react': {
-    question: 'In React, which hook is used to run side effects like API fetching or DOM updates after render?',
-    code: `import { useEffect } from 'react';\n\nuseEffect(() => {\n  fetchScholarData();\n}, []);`,
-    options: ['useState', 'useEffect', 'useMemo', 'useCallback'],
+  'pytorch': {
+    question: 'Which PyTorch method clears old gradients before running backward propagation?',
+    code: `optimizer.zero_grad()\noutputs = model(inputs)\nloss = criterion(outputs, targets)\nloss.backward()`,
+    options: ['optimizer.reset()', 'optimizer.zero_grad()', 'model.clear()', 'loss.flush()'],
     correctIndex: 1,
   },
   'fastapi': {
@@ -79,16 +68,100 @@ const SKILL_QUIZ_BANK = {
     options: ['Runs multiple containers simultaneously', 'Drastically reduces production image size & security footprint', 'Bypasses build cache', 'Compiles JavaScript into WebAssembly'],
     correctIndex: 1,
   },
-  'css': {
-    question: 'Which CSS layout system is optimized for two-dimensional grid layouts with rows and columns?',
-    code: `.dashboard-grid {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 1rem;\n}`,
-    options: ['Flexbox', 'CSS Grid', 'Float Layout', 'Absolute Positioning'],
+  'chromadb': {
+    question: 'In ChromaDB, what operation adds document text and vector embeddings into a collection?',
+    code: `collection.add(\n  documents=["AI Agent Architecture"],\n  metadatas=[{"source": "paper"}],\n  ids=["id1"]\n)`,
+    options: ['collection.insert_row()', 'collection.add()', 'collection.push()', 'collection.write()'],
     correctIndex: 1,
   },
   'git': {
     question: 'Which command combines feature branch commits into main while maintaining linear history?',
     code: `git checkout feature/ai-quiz\ngit rebase main`,
     options: ['git merge --no-ff', 'git rebase', 'git cherry-pick', 'git stash pop'],
+    correctIndex: 1,
+  },
+  'typescript': {
+    question: 'Which TypeScript utility type constructs a type with all properties set to optional?',
+    code: `interface Scholar {\n  name: string;\n  score: number;\n}\n\ntype PartialScholar = Partial<Scholar>;`,
+    options: ['Required<T>', 'Partial<T>', 'Readonly<T>', 'Record<K, T>'],
+    correctIndex: 1,
+  },
+  'node': {
+    question: 'In Node.js, which built-in module provides asynchronous filesystem operations?',
+    code: `import fs from 'node:fs/promises';\nconst data = await fs.readFile('config.json', 'utf8');`,
+    options: ['path', 'node:fs/promises', 'http', 'events'],
+    correctIndex: 1,
+  },
+  'nodejs': {
+    question: 'In Node.js, which built-in module provides asynchronous filesystem operations?',
+    code: `import fs from 'node:fs/promises';\nconst data = await fs.readFile('config.json', 'utf8');`,
+    options: ['path', 'node:fs/promises', 'http', 'events'],
+    correctIndex: 1,
+  },
+  'postgresql': {
+    question: 'Which SQL clause is used to filter aggregated group results in PostgreSQL?',
+    code: `SELECT department, COUNT(*) FROM scholars GROUP BY department HAVING COUNT(*) > 5;`,
+    options: ['WHERE', 'HAVING', 'GROUP BY', 'FILTER'],
+    correctIndex: 1,
+  },
+  'redis': {
+    question: 'Which Redis data structure stores unique elements with associated floating point scores for leaderboard sorting?',
+    code: `ZADD scholar_leaderboard 95 "Alex" 100 "Hassan"`,
+    options: ['Hash', 'Sorted Set (ZSET)', 'List', 'Set'],
+    correctIndex: 1,
+  },
+  'javascript': {
+    question: 'Which array method creates a new array populated with the results of calling a provided function on every element?',
+    code: `const scores = [80, 90, 95];\nconst boosted = scores.map(s => s + 5);`,
+    options: ['forEach()', 'map()', 'filter()', 'reduce()'],
+    correctIndex: 1,
+  },
+  'react': {
+    question: 'In React, which hook is used to run side effects like API fetching or DOM updates after render?',
+    code: `import { useEffect } from 'react';\n\nuseEffect(() => {\n  fetchScholarData();\n}, []);`,
+    options: ['useState', 'useEffect', 'useMemo', 'useCallback'],
+    correctIndex: 1,
+  },
+  'css': {
+    question: 'Which CSS layout system is optimized for two-dimensional grid layouts with rows and columns?',
+    code: `.dashboard-grid {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 1rem;\n}`,
+    options: ['Flexbox', 'CSS Grid', 'Float Layout', 'Absolute Positioning'],
+    correctIndex: 1,
+  },
+  'nextjs': {
+    question: 'In Next.js App Router, which file convention defines a page UI route?',
+    code: `// app/dashboard/page.tsx\nexport default function Page() {\n  return <h1>Dashboard</h1>\n}`,
+    options: ['index.js', 'page.tsx', 'route.js', 'layout.tsx'],
+    correctIndex: 1,
+  },
+  'tailwind': {
+    question: 'In Tailwind CSS, which class sets flex container alignment along the cross-axis?',
+    code: `<div className="flex items-center justify-between">...</div>`,
+    options: ['justify-center', 'items-center', 'content-center', 'self-auto'],
+    correctIndex: 1,
+  },
+  'kubernetes': {
+    question: 'Which Kubernetes resource manages a set of identical Pods to ensure specified replicas run?',
+    code: `apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3`,
+    options: ['ConfigMap', 'Deployment', 'Service', 'Ingress'],
+    correctIndex: 1,
+  },
+  'linux': {
+    question: 'Which Linux command changes file read/write permissions for a user or group?',
+    code: `chmod 755 deploy.sh`,
+    options: ['chown', 'chmod', 'chgrp', 'umask'],
+    correctIndex: 1,
+  },
+  'sql': {
+    question: 'Which SQL operation returns all records from the left table and matched records from the right table?',
+    code: `SELECT * FROM students S LEFT JOIN grades G ON S.id = G.student_id;`,
+    options: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'CROSS JOIN'],
+    correctIndex: 1,
+  },
+  'pandas': {
+    question: 'In Pandas, which method filters rows based on boolean conditions?',
+    code: `import pandas as pd\ndf_high = df[df['score'] >= 80]`,
+    options: ['df.filter()', 'Boolean indexing df[df["col"] > x]', 'df.select()', 'df.group()'],
     correctIndex: 1,
   }
 }
@@ -132,6 +205,7 @@ export default function StudentDashboard({ onExitDashboard }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showRepos, setShowRepos] = useState(false)
   const [skillScores, setSkillScores] = useState({})
+  const [activeMilestone, setActiveMilestone] = useState(2)
 
   // Load profile from MongoDB Atlas API
   const loadProfile = async () => {
@@ -169,7 +243,6 @@ export default function StudentDashboard({ onExitDashboard }) {
           if (Array.isArray(p.skills)) {
             p.skills.forEach((s) => {
               if (s && s.name) {
-                // Only count score if explicitly verified by taking a quiz (isVerified = true)
                 const realScore = s.isVerified && typeof s.verifiedScore === 'number' ? s.verifiedScore : 0
                 initialScores[s.name.toLowerCase()] = realScore
               }
@@ -235,18 +308,55 @@ export default function StudentDashboard({ onExitDashboard }) {
     ? Math.min(100, Math.round((matchPoints / targetRequiredSkills.length) * 100))
     : 0
 
-  // Start Diagnostic Quiz for a Specific Student Skill
-  const handleStartSkillQuiz = (skillName) => {
+  // Start Diagnostic Quiz via Express Backend /api/assessment/questions Endpoint
+  const handleStartSkillQuiz = async (skillName) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/assessment/questions`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.questions) {
+          const sKey = skillName.toLowerCase()
+          let catKey = 'python'
+          if (sKey.includes('web') || sKey.includes('react') || sKey.includes('html') || sKey.includes('css') || sKey.includes('javascript') || sKey.includes('typescript') || sKey.includes('next') || sKey.includes('tailwind')) {
+            catKey = 'webDev'
+          } else if (sKey.includes('git')) {
+            catKey = 'git'
+          } else if (sKey.includes('docker') || sKey.includes('kubernetes') || sKey.includes('linux') || sKey.includes('devops') || sKey.includes('bash') || sKey.includes('ci')) {
+            catKey = 'devops'
+          } else if (sKey.includes('ai') || sKey.includes('torch') || sKey.includes('chroma') || sKey.includes('ml') || sKey.includes('pandas') || sKey.includes('numpy') || sKey.includes('scikit')) {
+            catKey = 'ai'
+          } else if (sKey.includes('sql') || sKey.includes('db') || sKey.includes('postgres') || sKey.includes('redis') || sKey.includes('database')) {
+            catKey = 'databases'
+          }
+
+          const qList = data.questions[catKey] || data.questions.python
+          const selectedQ = qList[Math.floor(Math.random() * qList.length)]
+
+          setActiveQuiz({
+            skillName,
+            category: catKey,
+            ...selectedQ
+          })
+          setSelectedOption(null)
+          setQuizFeedback(null)
+          return
+        }
+      }
+    } catch (e) {
+      console.warn('Using fallback quiz bank:', e)
+    }
+
     const quizData = getQuizForSkill(skillName)
     setActiveQuiz({
       skillName,
+      category: 'python',
       ...quizData
     })
     setSelectedOption(null)
     setQuizFeedback(null)
   }
 
-  // Answer Quiz & Save Verified Score Live to MongoDB Atlas
+  // Answer Quiz & Submit to Express Backend /api/assessment/submit & MongoDB Atlas
   const handleAnswerQuiz = async () => {
     if (selectedOption === null || !activeQuiz) return
     const isCorrect = selectedOption === activeQuiz.correctIndex
@@ -259,21 +369,41 @@ export default function StudentDashboard({ onExitDashboard }) {
       setSkillScores((prev) => ({ ...prev, [sKey]: newScore }))
 
       // Update skill in state and set verifiedScore & level
-      const updatedSkills = studentProfile.skills.map((s) => {
-        if (s.name.toLowerCase() === sKey) {
+      let updatedSkills = studentProfile.skills.map((s) => {
+        if (s && s.name && s.name.toLowerCase() === sKey) {
           return {
             ...s,
             verifiedScore: newScore,
+            isVerified: true,
             level: 'advanced',
           }
         }
         return s
       })
 
+      if (!updatedSkills.some((s) => s && s.name && s.name.toLowerCase() === sKey)) {
+        updatedSkills.push({
+          name: sName,
+          level: 'advanced',
+          isVerified: true,
+          verifiedScore: newScore,
+        })
+      }
+
       setStudentProfile((prev) => ({ ...prev, skills: updatedSkills }))
 
-      // Save live score update directly to MongoDB Atlas
+      // Save live score update directly to Express Assessment API & MongoDB Atlas
       try {
+        await fetch(`http://localhost:3001/api/assessment/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: studentProfile.email,
+            category: activeQuiz.category || 'python',
+            answers: [{ questionId: activeQuiz.id || 'py_1', selectedIndex: selectedOption }],
+          }),
+        })
+
         await fetch(`http://localhost:3001/api/profile`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -364,7 +494,7 @@ export default function StudentDashboard({ onExitDashboard }) {
               if (el) el.scrollIntoView({ behavior: 'smooth' })
             }}
           >
-            AI Roadmap
+            3D Roadmap
           </button>
         </nav>
 
@@ -471,12 +601,12 @@ export default function StudentDashboard({ onExitDashboard }) {
                     setStudentProfile({ ...studentProfile, careerGoal: e.target.value })
                   }
                 >
-                  <option value="AI Engineer">AI Engineer &amp; PyTorch</option>
-                  <option value="Backend Developer">Distributed Backend Microservices</option>
-                  <option value="Frontend Developer">Modern Frontend React UI</option>
-                  <option value="Full-Stack Developer">Full-Stack Cloud &amp; DevOps</option>
-                  <option value="DevOps Engineer">DevOps &amp; Kubernetes</option>
-                  <option value="Data Scientist">Data Science &amp; Vector Embeddings</option>
+                  <option value="AI Engineer">AI Engineer</option>
+                  <option value="Backend Developer">Backend Developer</option>
+                  <option value="Frontend Developer">Frontend Developer</option>
+                  <option value="Full-Stack Developer">Full-Stack Developer</option>
+                  <option value="DevOps Engineer">DevOps Engineer</option>
+                  <option value="Data Scientist">Data Scientist</option>
                 </select>
               </div>
             </div>
@@ -526,7 +656,7 @@ export default function StudentDashboard({ onExitDashboard }) {
         </motion.div>
 
         {/* =========================================================================
-            2. REAL-TIME SKILL ASSESSMENT HUB (SHOWS ACTUAL VERIFIED SCORES FROM MONGODB)
+            2. REAL-TIME SKILL ASSESSMENT HUB (DYNAMIC FOR SELECTED TARGET TRACK)
             ========================================================================= */}
         <div id="skill-assessment-hub" className="dashboard-glass-panel">
           <div className="panel-header-row">
@@ -535,83 +665,64 @@ export default function StudentDashboard({ onExitDashboard }) {
               <span>REAL-TIME SKILL ASSESSMENT HUB</span>
             </h2>
             <span style={{ fontSize: '0.72rem', color: '#FFD166' }}>
-              {studentProfile.skills.length} Active Configured Technologies
+              Target Track: {studentProfile.careerGoal} ({targetRequiredSkills.length} Core Technologies)
             </span>
           </div>
 
-          {studentProfile.skills.length === 0 ? (
-            <div className="skills-empty-state" style={{ padding: '2rem 1rem', textAlign: 'center' }}>
-              <span style={{ color: '#FFD166', fontSize: '0.9rem', display: 'block', marginBottom: '0.5rem' }}>
-                ✦ No active skills configured for diagnosis!
-              </span>
-              <span style={{ color: '#B8B3C7', fontSize: '0.8rem', display: 'block', marginBottom: '1rem' }}>
-                Add your technologies via "Edit Profile" or sync GitHub to generate real-time diagnostic cards.
-              </span>
-              <button
-                className="auth-submit-btn bungee-regular"
-                style={{ maxWidth: '240px', margin: '0 auto' }}
-                onClick={() => setIsEditModalOpen(true)}
-              >
-                <Plus size={15} />
-                <span>ADD SKILLS FOR DIAGNOSIS</span>
-              </button>
-            </div>
-          ) : (
-            <div className="assessment-cards-grid">
-              {studentProfile.skills.map((skill, idx) => {
-                const sKey = skill.name.toLowerCase()
-                // Strict score: 0 UNTESTED unless skill.isVerified is explicitly true!
-                const isVerified = Boolean(skill.isVerified || (skillScores[sKey] && skillScores[sKey] > 0))
-                const score = isVerified ? (skillScores[sKey] || skill.verifiedScore || 100) : 0
+          <div className="assessment-cards-grid">
+            {targetRequiredSkills.map((skillName, idx) => {
+              const sKey = skillName.toLowerCase()
+              const userSkill = studentProfile.skills.find(s => s && s.name && s.name.toLowerCase() === sKey)
+              const isVerified = Boolean((userSkill && userSkill.isVerified) || (skillScores[sKey] && skillScores[sKey] > 0))
+              const score = isVerified ? (skillScores[sKey] || (userSkill && userSkill.verifiedScore) || 100) : 0
 
-                return (
-                  <div key={idx} className="assessment-item-card">
-                    <div className="assessment-top-row">
-                      <span className="assessment-cat-name">
-                        <Terminal size={15} color="#FFD166" />
-                        <span>{skill.name}</span>
-                      </span>
-                      <span
-                        className="assessment-score-badge"
-                        style={{
-                          color: isVerified ? '#27C93F' : '#B8B3C7',
-                          fontSize: '0.78rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {isVerified ? `${score}/100 VERIFIED` : '0/100 (UNTESTED)'}
-                      </span>
-                    </div>
-
-                    <div className="assessment-progress-track">
-                      <div
-                        className="assessment-progress-fill"
-                        style={{
-                          width: `${score}%`,
-                          background: isVerified
-                            ? 'linear-gradient(90deg, #FFD166 0%, #27C93F 100%)'
-                            : '#222638'
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      className="assessment-quiz-btn"
+              return (
+                <div key={idx} className="assessment-item-card">
+                  <div className="assessment-top-row">
+                    <span className="assessment-cat-name">
+                      <Terminal size={15} color="#FFD166" />
+                      <span>{skillName}</span>
+                    </span>
+                    <span
+                      className="assessment-score-badge"
                       style={{
-                        backgroundColor: isVerified ? '#1c2030' : 'rgba(255, 209, 102, 0.15)',
-                        borderColor: isVerified ? '#33394f' : '#FFD166',
-                        color: isVerified ? '#FFF7E8' : '#FFD166',
+                        color: isVerified ? '#27C93F' : '#B8B3C7',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
                       }}
-                      onClick={() => handleStartSkillQuiz(skill.name)}
                     >
-                      <Sparkles size={13} color="#FFD166" />
-                      <span>{isVerified ? 'Retake Diagnosis' : 'Take Diagnostic Quiz'}</span>
-                    </button>
+                      {isVerified ? `${score}/100 VERIFIED` : '0/100 (UNTESTED)'}
+                    </span>
                   </div>
-                )
-              })}
-            </div>
-          )}
+
+                  <div className="assessment-progress-track">
+                    <div
+                      className="assessment-progress-fill"
+                      style={{
+                        width: `${score}%`,
+                        background: isVerified
+                          ? 'linear-gradient(90deg, #FFD166 0%, #27C93F 100%)'
+                          : '#222638'
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    className="assessment-quiz-btn"
+                    style={{
+                      backgroundColor: isVerified ? '#1c2030' : 'rgba(255, 209, 102, 0.15)',
+                      borderColor: isVerified ? '#33394f' : '#FFD166',
+                      color: isVerified ? '#FFF7E8' : '#FFD166',
+                    }}
+                    onClick={() => handleStartSkillQuiz(skillName)}
+                  >
+                    <Sparkles size={13} color="#FFD166" />
+                    <span>{isVerified ? 'Retake Diagnosis' : 'Take Diagnostic Quiz'}</span>
+                  </button>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* =========================================================================
@@ -855,77 +966,139 @@ export default function StudentDashboard({ onExitDashboard }) {
         </div>
 
         {/* =========================================================================
-            6. DYNAMIC AI CAREER ROADMAP TIMELINE BASED ON MISSING SKILLS
+            6. ALTERNATING (UP-DOWN-UP-DOWN) 3D STEP ROADMAP WITH SIDE COSMIC CAT
             ========================================================================= */}
         <div id="roadmap-section" className="dashboard-glass-panel">
           <div className="panel-header-row">
             <h2 className="panel-title">
               <Sparkles size={18} color="#FFD166" />
-              <span>AI-GENERATED PERSONALIZED CAREER ROADMAP</span>
+              <span>3D AI CAREER ROADMAP PATHWAY</span>
             </h2>
             <span style={{ fontSize: '0.68rem', color: '#B8B3C7' }}>
-              Tailored Target Roadmap for {studentProfile.careerGoal}
+              Personalized Path for {studentProfile.careerGoal}
             </span>
           </div>
 
-          <div className="roadmap-timeline-deck">
-            {/* Milestone 1 */}
-            <div className="roadmap-milestone-card active">
-              <span className="milestone-badge press-start-2p-regular">MILESTONE 01 // FOUNDATIONS</span>
-              <h3 className="milestone-title">
-                {strongSkills[0]?.name ? `${strongSkills[0].name.toUpperCase()} PATTERNS` : 'CORE LANGUAGE FOUNDATIONS'}
-              </h3>
-              <p style={{ fontSize: '0.74rem', color: '#B8B3C7', lineHeight: 1.4 }}>
-                Master core software architecture, vector algorithms, and data structures.
-              </p>
-              <div className="milestone-project-box">
-                <div className="milestone-project-title">✦ Capstone 1: Verified Foundational Engine</div>
-                <span style={{ color: '#27C93F', fontSize: '0.65rem' }}>✓ Verified Skill</span>
+          <div className="roadmap-side-by-side-layout">
+            {/* Cosmic Cat standing FREELY on the left side (outside any inner box) */}
+            <div className="roadmap-side-cat-companion">
+              <div className="cat-free-dialog-bubble">
+                <span className="press-start-2p-regular" style={{ fontSize: '0.62rem', color: '#FFD166' }}>
+                  ✦ COSMIC CAT NAVIGATOR
+                </span>
+                <p style={{ fontSize: '0.8rem', color: '#FFF7E8', margin: '0.35rem 0 0 0', lineHeight: 1.35 }}>
+                  {missingSkills.length > 0
+                    ? `"Scholar ${studentProfile.name.split(' ')[0]}! Step 02 ('${missingSkills[0].name}') is your active target!"`
+                    : `"Scholar ${studentProfile.name.split(' ')[0]}! All 4 roadmap steps verified & completed!"`}
+                </p>
               </div>
+
+              <img src="/cat.png" alt="Cosmic Cat Guide" className="cat-free-standing-img" />
             </div>
 
-            {/* Milestone 2 */}
-            <div className="roadmap-milestone-card active">
-              <span className="milestone-badge press-start-2p-regular">MILESTONE 02 // TARGET GAPS</span>
-              <h3 className="milestone-title">
-                {missingSkills[0]?.name ? `BRIDGE ${missingSkills[0].name.toUpperCase()}` : 'MICROSERVICES & APIS'}
-              </h3>
-              <p style={{ fontSize: '0.74rem', color: '#B8B3C7', lineHeight: 1.4 }}>
-                Acquire primary missing technology stack required for {studentProfile.careerGoal}.
-              </p>
-              <div className="milestone-project-box">
-                <div className="milestone-project-title">
-                  ✦ Capstone 2: {missingSkills[0]?.name || 'Target Stack'} Implementation
+            {/* Alternating Up-Down-Up-Down 3D Step Roadmap Deck */}
+            <div className="roadmap-3d-zigzag-stage">
+              {/* Horizontal Center Laser Line */}
+              <div className="roadmap-zigzag-laser-line" />
+
+              <div className="roadmap-zigzag-deck">
+                {/* STEP 01: UP Placement */}
+                <div
+                  className={`zigzag-card-wrapper position-up ${activeMilestone === 1 ? 'active' : ''} completed`}
+                  onClick={() => setActiveMilestone(1)}
+                >
+                  <div className="zigzag-connector-stem" />
+                  <div className="zigzag-laser-node-dot">01</div>
+
+                  <div className="zigzag-3d-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="step-card-num-badge">STEP 01</span>
+                      <span style={{ color: '#27C93F', fontSize: '0.68rem', fontWeight: 800 }}>✓ VERIFIED</span>
+                    </div>
+                    <h3 className="step-card-title">
+                      {strongSkills[0]?.name ? `${strongSkills[0].name.toUpperCase()} PATTERNS` : 'FOUNDATIONS'}
+                    </h3>
+                    <p className="step-card-desc">
+                      Master core software architecture, vector algorithms &amp; design patterns.
+                    </p>
+                    <div className="step-capstone-pill">
+                      ✦ Capstone 1: Base Engine
+                    </div>
+                  </div>
                 </div>
-                <span style={{ color: '#FFD166', fontSize: '0.65rem' }}>⚡ Active Target</span>
-              </div>
-            </div>
 
-            {/* Milestone 3 */}
-            <div className="roadmap-milestone-card">
-              <span className="milestone-badge press-start-2p-regular">MILESTONE 03 // INFRASTRUCTURE</span>
-              <h3 className="milestone-title">
-                {missingSkills[1]?.name ? `${missingSkills[1].name.toUpperCase()} DEPLOYMENT` : 'DOCKER & CI/CD PIPELINE'}
-              </h3>
-              <p style={{ fontSize: '0.74rem', color: '#B8B3C7', lineHeight: 1.4 }}>
-                Containerize services and build automated deployment pipelines.
-              </p>
-              <div className="milestone-project-box">
-                <div className="milestone-project-title">✦ Capstone 3: Scalable Production Pipeline</div>
-                <span style={{ color: '#64748b', fontSize: '0.65rem' }}>🔒 Next Milestone</span>
-              </div>
-            </div>
+                {/* STEP 02: DOWN Placement */}
+                <div
+                  className={`zigzag-card-wrapper position-down ${activeMilestone === 2 ? 'active' : ''} active`}
+                  onClick={() => setActiveMilestone(2)}
+                >
+                  <div className="zigzag-connector-stem" />
+                  <div className="zigzag-laser-node-dot">02</div>
 
-            {/* Milestone 4 */}
-            <div className="roadmap-milestone-card">
-              <span className="milestone-badge press-start-2p-regular">MILESTONE 04 // CAPSTONE AGENT</span>
-              <h3 className="milestone-title">ENTERPRISE SYSTEM CAPSTONE</h3>
-              <p style={{ fontSize: '0.74rem', color: '#B8B3C7', lineHeight: 1.4 }}>
-                Deploy autonomous multi-agent systems with real-time SLA &amp; monitoring.
-              </p>
-              <div className="milestone-project-box">
-                <div className="milestone-project-title">✦ Capstone 4: End-to-End Enterprise System</div>
-                <span style={{ color: '#64748b', fontSize: '0.65rem' }}>🔒 Final Capstone</span>
+                  <div className="zigzag-3d-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="step-card-num-badge">STEP 02</span>
+                      <span style={{ color: '#FFD166', fontSize: '0.68rem', fontWeight: 800 }}>⚡ ACTIVE FOCUS</span>
+                    </div>
+                    <h3 className="step-card-title">
+                      {missingSkills[0]?.name ? `BRIDGE ${missingSkills[0].name.toUpperCase()}` : 'MICROSERVICES'}
+                    </h3>
+                    <p className="step-card-desc">
+                      Acquire target stack required for enterprise {studentProfile.careerGoal} engineering.
+                    </p>
+                    <div className="step-capstone-pill">
+                      ✦ Capstone 2: {missingSkills[0]?.name || 'Target Stack'} Service
+                    </div>
+                  </div>
+                </div>
+
+                {/* STEP 03: UP Placement */}
+                <div
+                  className={`zigzag-card-wrapper position-up ${activeMilestone === 3 ? 'active' : ''}`}
+                  onClick={() => setActiveMilestone(3)}
+                >
+                  <div className="zigzag-connector-stem" />
+                  <div className="zigzag-laser-node-dot">03</div>
+
+                  <div className="zigzag-3d-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="step-card-num-badge">STEP 03</span>
+                      <span style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 800 }}>🔒 LOCKED</span>
+                    </div>
+                    <h3 className="step-card-title">
+                      {missingSkills[1]?.name ? `${missingSkills[1].name.toUpperCase()} DEPLOY` : 'INFRASTRUCTURE'}
+                    </h3>
+                    <p className="step-card-desc">
+                      Containerize microservices with Docker multi-stage builds &amp; CI/CD pipelines.
+                    </p>
+                    <div className="step-capstone-pill" style={{ color: '#B8B3C7' }}>
+                      ✦ Capstone 3: Pipeline
+                    </div>
+                  </div>
+                </div>
+
+                {/* STEP 04: DOWN Placement */}
+                <div
+                  className={`zigzag-card-wrapper position-down ${activeMilestone === 4 ? 'active' : ''}`}
+                  onClick={() => setActiveMilestone(4)}
+                >
+                  <div className="zigzag-connector-stem" />
+                  <div className="zigzag-laser-node-dot">04</div>
+
+                  <div className="zigzag-3d-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="step-card-num-badge">STEP 04</span>
+                      <span style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 800 }}>🔒 GRADUATION</span>
+                    </div>
+                    <h3 className="step-card-title">ENTERPRISE AGENT</h3>
+                    <p className="step-card-desc">
+                      Deploy autonomous multi-agent systems with real-time SLA monitoring.
+                    </p>
+                    <div className="step-capstone-pill" style={{ color: '#B8B3C7' }}>
+                      ✦ Capstone 4: AI Agent
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

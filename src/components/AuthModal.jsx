@@ -543,11 +543,11 @@ export default function AuthModal({
                             value={targetRole}
                             onChange={(e) => setTargetRole(e.target.value)}
                           >
-                            <option value="AI Engineer">AI Engineer &amp; PyTorch</option>
-                            <option value="Backend Developer">Backend Microservices</option>
-                            <option value="Frontend Developer">Frontend React UI</option>
-                            <option value="Full-Stack Developer">Full-Stack Cloud</option>
-                            <option value="DevOps Engineer">DevOps &amp; K8s</option>
+                            <option value="AI Engineer">AI Engineer</option>
+                            <option value="Backend Developer">Backend Developer</option>
+                            <option value="Frontend Developer">Frontend Developer</option>
+                            <option value="Full-Stack Developer">Full-Stack Developer</option>
+                            <option value="DevOps Engineer">DevOps Engineer</option>
                             <option value="Data Scientist">Data Scientist</option>
                           </select>
                         </div>

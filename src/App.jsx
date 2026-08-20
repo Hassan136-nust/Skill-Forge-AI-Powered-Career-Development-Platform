@@ -25,7 +25,24 @@ export default function App() {
   const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard'
   const [currentUser, setCurrentUser] = useState(null)
 
-  // Check existing session
+  const getDashboardPathForUser = (user) => {
+    if (!user) return '/dashboard'
+    const identifier = user._id || (user.email ? user.email.split('@')[0] : 'scholar')
+    return `/${encodeURIComponent(identifier)}/dashboard`
+  }
+
+  const syncViewFromUrl = () => {
+    const path = window.location.pathname
+    const isDashboardRoute = path.endsWith('/dashboard') || path.includes('/dashboard')
+    
+    if (isDashboardRoute) {
+      setCurrentView('dashboard')
+    } else {
+      setCurrentView('landing')
+    }
+  }
+
+  // Check existing session & sync URL route
   useEffect(() => {
     try {
       const token = localStorage.getItem('skillforge_token')
@@ -34,6 +51,14 @@ export default function App() {
         setCurrentUser(user)
       }
     } catch (e) {}
+
+    syncViewFromUrl()
+
+    const handlePopState = () => {
+      syncViewFromUrl()
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
   // Initialize Lenis Smooth Scroll
@@ -224,7 +249,11 @@ export default function App() {
 
   const handleOpenDashboard = () => {
     const token = localStorage.getItem('skillforge_token')
-    if (token) {
+    const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    
+    if (token || user) {
+      const targetUrl = getDashboardPathForUser(user || currentUser)
+      window.history.pushState({}, '', targetUrl)
       setCurrentView('dashboard')
     } else {
       setIsAuthOpen(true)
@@ -234,6 +263,8 @@ export default function App() {
   const handleAuthSuccess = (user) => {
     setCurrentUser(user)
     setIsAuthOpen(false)
+    const targetUrl = getDashboardPathForUser(user)
+    window.history.pushState({}, '', targetUrl)
     setCurrentView('dashboard')
   }
 
@@ -242,6 +273,7 @@ export default function App() {
     return (
       <StudentDashboard
         onExitDashboard={() => {
+          window.history.pushState({}, '', '/')
           setCurrentView('landing')
           const token = localStorage.getItem('skillforge_token')
           const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')

@@ -401,6 +401,13 @@ export default function StudentDashboard({ onExitDashboard }) {
   const [showRepos, setShowRepos] = useState(false)
   const [skillScores, setSkillScores] = useState({})
   const [activeMilestone, setActiveMilestone] = useState(2)
+  const [completedTasks, setCompletedTasks] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
+    } catch {
+      return []
+    }
+  })
 
   // Load profile from MongoDB Atlas API & LocalStorage Cache
   const loadProfile = async () => {
@@ -408,6 +415,11 @@ export default function StudentDashboard({ onExitDashboard }) {
       const cachedScores = JSON.parse(localStorage.getItem('skillforge_scores') || '{}')
       if (Object.keys(cachedScores).length > 0) {
         setSkillScores((prev) => ({ ...prev, ...cachedScores }))
+      }
+
+      const cachedTasks = JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
+      if (Array.isArray(cachedTasks) && cachedTasks.length > 0) {
+        setCompletedTasks(cachedTasks)
       }
 
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
@@ -440,6 +452,12 @@ export default function StudentDashboard({ onExitDashboard }) {
             reposCount: p.projects?.length || 0,
           }))
 
+          if (Array.isArray(p.completedTasks)) {
+            const merged = Array.from(new Set([...cachedTasks, ...p.completedTasks]))
+            setCompletedTasks(merged)
+            localStorage.setItem('skillforge_completed_tasks', JSON.stringify(merged))
+          }
+
           const mergedScores = { ...cachedScores }
           if (Array.isArray(p.skills)) {
             p.skills.forEach((s) => {
@@ -457,6 +475,73 @@ export default function StudentDashboard({ onExitDashboard }) {
       }
     } catch (e) {
       console.warn('Using cached profile:', e)
+    }
+  }
+
+  // Generate interactive sub-tasks for any roadmap milestone step
+  const getTasksForStep = (stepItem, stepNum) => {
+    const tasks = []
+    const prefix = `step_${stepNum}_`
+
+    // Extract clean tasks from topics or desc
+    let sourceText = stepItem.topics || stepItem.desc || ''
+    if (sourceText) {
+      const parts = sourceText
+        .split(/[•\n,]/)
+        .map((s) => s.replace(/https?:\/\/\S+/g, '').replace(/[*_#`()]/g, '').trim())
+        .filter((s) => s.length >= 4 && !s.toLowerCase().startsWith('http'))
+
+      const uniqueParts = Array.from(new Set(parts)).slice(0, 2)
+      uniqueParts.forEach((p, idx) => {
+        tasks.push({
+          id: `${prefix}task_${idx}`,
+          label: p.length > 55 ? p.substring(0, 52) + '...' : p,
+        })
+      })
+    }
+
+    if (tasks.length === 0) {
+      tasks.push({ id: `${prefix}task_0`, label: `Master core foundations of ${stepItem.title}` })
+      tasks.push({ id: `${prefix}task_1`, label: `Complete hands-on implementation labs` })
+    }
+
+    const capstoneName = (stepItem.capstone || 'Milestone Capstone')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[*_#`]/g, '')
+      .split(/[•\n]/)[0]
+      .trim()
+
+    tasks.push({
+      id: `${prefix}capstone`,
+      label: `🚀 Deliverable: ${capstoneName.length > 46 ? capstoneName.substring(0, 43) + '...' : capstoneName}`,
+      isCapstone: true,
+    })
+
+    return tasks
+  }
+
+  // 1-Click Interactive Checkbox Toggle with MongoDB & LocalStorage Sync
+  const handleToggleTask = async (taskId) => {
+    const updated = completedTasks.includes(taskId)
+      ? completedTasks.filter((id) => id !== taskId)
+      : [...completedTasks, taskId]
+
+    setCompletedTasks(updated)
+    localStorage.setItem('skillforge_completed_tasks', JSON.stringify(updated))
+
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+      await fetch('http://localhost:3001/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: storedUser._id,
+          email: studentProfile.email,
+          completedTasks: updated,
+        }),
+      })
+    } catch (err) {
+      console.warn('Could not sync completed tasks to DB:', err)
     }
   }
 
@@ -488,11 +573,13 @@ export default function StudentDashboard({ onExitDashboard }) {
         if (parts.length >= 3 && !parts[0].includes('---') && !parts[0].toLowerCase().includes('milestone')) {
           const stepNum = String(milestones.length + 1).padStart(2, '0')
           const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
-          const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || ''
-          const rawCapstone = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || `Capstone ${milestones.length + 1}`
+          const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' • ').trim() || ''
+          const rawTopics = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ', ').trim() || ''
+          const rawResources = parts[3]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ', ').trim() || ''
+          const rawCapstone = (parts[4] || parts[2] || `Capstone ${milestones.length + 1}`).replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim()
 
           let tech = 'python'
-          const lower = (rawTitle + ' ' + rawDesc + ' ' + rawCapstone).toLowerCase()
+          const lower = (rawTitle + ' ' + rawDesc + ' ' + rawTopics + ' ' + rawCapstone).toLowerCase()
           if (lower.includes('torch') || lower.includes('deep learning') || lower.includes('neural')) tech = 'pytorch'
           else if (lower.includes('fastapi') || lower.includes('vector') || lower.includes('chroma') || lower.includes('api')) tech = 'fastapi'
           else if (lower.includes('docker') || lower.includes('cloud') || lower.includes('deploy') || lower.includes('agent')) tech = 'docker'
@@ -504,8 +591,10 @@ export default function StudentDashboard({ onExitDashboard }) {
           milestones.push({
             step: stepNum,
             title: rawTitle.toUpperCase(),
-            desc: rawDesc.length > 115 ? rawDesc.substring(0, 112) + '...' : rawDesc,
-            capstone: rawCapstone.length > 55 ? rawCapstone.substring(0, 52) + '...' : rawCapstone,
+            desc: rawDesc,
+            topics: rawTopics,
+            resources: rawResources,
+            capstone: rawCapstone,
             tech: tech,
           })
         }
@@ -519,12 +608,14 @@ export default function StudentDashboard({ onExitDashboard }) {
         if (bLines.length > 0 && /(?:Milestone|Step|\d)/i.test(bLines[0])) {
           const stepNum = String(milestones.length + 1).padStart(2, '0')
           const title = bLines[0].replace(/[*_#`]/g, '').trim().toUpperCase()
-          const desc = bLines.slice(1, 4).join(' ').replace(/[*_#`]/g, '').trim()
+          const desc = bLines.slice(1, 6).join(' ').replace(/[*_#`]/g, '').trim()
           milestones.push({
             step: stepNum,
             title: title,
-            desc: desc.length > 115 ? desc.substring(0, 112) + '...' : desc,
-            capstone: `Capstone ${stepNum}: Production Showcase`,
+            desc: desc,
+            topics: '',
+            resources: '',
+            capstone: `Capstone ${stepNum}: Production Showcase & Benchmark`,
             tech: idx === 0 ? 'python' : idx === 1 ? 'pytorch' : idx === 2 ? 'fastapi' : 'docker',
           })
         }
@@ -721,9 +812,20 @@ export default function StudentDashboard({ onExitDashboard }) {
   })
 
   const matchPoints = strongSkills.length * 1.0 + developingSkills.length * 0.5
-  const readinessPercent = targetRequiredSkills.length > 0 
-    ? Math.min(100, Math.round((matchPoints / targetRequiredSkills.length) * 100))
+  const baseSkillScore = targetRequiredSkills.length > 0 
+    ? Math.round((matchPoints / targetRequiredSkills.length) * 100)
     : 0
+
+  const activeRoadmapSteps = (aiGeneratedMilestones && aiGeneratedMilestones.length > 0)
+    ? aiGeneratedMilestones
+    : (TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer'])
+
+  const totalPossibleTasks = activeRoadmapSteps.reduce((sum, step, idx) => sum + getTasksForStep(step, idx + 1).length, 0)
+  const totalCompletedTasks = completedTasks.filter((id) => id.startsWith('step_')).length
+  const checklistBonus = totalPossibleTasks > 0 ? Math.round((totalCompletedTasks / totalPossibleTasks) * 35) : 0
+
+  // Live Career Readiness: Skill Assessments (65%) + Interactive Roadmap Checklists (35%)
+  const readinessPercent = Math.min(100, Math.round(baseSkillScore * 0.65 + checklistBonus))
 
   // Quiz Runner States
   const [activeQuiz, setActiveQuiz] = useState(null)
@@ -1680,17 +1782,95 @@ export default function StudentDashboard({ onExitDashboard }) {
                         <div className="zigzag-laser-node-dot">0{stepNum}</div>
 
                         <div className="zigzag-3d-card">
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          {/* Card Top Bar */}
+                          <div className="step-card-header-bar">
                             <span className="step-card-num-badge">STEP 0{stepNum}</span>
-                            <span style={{ color: statusColor, fontSize: '0.68rem', fontWeight: 800 }}>{statusText}</span>
+                            <span className="step-card-status-badge" style={{ color: statusColor, borderColor: statusColor }}>
+                              {statusText}
+                            </span>
                           </div>
-                          <h3 className="step-card-title">{stepItem.title}</h3>
-                          <p className="step-card-desc">{stepItem.desc}</p>
+
+                          {/* Title & One-line Summary */}
+                          <div>
+                            <h3 className="step-card-title">{stepItem.title}</h3>
+                            <p className="step-card-brief">
+                              {stepItem.desc ? stepItem.desc.split(/[•\n]/)[0].trim() : 'Master technical foundations & pipelines.'}
+                            </p>
+                          </div>
+
+                          {/* Dynamic Interactive Sub-Tasks Checklist */}
+                          {(() => {
+                            const stepTasks = getTasksForStep(stepItem, stepNum)
+                            const stepDoneCount = stepTasks.filter((t) => completedTasks.includes(t.id)).length
+                            const stepPct = Math.round((stepDoneCount / stepTasks.length) * 100)
+
+                            return (
+                              <div className="step-checklist-container" onClick={(e) => e.stopPropagation()}>
+                                <div className="checklist-meta-row">
+                                  <span className="checklist-title press-start-2p-regular">
+                                    ✦ TASKS ({stepDoneCount}/{stepTasks.length})
+                                  </span>
+                                  <span
+                                    className="checklist-pct-badge"
+                                    style={{ color: stepPct === 100 ? '#27C93F' : '#FFD166' }}
+                                  >
+                                    {stepPct}%
+                                  </span>
+                                </div>
+
+                                <div className="checklist-progress-bar">
+                                  <div
+                                    className="checklist-progress-fill"
+                                    style={{
+                                      width: `${stepPct}%`,
+                                      background:
+                                        stepPct === 100
+                                          ? '#27C93F'
+                                          : 'linear-gradient(90deg, #FFD166 0%, #00D2FF 100%)',
+                                    }}
+                                  />
+                                </div>
+
+                                <div className="checklist-items-stack">
+                                  {stepTasks.map((t) => {
+                                    const isDone = completedTasks.includes(t.id)
+                                    return (
+                                      <div
+                                        key={t.id}
+                                        className={`checklist-row ${isDone ? 'checked' : ''} ${t.isCapstone ? 'capstone' : ''}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleToggleTask(t.id)
+                                        }}
+                                        title="Click to toggle completion & boost Career Readiness"
+                                      >
+                                        <div className={`cyber-check-circle ${isDone ? 'checked' : ''}`}>
+                                          {isDone && <Check size={10} color="#05060A" strokeWidth={3.5} />}
+                                        </div>
+                                        <span className="checklist-label-text">{t.label}</span>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )
+                          })()}
+
+                          {/* Quick Link to View Detailed AI Syllabus */}
                           <div
-                            className="step-capstone-pill"
-                            style={{ color: isVerified ? '#27C93F' : cardStateClass === 'active' ? '#FFD166' : '#B8B3C7' }}
+                            className="step-card-footer-action"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (roadmapHistoryList && roadmapHistoryList.length > 0) {
+                                setAiRoadmapModalData(roadmapHistoryList[0])
+                              } else {
+                                handleGenerateAiRoadmap()
+                              }
+                            }}
+                            title="Open detailed AI syllabus & resources"
                           >
-                            ✦ {stepItem.capstone}
+                            <span>📖 Full Syllabus &amp; Resources</span>
+                            <ArrowRight size={11} color="#FFD166" />
                           </div>
                         </div>
                       </div>
@@ -2080,7 +2260,23 @@ export default function StudentDashboard({ onExitDashboard }) {
               </div>
 
               {/* Main Content Area (With optional History Sidebar) */}
-              <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, gap: '1rem', overflow: 'hidden' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  height: 'calc(88vh - 180px)',
+                  maxHeight: 'calc(88vh - 180px)',
+                  gap: '1rem',
+                  overflow: 'hidden',
+                }}
+                onWheel={(e) => {
+                  const el = document.getElementById('ai-roadmap-printable-area')
+                  if (el) {
+                    el.scrollTop += e.deltaY
+                  }
+                }}
+              >
                 {/* Previous Roadmaps History Drawer */}
                 {showHistoryDrawer && (
                   <motion.div
@@ -2097,6 +2293,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                       gap: '0.6rem',
                       overflowY: 'auto',
                       minWidth: '260px',
+                      height: '100%',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.5rem' }}>
@@ -2160,8 +2357,11 @@ export default function StudentDashboard({ onExitDashboard }) {
                     minHeight: 0,
                     height: '100%',
                     maxHeight: '100%',
-                    overflowY: 'auto',
+                    overflowY: 'scroll',
+                    overflowX: 'hidden',
                     paddingRight: '0.8rem',
+                    pointerEvents: 'auto',
+                    touchAction: 'pan-y',
                   }}
                 >
                   <div className="ai-roadmap-markdown-body">
@@ -2313,15 +2513,27 @@ export default function StudentDashboard({ onExitDashboard }) {
 
               {/* History List */}
               <div
+                id="previous-roadmaps-scroll-area"
                 className="ai-roadmap-scroll-container"
                 style={{
                   flex: '1 1 auto',
                   minHeight: 0,
+                  height: 'calc(75vh - 140px)',
+                  maxHeight: 'calc(75vh - 140px)',
                   padding: '1.2rem',
-                  overflowY: 'auto',
+                  overflowY: 'scroll',
+                  overflowX: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1rem',
+                  pointerEvents: 'auto',
+                  touchAction: 'pan-y',
+                }}
+                onWheel={(e) => {
+                  const el = document.getElementById('previous-roadmaps-scroll-area')
+                  if (el) {
+                    el.scrollTop += e.deltaY
+                  }
                 }}
               >
                 {roadmapHistoryList.length === 0 ? (

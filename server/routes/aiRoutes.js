@@ -80,7 +80,7 @@ function parseMilestonesFromText(text, fallbackRole) {
   const milestones = []
   if (!text) return milestones
 
-  // 1. Try parsing Markdown table rows (| Milestone | Focus / Objectives | Capstone | ...)
+  // 1. Try parsing Markdown table rows (| Milestone | Core Learning Objectives | Key Topics & Tools | Recommended Resources | Capstone Project |)
   const lines = text.split('\n')
   for (const line of lines) {
     if (line.startsWith('|') && (line.includes('1') || line.includes('2') || line.includes('3') || line.includes('4') || line.includes('5') || line.includes('6') || line.includes('Milestone') || line.includes('Step'))) {
@@ -88,11 +88,13 @@ function parseMilestonesFromText(text, fallbackRole) {
       if (parts.length >= 3 && !parts[0].includes('---') && !parts[0].toLowerCase().includes('milestone')) {
         const stepNum = String(milestones.length + 1).padStart(2, '0')
         const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
-        const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || ''
-        const rawCapstone = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || `Capstone ${milestones.length + 1}`
+        const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' • ').trim() || ''
+        const rawTopics = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ', ').trim() || ''
+        const rawResources = parts[3]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ', ').trim() || ''
+        const rawCapstone = (parts[4] || parts[2] || `Capstone ${milestones.length + 1}`).replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim()
 
         let tech = 'python'
-        const lower = (rawTitle + ' ' + rawDesc + ' ' + rawCapstone).toLowerCase()
+        const lower = (rawTitle + ' ' + rawDesc + ' ' + rawTopics + ' ' + rawCapstone).toLowerCase()
         if (lower.includes('torch') || lower.includes('deep learning') || lower.includes('neural')) tech = 'pytorch'
         else if (lower.includes('fastapi') || lower.includes('vector') || lower.includes('chroma') || lower.includes('api')) tech = 'fastapi'
         else if (lower.includes('docker') || lower.includes('cloud') || lower.includes('deploy') || lower.includes('agent')) tech = 'docker'
@@ -105,8 +107,10 @@ function parseMilestonesFromText(text, fallbackRole) {
         milestones.push({
           step: stepNum,
           title: rawTitle.toUpperCase(),
-          desc: rawDesc.length > 120 ? rawDesc.substring(0, 117) + '...' : rawDesc,
-          capstone: rawCapstone.length > 55 ? rawCapstone.substring(0, 52) + '...' : rawCapstone,
+          desc: rawDesc,
+          topics: rawTopics,
+          resources: rawResources,
+          capstone: rawCapstone,
           tech: tech,
         })
       }
@@ -121,12 +125,14 @@ function parseMilestonesFromText(text, fallbackRole) {
       if (bLines.length > 0 && /(?:Milestone|Step|\d)/i.test(bLines[0])) {
         const stepNum = String(milestones.length + 1).padStart(2, '0')
         const title = bLines[0].replace(/[*_#`]/g, '').trim().toUpperCase()
-        const desc = bLines.slice(1, 4).join(' ').replace(/[*_#`]/g, '').trim()
+        const desc = bLines.slice(1, 6).join(' ').replace(/[*_#`]/g, '').trim()
         milestones.push({
           step: stepNum,
           title: title,
-          desc: desc.length > 120 ? desc.substring(0, 117) + '...' : desc,
-          capstone: `Capstone ${stepNum}: Production Showcase`,
+          desc: desc,
+          topics: '',
+          resources: '',
+          capstone: `Capstone ${stepNum}: Production Showcase & Benchmark`,
           tech: idx === 0 ? 'python' : idx === 1 ? 'pytorch' : idx === 2 ? 'fastapi' : 'docker',
         })
       }

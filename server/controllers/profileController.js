@@ -48,6 +48,7 @@ export const saveProfile = async (req, res) => {
       projects,
       certifications,
       careerGoal,
+      completedTasks,
     } = req.body
 
     let targetUserId = req.user?._id || userId
@@ -88,6 +89,7 @@ export const saveProfile = async (req, res) => {
       if (projects !== undefined) profile.projects = projects
       if (certifications !== undefined) profile.certifications = certifications
       if (careerGoal !== undefined) profile.careerGoal = careerGoal
+      if (completedTasks !== undefined) profile.completedTasks = completedTasks
 
       await profile.save()
     } else {
@@ -101,6 +103,7 @@ export const saveProfile = async (req, res) => {
         projects: projects || [],
         certifications: certifications || [],
         careerGoal: careerGoal || 'AI Engineer',
+        completedTasks: completedTasks || [],
       })
     }
 

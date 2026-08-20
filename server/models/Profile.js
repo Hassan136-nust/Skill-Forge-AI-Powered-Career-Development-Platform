@@ -55,6 +55,7 @@ const ProfileSchema = new mongoose.Schema(
       ],
       default: 'AI Engineer',
     },
+    completedTasks: [{ type: String }],
     currentRoadmap: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Roadmap',

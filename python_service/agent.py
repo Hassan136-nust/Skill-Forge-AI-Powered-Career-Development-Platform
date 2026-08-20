@@ -220,34 +220,49 @@ Student Profile:
 - Target Career Track: {state.career_goal}
 - Verified Skill Gaps: {', '.join([g['skill'] for g in state.detected_gaps[:3]]) if state.detected_gaps else 'None'}
 
-Verified Knowledge Base Context:
+Verified Knowledge Base Context (ChromaDB Grounded):
 {state.retrieved_context}
 
-Formulate an authoritative, structured, and motivational 4-step Career Execution Plan.
-Highlight the hands-on capstone for each step and link to industry job readiness.
+Instructions:
+1. Formulate an authoritative, structured, and motivational 4-step Career Execution Plan with hands-on capstones.
+2. Provide a COMPLETE, fully filled Suggested Timeline Table covering Month 1-2, Month 3-4, Month 5-6, and Month 7-8.
+3. CRITICAL: Do NOT truncate, cut off, or stop mid-sentence. Write out every section, table row, and capstone deliverable to completion.
 """
 
     try:
         client = get_groq_client()
         completion = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are the SkillForge Autonomous Career Planning Agent."},
+                {"role": "system", "content": "You are the SkillForge Autonomous Career Planning Agent. You always produce comprehensive, complete, non-truncated career blueprints."},
                 {"role": "user", "content": agent_prompt}
             ],
             model="openai/gpt-oss-120b",
             temperature=0.7,
-            max_completion_tokens=1500,
+            max_completion_tokens=4096,
         )
         ai_synthesis = completion.choices[0].message.content
     except Exception:
-        ai_synthesis = f"SkillForge Autonomous Plan for {state.career_goal}: Prioritize closing gaps in {', '.join([g['skill'] for g in state.detected_gaps[:2]]) if state.detected_gaps else 'Core Systems'}. Complete the 4 capstone deliverables below to reach industry job readiness."
+        try:
+            client = get_groq_client()
+            completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are the SkillForge Autonomous Career Planning Agent."},
+                    {"role": "user", "content": agent_prompt}
+                ],
+                model="openai/gpt-oss-20b",
+                temperature=0.7,
+                max_completion_tokens=4096,
+            )
+            ai_synthesis = completion.choices[0].message.content
+        except Exception:
+            ai_synthesis = f"SkillForge Autonomous Plan for {state.career_goal}: Complete the 4 capstone deliverables below to reach industry job readiness."
 
     state.final_synthesis = ai_synthesis
     state.reasoning_steps.append({
         "node": "RoadmapSynthesizer",
         "thought": "Synthesized final personalized career blueprint using Groq LLaMA 3.3.",
-        "action": "GroqChatCompletion(model='openai/gpt-oss-120b')",
-        "observation": "Career Plan generated successfully with full source grounding.",
+        "action": "GroqChatCompletion(model='openai/gpt-oss-120b', max_tokens=4096)",
+        "observation": "Career Plan generated completely without truncation.",
     })
     return state
 

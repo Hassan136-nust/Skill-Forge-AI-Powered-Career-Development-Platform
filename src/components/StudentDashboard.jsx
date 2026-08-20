@@ -382,7 +382,7 @@ const getQuizForSkill = (skillName) => {
   }
 }
 
-export default function StudentDashboard({ onExitDashboard }) {
+export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap }) {
   const DEFAULT_AVATAR = 'https://imgs.search.brave.com/en8GueUwEke4A7ecDjpRnIpFR8Y-WWOEbjzD2xCNTu0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn'
 
   const [studentProfile, setStudentProfile] = useState({
@@ -1917,16 +1917,17 @@ export default function StudentDashboard({ onExitDashboard }) {
               <img src="/cat.png" alt="Cosmic Cat Guide" className="cat-free-standing-img" />
             </div>
 
-            {/* Alternating Up-Down-Up-Down 3D Step Roadmap Deck */}
+            {/* Alternating Up-Down-Up-Down 3D Step Roadmap Deck (First 4 Core Focus Cards) */}
             <div className="roadmap-3d-zigzag-stage">
               {/* Horizontal Center Laser Line */}
               <div className="roadmap-zigzag-laser-line" />
 
               <div className="roadmap-zigzag-deck">
                 {(() => {
-                  const roadmapSteps = (aiGeneratedMilestones && aiGeneratedMilestones.length > 0)
+                  const fullRoadmapSteps = (aiGeneratedMilestones && aiGeneratedMilestones.length > 0)
                     ? aiGeneratedMilestones
                     : (TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer'])
+                  const roadmapSteps = fullRoadmapSteps.slice(0, 4)
                   let activeFocusFound = false
 
                   return roadmapSteps.map((stepItem, sIdx) => {
@@ -2063,6 +2064,51 @@ export default function StudentDashboard({ onExitDashboard }) {
               </div>
             </div>
           </div>
+
+          {/* =========================================================================
+              SHOW COMPLETE ROADMAP ACTION BANNER (NAVIGATES TO FULL DEDICATED ROUTE)
+              ========================================================================= */}
+          {(() => {
+            const allRoadmapSteps = (aiGeneratedMilestones && aiGeneratedMilestones.length > 0)
+              ? aiGeneratedMilestones
+              : (TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer'])
+            
+            return (
+              <div className="roadmap-expand-full-banner">
+                <div className="expand-banner-content">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+                    <div className="expand-icon-pulse">
+                      <Compass size={24} color="#00D2FF" style={{ animation: 'spin 12s linear infinite' }} />
+                    </div>
+                    <div>
+                      <h3 className="bungee-regular" style={{ color: '#FFD166', fontSize: '1.02rem', margin: 0, letterSpacing: '0.04em' }}>
+                        SHOW COMPLETE ROADMAP ({allRoadmapSteps.length} MILESTONES)
+                      </h3>
+                      <p style={{ color: '#B8B3C7', fontSize: '0.82rem', margin: '0.3rem 0 0 0', lineHeight: 1.4 }}>
+                        Launch full-screen deep space interactive pathway with all {allRoadmapSteps.length} waypoints, task sync &amp; capstone deliverables.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (typeof onOpenFullRoadmap === 'function') {
+                        onOpenFullRoadmap(allRoadmapSteps)
+                      } else {
+                        const identifier = studentProfile.name ? studentProfile.name.split(' ')[0].toLowerCase() : 'scholar'
+                        window.history.pushState({}, '', `/${encodeURIComponent(identifier)}/roadmap`)
+                        window.dispatchEvent(new PopStateEvent('popstate'))
+                      }
+                    }}
+                    className="bungee-regular expand-launch-btn"
+                  >
+                    <span>VIEW FULL MAP</span>
+                    <ArrowRight size={16} color="#05060A" strokeWidth={2.8} />
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
         </div>
       </main>
 

@@ -179,12 +179,12 @@ router.post('/roadmap/generate', async (req, res) => {
   try {
     const { userId, email, careerGoal, currentSkills, missingSkills } = req.body
 
-    const targetGoal = careerGoal || 'AI Engineer'
-    const cleanEmail = (email || 'student@nust.edu.pk').toLowerCase()
-
-    // Call Python FastAPI Microservice for Skill Analysis
+    // Call Python FastAPI Microservice for Skill Analysis and ChromaDB Semantic Grounding
     let pythonAnalysis = null
+    let chromaContext = ''
+    let chromaSources = []
     try {
+      // 1. Skill Analyzer
       const pyRes = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -196,12 +196,30 @@ router.post('/roadmap/generate', async (req, res) => {
       if (pyRes.ok) {
         pythonAnalysis = await pyRes.json()
       }
+
+      // 2. ChromaDB Semantic Search for target role roadmap & projects
+      const searchRes = await fetch('http://localhost:8000/vectorstore/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `${targetGoal} learning roadmap capstone projects skills`,
+          top_k: 3,
+        }),
+      })
+      if (searchRes.ok) {
+        const searchData = await searchRes.json()
+        chromaContext = searchData.context || ''
+        chromaSources = searchData.sources || []
+      }
     } catch (err) {
       console.warn('Python service call fallback:', err.message)
     }
 
     const prompt = `Generate a comprehensive, fully written 4-step AI Career Learning Roadmap for a CS student targeting the role of "${targetGoal}".
 Student Identified Skill Gaps: ${missingSkills ? JSON.stringify(missingSkills) : 'Target Stack Foundations'}.
+
+${chromaContext ? `[VERIFIED KNOWLEDGE BASE CONTEXT — RETRIEVED FROM CHROMADB]\n${chromaContext}\n` : ''}
+
 Requirements:
 1. Motivational Kick-Off introduction.
 2. Formatted Table / Structured breakdown covering ALL 4 Milestones:

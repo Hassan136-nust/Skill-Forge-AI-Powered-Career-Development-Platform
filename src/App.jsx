@@ -12,6 +12,7 @@ import SdgArchSection from './components/SdgArchSection'
 import CosmicCatGuide from './components/CosmicCatGuide'
 import AuthModal from './components/AuthModal'
 import StudentDashboard from './components/StudentDashboard'
+import FullRoadmapPage from './components/FullRoadmapPage'
 import Footer from './components/Footer'
 import './App.css'
 
@@ -22,7 +23,7 @@ export default function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isAuthOpen, setIsAuthOpen] = useState(false)
-  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard'
+  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard' | 'roadmap'
   const [currentUser, setCurrentUser] = useState(null)
 
   const getDashboardPathForUser = (user) => {
@@ -31,11 +32,20 @@ export default function App() {
     return `/${encodeURIComponent(identifier)}/dashboard`
   }
 
+  const getRoadmapPathForUser = (user) => {
+    if (!user) return '/roadmap'
+    const identifier = user._id || (user.email ? user.email.split('@')[0] : 'scholar')
+    return `/${encodeURIComponent(identifier)}/roadmap`
+  }
+
   const syncViewFromUrl = () => {
     const path = window.location.pathname
+    const isRoadmapRoute = path.endsWith('/roadmap') || path.includes('/roadmap')
     const isDashboardRoute = path.endsWith('/dashboard') || path.includes('/dashboard')
     
-    if (isDashboardRoute) {
+    if (isRoadmapRoute) {
+      setCurrentView('roadmap')
+    } else if (isDashboardRoute) {
       setCurrentView('dashboard')
     } else {
       setCurrentView('landing')
@@ -268,6 +278,20 @@ export default function App() {
     setCurrentView('dashboard')
   }
 
+  // If in Dedicated Full Roadmap View, render the interactive galaxy map with login.webm
+  if (currentView === 'roadmap') {
+    return (
+      <FullRoadmapPage
+        onBackToDashboard={() => {
+          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getDashboardPathForUser(user)
+          window.history.pushState({}, '', targetUrl)
+          setCurrentView('dashboard')
+        }}
+      />
+    )
+  }
+
   // If in Dashboard View, render the Student Dashboard
   if (currentView === 'dashboard') {
     return (
@@ -278,6 +302,15 @@ export default function App() {
           const token = localStorage.getItem('skillforge_token')
           const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
           setCurrentUser(token ? user : null)
+        }}
+        onOpenFullRoadmap={(milestones) => {
+          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          if (milestones && milestones.length > 0) {
+            localStorage.setItem('skillforge_current_milestones', JSON.stringify(milestones))
+          }
+          const targetUrl = getRoadmapPathForUser(user)
+          window.history.pushState({}, '', targetUrl)
+          setCurrentView('roadmap')
         }}
       />
     )

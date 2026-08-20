@@ -95,6 +95,25 @@ def rebuild_index():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class SearchRequest(BaseModel):
+    query: str
+    top_k: Optional[int] = 3
+
+@app.post("/vectorstore/search")
+def search_vectorstore(req: SearchRequest):
+    """POST /vectorstore/search — Query ChromaDB semantic search directly"""
+    try:
+        context, sources = vector_store.search(req.query, top_k=req.top_k or 3)
+        return {
+            "success": True,
+            "query": req.query,
+            "context": context,
+            "sources": sources,
+            "mode": vector_store.status()["mode"],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/analyze")
 def analyze_skills(req: AnalyzeRequest):
     """POST /analyze — run SkillAnalyzer on assessment results"""

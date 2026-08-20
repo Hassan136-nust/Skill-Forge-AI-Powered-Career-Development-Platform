@@ -23,7 +23,10 @@ import {
   Terminal,
   Cpu,
   BrainCircuit,
-  Zap
+  Zap,
+  Activity,
+  GraduationCap,
+  CheckCircle2
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -127,9 +130,11 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
   }
 
   // 4. Create New Session
+  // 4. Create New Session
   const handleCreateNewSession = async () => {
     try {
       const email = studentProfile.email
+      const activeMilestonesList = getActiveMilestones()
       const res = await fetch('http://localhost:3001/api/mentor/session/new', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,6 +142,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
           email,
           careerGoal: studentProfile.careerGoal,
           initialTitle: `Mentorship • ${studentProfile.careerGoal}`,
+          currentMilestones: activeMilestonesList,
         }),
       })
 
@@ -201,11 +207,8 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
     setInputValue('')
     setIsSending(true)
 
-    // Read cached milestones
-    let cachedMilestones = []
-    try {
-      cachedMilestones = JSON.parse(localStorage.getItem('skillforge_current_milestones') || '[]')
-    } catch {}
+    // Read cached active milestones from localStorage or backend
+    const activeMilestonesToSend = getActiveMilestones()
 
     try {
       const res = await fetch('http://localhost:3001/api/mentor/chat', {
@@ -215,7 +218,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
           email: studentProfile.email,
           sessionId: activeSessionId,
           message: query,
-          currentMilestones: cachedMilestones,
+          currentMilestones: activeMilestonesToSend,
           careerGoal: studentProfile.careerGoal,
         }),
       })
@@ -295,6 +298,22 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
       prompt: `Give me a hard technical interview coding challenge specifically asked for ${studentProfile.careerGoal} roles, with starter code and evaluation criteria.`,
     },
   ]
+
+  // Helper: Get active roadmap milestones from local cache or backend
+  const getActiveMilestones = () => {
+    try {
+      const cached = JSON.parse(localStorage.getItem('skillforge_current_milestones') || '[]')
+      if (Array.isArray(cached) && cached.length > 0) return cached
+      const roleKey = (studentProfile.careerGoal || 'ai_engineer').toLowerCase().replace(/\s+/g, '_')
+      const roleCached = JSON.parse(localStorage.getItem(`skillforge_roadmap_${roleKey}`) || '[]')
+      if (Array.isArray(roleCached) && roleCached.length > 0) return roleCached
+    } catch {}
+    return studentContext?.roadmap?.milestones || []
+  }
+
+  const activeMilestones = getActiveMilestones()
+  const milestoneCount = activeMilestones.length > 0 ? activeMilestones.length : (studentContext?.roadmap?.milestones?.length || 4)
+  const githubProjectsCount = studentContext?.profile?.projects?.length || 0
 
   // Filtered Sessions
   const filteredSessions = sessions.filter((s) =>
@@ -476,7 +495,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
                 <div className="mentor-context-indicator">
                   <div className="mentor-context-dot" />
                   <span>
-                    Synced: {studentContext?.profile?.projects?.length || 0} GitHub Repos • {studentContext?.roadmap?.milestones?.length || 4} Milestones • LLaMA 3.3 Turbo
+                    Synced: {githubProjectsCount} GitHub Repos • {milestoneCount} Milestones • LLaMA 3.3 Turbo
                   </span>
                 </div>
               </div>
@@ -495,13 +514,13 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
                 <h2 className="mentor-hero-title">HOW CAN I ACCELERATE YOUR MISSION?</h2>
                 
                 <div className="mentor-hero-dossier-pill">
-                  <span>🎯 <b>Target</b>: {studentProfile.careerGoal}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><Target size={13} color="#FFD166" /> <b>Target</b>: {studentProfile.careerGoal}</span>
                   <span>•</span>
-                  <span>🐙 <b>GitHub</b>: {studentContext?.profile?.projects?.length || 0} Projects Synced</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><GitBranch size={13} color="#FFD166" /> <b>GitHub</b>: {githubProjectsCount} Projects Synced</span>
                   <span>•</span>
-                  <span>📊 <b>Assessment</b>: Verified</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><Activity size={13} color="#FFD166" /> <b>Assessment</b>: Verified</span>
                   <span>•</span>
-                  <span>🗺️ <b>Roadmap</b>: {studentContext?.roadmap?.milestones?.length || 4} Milestones Active</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><Compass size={13} color="#FFD166" /> <b>Roadmap</b>: {milestoneCount} Milestones Active</span>
                 </div>
 
                 <p style={{ color: '#94A3B8', fontSize: '0.84rem', maxWidth: '560px', lineHeight: 1.5, margin: '0 auto 0.8rem' }}>
@@ -561,8 +580,58 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
                       )}
                     </div>
 
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                      {msg.content}
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                      components={{
+                        li: ({ node, children, ...props }) => {
+                          const getText = (c) => {
+                            if (!c) return ''
+                            if (typeof c === 'string') return c
+                            if (Array.isArray(c)) return c.map(getText).join('')
+                            if (c.props && c.props.children) return getText(c.props.children)
+                            return ''
+                          }
+                          const rawString = getText(children)
+                          const lower = rawString.toLowerCase()
+
+                          let icon = <span className="mentor-bullet-dot" />
+                          let isTelemetry = false
+
+                          if (lower.includes('target') || lower.includes('career track') || lower.includes('goal')) {
+                            icon = <Target size={13} color="#FFD166" />
+                            isTelemetry = true
+                          } else if (lower.includes('academic') || lower.includes('university') || lower.includes('degree')) {
+                            icon = <GraduationCap size={13} color="#FFD166" />
+                            isTelemetry = true
+                          } else if (lower.includes('github') || lower.includes('repo') || lower.includes('project')) {
+                            icon = <GitBranch size={13} color="#FFD166" />
+                            isTelemetry = true
+                          } else if (lower.includes('radar') || lower.includes('score') || lower.includes('assessment')) {
+                            icon = <Activity size={13} color="#FFD166" />
+                            isTelemetry = true
+                          } else if (lower.includes('roadmap') || lower.includes('milestone') || lower.includes('step')) {
+                            icon = <Compass size={13} color="#FFD166" />
+                            isTelemetry = true
+                          }
+
+                          return (
+                            <li className={`mentor-styled-li ${isTelemetry ? 'telemetry-item' : ''}`} {...props}>
+                              <span className="mentor-li-icon">{icon}</span>
+                              <div className="mentor-li-text">{children}</div>
+                            </li>
+                          )
+                        },
+                        ul: ({ node, children, ...props }) => (
+                          <ul className="mentor-styled-ul" {...props}>
+                            {children}
+                          </ul>
+                        )
+                      }}
+                    >
+                      {(msg.content || '')
+                        .replace(/[🎯🎓🐙📊🗺️🚀💡🔥⚡✨🤖🧑‍💻🛸🪐🌌]/gu, '')
+                        .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')}
                     </ReactMarkdown>
 
                     {msg.sources && msg.sources.length > 0 && (

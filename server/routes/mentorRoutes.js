@@ -12,6 +12,38 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || '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',
 })
 
+// Helper: Parse structured milestones from markdown table
+function parseMilestonesFromText(text) {
+  const milestones = []
+  if (!text) return milestones
+
+  const lines = text.split('\n')
+  for (const line of lines) {
+    if (line.startsWith('|') && (line.includes('1') || line.includes('2') || line.includes('3') || line.includes('4') || line.includes('5') || line.includes('6') || line.includes('Milestone') || line.includes('Step'))) {
+      const parts = line.split('|').map((p) => p.trim()).filter(Boolean)
+      if (parts.length >= 3 && !parts[0].includes('---') && parts[0].toLowerCase().trim() !== 'milestone') {
+        const stepNum = String(milestones.length + 1).padStart(2, '0')
+        const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
+        const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' • ').trim() || ''
+        const rawTopics = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ', ').trim() || ''
+        const rawResources = parts[3]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ', ').trim() || ''
+        const rawCapstone = (parts[4] || parts[2] || `Capstone ${milestones.length + 1}`).replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim()
+
+        milestones.push({
+          step: stepNum,
+          title: rawTitle.toUpperCase(),
+          desc: rawDesc,
+          topics: rawTopics,
+          resources: rawResources,
+          capstone: rawCapstone,
+          tech: 'python',
+        })
+      }
+    }
+  }
+  return milestones
+}
+
 // Helper: Fetch all consolidated student context from database
 async function getStudentFullContext(email) {
   const cleanEmail = (email || '').trim().toLowerCase()
@@ -21,7 +53,22 @@ async function getStudentFullContext(email) {
     const user = await User.findOne({ email: cleanEmail }).select('-password -otpCode').lean()
     const profile = user ? await Profile.findOne({ userId: user._id }).lean() : await Profile.findOne({ email: cleanEmail }).lean()
     const assessment = user ? await Assessment.findOne({ userId: user._id }).sort({ createdAt: -1 }).lean() : null
-    const roadmap = await Roadmap.findOne({ email: cleanEmail }).sort({ createdAt: -1 }).lean()
+    
+    // Find the latest roadmap matching student career track, or most recent overall
+    const targetGoal = profile?.careerGoal || 'AI Engineer'
+    const goalRegex = new RegExp(targetGoal.replace(/\(.*?\)/g, '').trim(), 'i')
+    let roadmap = await Roadmap.findOne({ email: cleanEmail, careerGoal: goalRegex }).sort({ createdAt: -1 }).lean()
+    if (!roadmap) {
+      roadmap = await Roadmap.findOne({ email: cleanEmail }).sort({ createdAt: -1 }).lean()
+    }
+
+    let milestones = roadmap?.milestones || []
+    if ((!milestones || milestones.length <= 4) && roadmap?.generatedRoadmapText) {
+      const parsed = parseMilestonesFromText(roadmap.generatedRoadmapText)
+      if (parsed && parsed.length > milestones.length) {
+        milestones = parsed
+      }
+    }
 
     return {
       user: {
@@ -34,7 +81,7 @@ async function getStudentFullContext(email) {
         degree: profile?.degree || 'BS Computer Science',
         yearOfStudy: profile?.yearOfStudy || 3,
         experienceLevel: profile?.experienceLevel || 'intermediate',
-        careerGoal: profile?.careerGoal || 'AI Engineer',
+        careerGoal: targetGoal,
         skills: profile?.skills || [],
         projects: profile?.projects || [],
         completedTasks: profile?.completedTasks || [],
@@ -45,8 +92,8 @@ async function getStudentFullContext(email) {
         takenAt: assessment?.takenAt || null,
       },
       roadmap: {
-        careerGoal: roadmap?.careerGoal || profile?.careerGoal || 'AI Engineer',
-        milestones: roadmap?.milestones || [],
+        careerGoal: roadmap?.careerGoal || targetGoal,
+        milestones: milestones,
         model: roadmap?.model || 'openai/gpt-oss-120b (Groq Cloud)',
       },
     }
@@ -121,7 +168,7 @@ router.get('/session/:sessionId', async (req, res) => {
 // =========================================================================
 router.post('/session/new', async (req, res) => {
   try {
-    const { email, careerGoal, initialTitle } = req.body
+    const { email, careerGoal, initialTitle, currentMilestones } = req.body
     const cleanEmail = (email || '').trim().toLowerCase()
     if (!cleanEmail) {
       return res.status(400).json({ success: false, message: 'Email is required' })
@@ -131,9 +178,13 @@ router.post('/session/new', async (req, res) => {
     const activeRole = careerGoal || context?.profile?.careerGoal || 'AI Engineer'
     const studentName = context?.user?.name || 'Scholar'
 
+    const milestoneCount = (currentMilestones && currentMilestones.length > 0)
+      ? currentMilestones.length
+      : (context?.roadmap?.milestones?.length || 4)
+
     const greetingMessage = {
       role: 'assistant',
-      content: `Greetings **${studentName}**! 🚀 I am your **SkillForge Autonomous AI Career Mentor**.\n\nI have digested your full telemetry profile:\n- 🎯 **Target Track**: \`${activeRole}\`\n- 🎓 **Academics**: ${context?.profile?.degree || 'BS CS'} (${context?.profile?.university || 'University'})\n- 🐙 **GitHub Sync**: Synced ${context?.profile?.projects?.length || 0} repositories\n- 📊 **Radar Scores**: Python (${context?.assessment?.scores?.python || 75}%), Git (${context?.assessment?.scores?.git || 80}%), AI (${context?.assessment?.scores?.ai || 70}%)\n- 🗺️ **Roadmap Active**: ${context?.roadmap?.milestones?.length || 4} dynamic milestones verified\n\nHow can I accelerate your learning, review your GitHub code, or solve your blockers today?`,
+      content: `Greetings **${studentName}**! I am your **SkillForge Autonomous AI Career Mentor**.\n\nI have verified your full student telemetry dossier:\n\n- **Target Career Track**: \`${activeRole}\`\n- **Academic Profile**: ${context?.profile?.degree || 'BS CS'} (${context?.profile?.university || 'University'})\n- **GitHub Telemetry**: Synced ${context?.profile?.projects?.length || 0} repositories\n- **Skill Radar Scores**: Python (${context?.assessment?.scores?.python || 75}%), Git (${context?.assessment?.scores?.git || 80}%), AI (${context?.assessment?.scores?.ai || 70}%)\n- **Active Roadmap**: ${milestoneCount} verified milestones\n\nHow can I accelerate your learning, review your GitHub code, or solve your technical blockers today?`,
       sources: ['SkillForge Profile Registry', 'GitHub Synced Data', 'Assessment Engine', 'Roadmap Graph'],
       timestamp: new Date(),
     }
@@ -214,11 +265,12 @@ ${milestonesFormatted}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 MENTORSHIP GUIDELINES:
-1. Speak as a world-class senior engineering lead with deep tactical clarity, high-agency mentorship, and cosmic Guardians flair.
+1. Speak as a world-class senior engineering lead with deep tactical clarity and high-agency mentorship.
 2. Directly reference the student's actual projects, GitHub tech stack, specific quiz gaps, and roadmap milestones to make advice hyper-personalized.
-3. VISUAL OUTPUT FORMATTING (CRITICAL FOR READABILITY):
-   - Use clean, modern Markdown with bold key terms, spaced bullet points, and concise section dividers (---).
-   - Use '###' for section titles with relevant emojis (e.g., '### 🎯 Strategic Gap Analysis', '### 🛠️ Hands-On Project Blueprint').
+3. AESTHETICS & FORMATTING (CRITICAL):
+   - DO NOT use phone emojis (no 🚀, 🎯, 🐙, 📊, 🗺️, 💡, 🔥, etc.). Keep the output clean, modern, and engineering-grade.
+   - Use clean, structured Markdown with bold key terms, spaced bullet points, and concise section dividers (---).
+   - Use '###' for section titles with clean technical labels (e.g., '### Technical Gap Analysis', '### Hands-On Project Blueprint', '### Implementation Sprint Plan').
    - Keep tables compact (maximum 2-3 columns: e.g. | Capability | Recommendation |) so they remain clean and readable on all screens.
    - For code, provide clean, concise, production-ready code snippets with comments.
    - Structure action plans as step-by-step checklist sprints (e.g. Sprint 1, Sprint 2) rather than dense multi-column grids.

@@ -2,36 +2,26 @@
 SkillForge Advanced RAG Engine & Multi-Node LangGraph / ReAct Agent
 Powered by Groq Cloud LLaMA 3.3 (120B / 70B Instant)
 Implements:
-1. RAG Knowledge Retriever with Semantic Ranking & Source Citations
+1. RAG Knowledge Retriever — ChromaDB semantic search (BM25 fallback)
 2. Multi-Node LangGraph StateGraph Workflow:
    - Node 1: SkillProfiler
-   - Node 2: KnowledgeRetriever
+   - Node 2: KnowledgeRetriever  (now uses ChromaDB!)
    - Node 3: AgentPlanner (Thought -> Action -> Observation)
    - Node 4: RoadmapSynthesizer
 """
 
 import os
-import glob
-import math
-import re
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any
 from groq import Groq
 from skill_analyzer import SkillAnalyzer
 from roadmap_generator import RoadmapGenerator
+from vectorstore import vector_store  # ChromaDB singleton
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
 
 def get_groq_client() -> Groq:
     return Groq(api_key=GROQ_API_KEY)
 
-# =========================================================================
-# 1. ADVANCED RAG RETRIEVER (Semantic Ranking + Source Citations)
-# =========================================================================
-
-def get_clean_doc_title(fpath: str) -> str:
-    """Generates clean human-readable title from knowledge base filename."""
-    bname = os.path.basename(fpath).replace(".txt", "").replace("-", " ").title()
-    return bname
 
 def search_knowledge_base_with_sources(query: str, top_k: int = 3) -> Tuple[str, List[str]]:
     """

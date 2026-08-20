@@ -395,7 +395,7 @@ const getUserScopedKey = (baseKey, overrideUser = null) => {
   }
 }
 
-export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, onOpenAiMentor }) {
+export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, onOpenAiMentor, onOpenAdmin }) {
   const DEFAULT_AVATAR = 'https://imgs.search.brave.com/en8GueUwEke4A7ecDjpRnIpFR8Y-WWOEbjzD2xCNTu0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn'
 
   const [studentProfile, setStudentProfile] = useState(() => {
@@ -1457,6 +1457,37 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
         </nav>
 
         <div className="navbar-right-actions">
+          {(() => {
+            try {
+              const u = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+              if (u.role === 'admin') {
+                return (
+                  <button
+                    className="navbar-item-btn"
+                    style={{
+                      color: '#020612',
+                      backgroundColor: '#00F0FF',
+                      border: '1px solid #00F0FF',
+                      borderRadius: '20px',
+                      padding: '0.45rem 1rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer',
+                      boxShadow: '0 0 15px rgba(0, 240, 255, 0.4)',
+                    }}
+                    onClick={() => onOpenAdmin && onOpenAdmin()}
+                    title="Open Admin Command Center"
+                  >
+                    <span>👑 Admin Dashboard</span>
+                  </button>
+                )
+              }
+            } catch {}
+            return null
+          })()}
+
           <button
             className="navbar-item-btn"
             style={{

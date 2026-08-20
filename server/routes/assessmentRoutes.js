@@ -1,6 +1,7 @@
 import express from 'express'
 import Profile from '../models/Profile.js'
 import User from '../models/User.js'
+import Question from '../models/Question.js'
 
 const router = express.Router()
 
@@ -280,24 +281,51 @@ const ASSESSMENT_QUESTION_BANK = {
   ]
 }
 
-// GET /api/assessment/questions — Fetch all PRD 6 categories (5 questions each)
-router.get('/questions', (req, res) => {
-  const { category } = req.query
-  if (category && ASSESSMENT_QUESTION_BANK[category]) {
-    return res.json({
+// GET /api/assessment/questions — Fetch all PRD 6 categories (5 questions each + custom DB questions)
+router.get('/questions', async (req, res) => {
+  try {
+    const { category } = req.query
+    const dbQuestions = await Question.find({ isActive: true }).lean().catch(() => [])
+
+    const mergedBank = JSON.parse(JSON.stringify(ASSESSMENT_QUESTION_BANK))
+    dbQuestions.forEach((q) => {
+      const cat = q.category || 'python'
+      if (!mergedBank[cat]) mergedBank[cat] = []
+      mergedBank[cat].push({
+        id: String(q._id),
+        question: q.question,
+        code: q.code || '',
+        options: q.options,
+        correctIndex: q.correctIndex,
+        difficulty: q.difficulty || 'intermediate',
+        explanation: q.explanation || '',
+        isCustom: true,
+      })
+    })
+
+    if (category && mergedBank[category]) {
+      return res.json({
+        success: true,
+        category,
+        questions: mergedBank[category],
+      })
+    }
+
+    res.json({
       success: true,
-      category,
-      questions: ASSESSMENT_QUESTION_BANK[category],
+      categories: Object.keys(mergedBank),
+      totalCategories: Object.keys(mergedBank).length,
+      questions: mergedBank,
+    })
+  } catch (err) {
+    res.json({
+      success: true,
+      categories: Object.keys(ASSESSMENT_QUESTION_BANK),
+      totalCategories: 6,
+      questionsPerCategory: 5,
+      questions: ASSESSMENT_QUESTION_BANK,
     })
   }
-
-  res.json({
-    success: true,
-    categories: Object.keys(ASSESSMENT_QUESTION_BANK),
-    totalCategories: 6,
-    questionsPerCategory: 5,
-    questions: ASSESSMENT_QUESTION_BANK,
-  })
 })
 
 // POST /api/assessment/submit — Submit assessment answers & auto-score 0-100 per category

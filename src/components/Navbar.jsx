@@ -1,7 +1,7 @@
 import { Sun } from 'lucide-react'
 import './Navbar.css'
 
-export default function Navbar({ onNavigate, onStart, onOpenDashboard, currentUser }) {
+export default function Navbar({ onNavigate, onStart, onOpenDashboard, onOpenAdmin, currentUser }) {
   const scrollToSection = (id) => {
     const el = document.getElementById(id)
     if (el) {
@@ -10,6 +10,8 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, currentUs
       onNavigate(0)
     }
   }
+
+  const isAdmin = currentUser?.role === 'admin'
 
   return (
     <header className="navbar-container">
@@ -45,26 +47,61 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, currentUs
         <button className="navbar-item-btn" onClick={() => scrollToSection('architecture')}>
           DevOps
         </button>
+        {isAdmin && (
+          <button
+            className="navbar-item-btn"
+            style={{
+              color: '#00F0FF',
+              fontWeight: 800,
+              border: '1px solid rgba(0, 240, 255, 0.4)',
+              borderRadius: '20px',
+              padding: '0.25rem 0.75rem',
+              backgroundColor: 'rgba(0, 240, 255, 0.12)',
+            }}
+            onClick={() => onOpenAdmin && onOpenAdmin()}
+          >
+            👑 Admin Portal
+          </button>
+        )}
       </nav>
 
       {/* Right Actions: Dashboard shortcut + theme button + Get Started pill button */}
       <div className="navbar-right-actions">
         {currentUser ? (
-          <button
-            className="navbar-item-btn"
-            style={{
-              color: '#05060A',
-              backgroundColor: '#FFD166',
-              border: '1px solid #FFD166',
-              borderRadius: '20px',
-              padding: '0.45rem 1.1rem',
-              fontWeight: 700,
-              boxShadow: '0 0 15px rgba(255, 209, 102, 0.4)',
-            }}
-            onClick={() => onOpenDashboard && onOpenDashboard()}
-          >
-            ✦ {currentUser.name?.split(' ')[0] || 'Scholar'}'s Dashboard
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {isAdmin && (
+              <button
+                className="navbar-item-btn"
+                style={{
+                  color: '#020612',
+                  backgroundColor: '#00F0FF',
+                  border: '1px solid #00F0FF',
+                  borderRadius: '20px',
+                  padding: '0.45rem 1rem',
+                  fontWeight: 800,
+                  boxShadow: '0 0 15px rgba(0, 240, 255, 0.4)',
+                }}
+                onClick={() => onOpenAdmin && onOpenAdmin()}
+              >
+                👑 Admin Portal
+              </button>
+            )}
+            <button
+              className="navbar-item-btn"
+              style={{
+                color: '#05060A',
+                backgroundColor: '#FFD166',
+                border: '1px solid #FFD166',
+                borderRadius: '20px',
+                padding: '0.45rem 1.1rem',
+                fontWeight: 700,
+                boxShadow: '0 0 15px rgba(255, 209, 102, 0.4)',
+              }}
+              onClick={() => onOpenDashboard && onOpenDashboard()}
+            >
+              ✦ {currentUser.name?.split(' ')[0] || 'Scholar'}'s Dashboard
+            </button>
+          </div>
         ) : (
           <>
             <button

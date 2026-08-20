@@ -14,6 +14,7 @@ import AuthModal from './components/AuthModal'
 import StudentDashboard from './components/StudentDashboard'
 import FullRoadmapPage from './components/FullRoadmapPage'
 import AiMentorPage from './components/AiMentorPage'
+import AdminDashboard from './components/AdminDashboard'
 import Footer from './components/Footer'
 import './App.css'
 
@@ -24,7 +25,7 @@ export default function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isAuthOpen, setIsAuthOpen] = useState(false)
-  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard' | 'roadmap' | 'mentor'
+  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard' | 'roadmap' | 'mentor' | 'admin'
   const [currentUser, setCurrentUser] = useState(null)
 
   const getDashboardPathForUser = (user) => {
@@ -45,13 +46,22 @@ export default function App() {
     return `/${encodeURIComponent(identifier)}/mentor`
   }
 
+  const getAdminPathForUser = (user) => {
+    if (!user) return '/admin'
+    const identifier = user._id || (user.email ? user.email.split('@')[0] : 'admin')
+    return `/${encodeURIComponent(identifier)}/admin`
+  }
+
   const syncViewFromUrl = () => {
     const path = window.location.pathname
+    const isAdminRoute = path.endsWith('/admin') || path.includes('/admin')
     const isMentorRoute = path.endsWith('/mentor') || path.includes('/mentor')
     const isRoadmapRoute = path.endsWith('/roadmap') || path.includes('/roadmap')
     const isDashboardRoute = path.endsWith('/dashboard') || path.includes('/dashboard')
 
-    if (isMentorRoute) {
+    if (isAdminRoute) {
+      setCurrentView('admin')
+    } else if (isMentorRoute) {
       setCurrentView('mentor')
     } else if (isRoadmapRoute) {
       setCurrentView('roadmap')
@@ -293,12 +303,48 @@ export default function App() {
     }
   }
 
+  const handleOpenAdmin = () => {
+    const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    const targetUrl = getAdminPathForUser(user)
+    window.history.pushState({}, '', targetUrl)
+    setCurrentView('admin')
+  }
+
   const handleAuthSuccess = (user) => {
     setCurrentUser(user)
     setIsAuthOpen(false)
-    const targetUrl = getDashboardPathForUser(user)
-    window.history.pushState({}, '', targetUrl)
-    setCurrentView('dashboard')
+    if (user && user.role === 'admin') {
+      const targetUrl = getAdminPathForUser(user)
+      window.history.pushState({}, '', targetUrl)
+      setCurrentView('admin')
+    } else {
+      const targetUrl = getDashboardPathForUser(user)
+      window.history.pushState({}, '', targetUrl)
+      setCurrentView('dashboard')
+    }
+  }
+
+  // If in Admin Dashboard View, render the Admin Command Center
+  if (currentView === 'admin') {
+    return (
+      <AdminDashboard
+        onExitAdmin={() => {
+          window.history.pushState({}, '', '/')
+          window.scrollTo(0, 0)
+          setScrollProgress(0)
+          setCurrentView('landing')
+          const token = localStorage.getItem('skillforge_token')
+          const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          setCurrentUser(token ? user : null)
+        }}
+        onOpenStudentDashboard={() => {
+          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getDashboardPathForUser(user)
+          window.history.pushState({}, '', targetUrl)
+          setCurrentView('dashboard')
+        }}
+      />
+    )
   }
 
   // If in Dedicated Full Roadmap View, render the interactive galaxy map with login.webm
@@ -358,6 +404,7 @@ export default function App() {
           window.history.pushState({}, '', targetUrl)
           setCurrentView('mentor')
         }}
+        onOpenAdmin={handleOpenAdmin}
       />
     )
   }
@@ -383,6 +430,7 @@ export default function App() {
         onNavigate={scrollToVideoProgress}
         onStart={() => setIsAuthOpen(true)}
         onOpenDashboard={handleOpenDashboard}
+        onOpenAdmin={handleOpenAdmin}
         currentUser={currentUser}
       />
 

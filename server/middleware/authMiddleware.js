@@ -14,7 +14,7 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ success: false, message: 'User not found' })
       }
 
-      next()
+      return next()
     } catch (error) {
       console.error('[Auth Middleware] Token error:', error.message)
       return res.status(401).json({ success: false, message: 'Not authorized, token failed' })
@@ -24,4 +24,11 @@ export const protect = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ success: false, message: 'Not authorized, no token provided' })
   }
+}
+
+export const requireAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    return next()
+  }
+  return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' })
 }

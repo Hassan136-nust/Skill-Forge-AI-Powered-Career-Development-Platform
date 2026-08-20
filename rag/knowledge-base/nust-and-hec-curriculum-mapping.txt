@@ -1,0 +1,23 @@
+# NUST & HEC Curriculum Alignment & Industry Transition Blueprint
+
+## Overview
+Mapping of standard Higher Education Commission (HEC) and NUST (SEECS / SCME) Computer Science & Software Engineering course curricula to 2026 industry job requirements.
+
+## 1. Semester-by-Semester Industry Mapping
+- Semesters 1-2 (Programming Fundamentals & OOP with C++/Python):
+  - Academic Core: Control structures, pointers, memory management, inheritance, polymorphism.
+  - Industry Gap To Bridge: Modern Git branching, unit testing (pytest/gtest), clean code principles.
+- Semesters 3-4 (Data Structures, Algorithms & Database Systems):
+  - Academic Core: Linked lists, Trees, Graphs, SQL relational queries, Normalization.
+  - Industry Gap To Bridge: PostgreSQL performance indexing, Redis caching, LeetCode medium problem solving.
+- Semesters 5-6 (Operating Systems, Computer Networks & Software Design):
+  - Academic Core: Concurrency, threads, memory paging, TCP/IP, OSI model, Design Patterns.
+  - Industry Gap To Bridge: Linux bash scripting, Docker containerization, REST/gRPC API development.
+- Semesters 7-8 (Artificial Intelligence, Distributed Systems & Final Year Project):
+  - Academic Core: Machine Learning basics, distributed consensus, FYP Capstone.
+  - Industry Gap To Bridge: PyTorch deep learning pipelines, FastAPI microservices, Kubernetes cloud deployment, production CI/CD.
+
+## 2. Final Year Project (FYP) High-Impact Recommendations
+- Build full-scale AI-powered applications with real vector retrieval (RAG) and Agentic reasoning.
+- Implement microservice architectures deployed on AWS/GCP with automated test suites.
+- Open-source the project with clear architectural documentation to stand out to recruiters.

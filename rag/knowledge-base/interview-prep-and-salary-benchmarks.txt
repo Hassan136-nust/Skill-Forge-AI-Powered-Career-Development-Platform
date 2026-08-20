@@ -1,0 +1,29 @@
+# Technical Interview Preparation, Coding Standards & Salary Benchmarks (2026)
+
+## Overview
+A comprehensive guide for Pakistani and global CS graduates preparing for technical screening, data structures & algorithms (DSA), system design interviews, and international remote engineering positions.
+
+## 1. Top Technical Coding & Algorithm Focus Areas
+- Arrays, HashMaps & Two Pointers (Prefix sums, sliding window algorithms).
+- Trees & Graphs (BFS, DFS, Dijkstra shortest path, topological sorting).
+- Dynamic Programming & Recursion (Memoization, tabulation, knapsack patterns).
+- Concurrency & Multi-threading (Locks, race conditions, async task pools).
+- Key Platforms: LeetCode (Top 150 Interview Questions), NeetCode Roadmap.
+
+## 2. System Design Interview Patterns for Juniors & Mid-Level
+- Horizontal vs. Vertical Scaling, Load Balancing algorithms (Round-robin, Least connections).
+- Caching strategies (Write-through, Cache-aside, LRU Eviction).
+- Database Sharding, Replication (Leader-Follower), CAP Theorem trade-offs.
+- API Rate Limiting (Token bucket, Leaky bucket algorithms).
+
+## 3. Salary Benchmarks (Pakistan & Global Remote 2026)
+- Junior AI / ML Engineer (PK): PKR 120,000 – 220,000 / month.
+- Junior Backend / Full-Stack Engineer (PK): PKR 100,000 – 180,000 / month.
+- Mid-Level Engineer (PK): PKR 250,000 – 450,000 / month.
+- Global Remote Junior Engineer (US / EU / UAE / Remote): $2,000 – $4,500 / month ($24,000 – $54,000 / year).
+- Global Remote Mid-Senior Engineer: $5,000 – $10,000+ / month.
+
+## 4. Resume & GitHub Portfolio Checklist
+- Clean README with architecture diagrams, live demo links, and Docker commands to run.
+- Minimum 2 production-grade capstone projects demonstrating database indexing, caching, and CI/CD tests.
+- Verifiable assessment certifications and technical badges.

@@ -1,0 +1,28 @@
+# Full-Stack Software Engineering Roadmap (2026 Industry Benchmark)
+
+## Overview
+Full-Stack Engineers master end-to-end web architecture, connecting rich reactive frontend interfaces to high-throughput, secure backend microservices, relational/NoSQL databases, and cloud deployments.
+
+## Milestone 1: Core Web Foundations & RESTful API Architectures
+- Core Focus: React UI components, Node.js/Express and Python/FastAPI backends, JWT token authentication, HTTP/2 protocol, middleware architecture.
+- Essential Tools: Node.js, Express, React, TypeScript, Postman.
+- Capstone: Multi-Role Auth Platform with OAuth2 (GitHub/Google) and Role-Based Access Control (RBAC).
+- Resources: MDN Web Docs, FullStackOpen (University of Helsinki).
+
+## Milestone 2: Relational Databases & NoSQL Data Persistence
+- Core Focus: PostgreSQL schema design, indexing, foreign keys, ACID transactions, Prisma / TypeORM, MongoDB Atlas aggregation pipelines, Redis caching.
+- Essential Tools: PostgreSQL, MongoDB, Redis, Prisma ORM, Docker.
+- Capstone: High-Throughput Real-Time Task Management System with Redis Pub/Sub & MongoDB Aggregations.
+- Resources: Designing Data-Intensive Applications (Martin Kleppmann), PostgreSQL Documentation.
+
+## Milestone 3: Real-Time WebSockets, Messaging & Event-Driven Architecture
+- Core Focus: WebSockets (Socket.IO), Background Job Queues (BullMQ / Celery), Event-Driven Architecture, Microservices communication.
+- Essential Tools: Socket.IO, BullMQ, Redis, RabbitMQ.
+- Capstone: Collaborative Real-Time Code Collaboration / Whiteboard Workspace with Instant Sync.
+- Resources: Enterprise Integration Patterns, WebSockets Specification.
+
+## Milestone 4: Production Cloud Deployment, CI/CD & System Design
+- Core Focus: Docker multi-stage builds, AWS EC2/S3/ECS, Nginx reverse proxy, CI/CD automation, System Design patterns (Load Balancer, CDN, Rate Limiting).
+- Essential Tools: Docker, Nginx, AWS, GitHub Actions, Cloudflare.
+- Capstone: Enterprise-Scale SaaS Platform deployed on Cloud Infrastructure with 99.9% Uptime SLA.
+- Resources: System Design Primer by Donne Martin, AWS Certified Solutions Architect Guide.

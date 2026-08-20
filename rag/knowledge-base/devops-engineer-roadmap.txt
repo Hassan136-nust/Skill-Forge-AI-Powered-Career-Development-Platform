@@ -1,0 +1,28 @@
+# DevOps & Cloud Platform Engineering Roadmap (2026 Industry Benchmark)
+
+## Overview
+DevOps engineers bridge software development and operations by building automated CI/CD pipelines, provisioning infrastructure as code, and managing scalable Kubernetes clusters in production environments.
+
+## Milestone 1: Linux Systems, Bash Scripting & GitOps
+- Core Focus: Linux internals, POSIX permissions, process management (systemd), SSH tunneling, bash scripting automation.
+- Essential Tools: Ubuntu/Debian, Bash, Git, GitHub Actions, GitOps workflows.
+- Capstone: Automated Linux Server Hardening & GitOps Deployment Script.
+- Resources: Linux Foundation Certified System Administrator (LFCS), Pro Git Book.
+
+## Milestone 2: Containerization & Docker Microservices
+- Core Focus: Multi-stage Docker builds, image layer caching, docker-compose orchestration, container networking, and secrets management.
+- Essential Tools: Docker, Docker Compose, Hadolint, Dive.
+- Capstone: Multi-Service Containerized Microservices Stack (React + FastAPI + Redis + PostgreSQL).
+- Resources: Docker Deep Dive by Nigel Poulton, Official Docker Documentation.
+
+## Milestone 3: Kubernetes Container Orchestration & Cloud Infrastructure
+- Core Focus: Kubernetes Pods, Deployments, StatefulSets, Services, Ingress-Nginx, ConfigMaps, Secrets, Helm Charts.
+- Essential Tools: Minikube, Kind, K9s, Helm, Terraform (AWS/GCP Provisioning).
+- Capstone: Highly-Available Production Kubernetes Cluster with Automated Auto-scaling (HPA) & Ingress SSL.
+- Resources: Kubernetes Up and Running (O'Reilly), Certified Kubernetes Administrator (CKA).
+
+## Milestone 4: CI/CD Automation, Observability & Site Reliability
+- Core Focus: GitHub Actions CI/CD matrix builds, Prometheus metric scrapers, Grafana dashboards, Loki log aggregation, Sentry error tracing.
+- Essential Tools: GitHub Actions, Prometheus, Grafana, Loki, Terraform, Alertmanager.
+- Capstone: Complete Zero-Downtime CI/CD Pipeline with Automated Canary Deployments and Live Grafana Health Monitoring.
+- Resources: Google Site Reliability Engineering (SRE) Handbook, Prometheus Up & Running.

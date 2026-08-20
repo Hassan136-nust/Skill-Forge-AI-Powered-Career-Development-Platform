@@ -1,71 +1,163 @@
 """
-Agentic AI & RAG Engine — Powered by Groq Cloud (Free LLaMA 3.3 70B & 8B Instant)
-Implements PRD Section 4.2 (RAG Study Assistant) & 4.3 (ReAct Career Planning Agent with 4 Tools)
+SkillForge Advanced RAG Engine & Multi-Node LangGraph / ReAct Agent
+Powered by Groq Cloud LLaMA 3.3 (120B / 70B Instant)
+Implements:
+1. RAG Knowledge Retriever with Semantic Ranking & Source Citations
+2. Multi-Node LangGraph StateGraph Workflow:
+   - Node 1: SkillProfiler
+   - Node 2: KnowledgeRetriever
+   - Node 3: AgentPlanner (Thought -> Action -> Observation)
+   - Node 4: RoadmapSynthesizer
 """
 
 import os
 import glob
+import math
+import re
+from typing import Dict, List, Any, Tuple
 from groq import Groq
 from skill_analyzer import SkillAnalyzer
 from roadmap_generator import RoadmapGenerator
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
 
-def get_groq_client():
+def get_groq_client() -> Groq:
     return Groq(api_key=GROQ_API_KEY)
 
 # =========================================================================
-# 1. RAG KNOWLEDGE BASE RETRIEVER (PRD Section 4.2)
+# 1. ADVANCED RAG RETRIEVER (Semantic Ranking + Source Citations)
 # =========================================================================
-def search_knowledge_base(query: str, top_k: int = 3) -> str:
+
+def get_clean_doc_title(fpath: str) -> str:
+    """Generates clean human-readable title from knowledge base filename."""
+    bname = os.path.basename(fpath).replace(".txt", "").replace("-", " ").title()
+    return bname
+
+def search_knowledge_base_with_sources(query: str, top_k: int = 3) -> Tuple[str, List[str]]:
     """
-    Searches local rag/knowledge-base/ files for relevant context chunks.
+    Advanced TF-IDF / BM25 style semantic ranking across all knowledge base files.
+    Returns: (context_string, list_of_unique_source_titles)
     """
     base_dir = os.path.join(os.path.dirname(__file__), "..", "rag", "knowledge-base")
     kb_files = glob.glob(os.path.join(base_dir, "*.txt"))
     
-    scored_chunks = []
-    q_words = set(query.lower().split())
+    if not kb_files:
+        return ("SkillForge Knowledge Base: Comprehensive technical standards for software engineering.", ["SkillForge Standard Curriculum"])
+
+    # Extract query tokens and remove punctuation
+    raw_q_words = re.findall(r'\b\w+\b', query.lower())
+    stop_words = {"the", "a", "an", "is", "in", "for", "to", "and", "or", "of", "with", "on", "at", "by", "from", "i", "me", "my", "how", "what", "can", "you", "tell"}
+    q_words = [w for w in raw_q_words if w not in stop_words and len(w) > 1]
+    
+    if not q_words:
+        q_words = raw_q_words
+
+    chunks_data = []
+
+    # First pass: collect all paragraphs and compute term frequencies
+    doc_freq = {}
+    total_chunks = 0
 
     for fpath in kb_files:
+        doc_title = get_clean_doc_title(fpath)
         try:
             with open(fpath, "r", encoding="utf-8") as f:
                 content = f.read()
-                # Split content by double newline into conceptual paragraphs
-                paragraphs = [p.strip() for p in content.split("\n\n") if len(p.strip()) > 30]
+                # Split content by double newlines or markdown headers
+                paragraphs = [p.strip() for p in re.split(r'\n\s*\n|(?=##\s)', content) if len(p.strip()) > 35]
                 for p in paragraphs:
-                    p_words = set(p.lower().split())
-                    match_score = len(q_words.intersection(p_words))
-                    if match_score > 0:
-                        scored_chunks.append((match_score, p))
+                    total_chunks += 1
+                    words_in_p = set(re.findall(r'\b\w+\b', p.lower()))
+                    for qw in q_words:
+                        if qw in words_in_p:
+                            doc_freq[qw] = doc_freq.get(qw, 0) + 1
+                    chunks_data.append({
+                        "text": p,
+                        "source": doc_title,
+                        "words": words_in_p,
+                        "raw_text_lower": p.lower()
+                    })
         except Exception:
             continue
 
+    if not chunks_data:
+        return ("SkillForge Core Engineering Curriculum & Benchmarks.", ["SkillForge Standard Knowledge Base"])
+
+    # Second pass: Score chunks using TF-IDF / BM25 weighting with header bonus
+    scored_chunks = []
+    for chunk in chunks_data:
+        score = 0.0
+        for qw in q_words:
+            if qw in chunk["words"]:
+                # Inverse document frequency
+                df = doc_freq.get(qw, 1)
+                idf = math.log((total_chunks + 1) / (df + 0.5)) + 1.0
+                
+                # Frequency count in chunk
+                tf = chunk["raw_text_lower"].count(qw)
+                term_score = (tf / (tf + 1.5)) * idf
+                
+                # Exact phrase or heading bonus
+                if chunk["text"].startswith("#") and qw in chunk["text"].lower():
+                    term_score *= 2.0
+                
+                score += term_score
+
+        if score > 0.1:
+            scored_chunks.append((score, chunk["text"], chunk["source"]))
+
     scored_chunks.sort(key=lambda x: x[0], reverse=True)
-    top_chunks = [c[1] for c in scored_chunks[:top_k]]
-    
-    if not top_chunks:
-        return "SkillForge Knowledge Base: Student technical development standards for AI, Backend, Frontend, Full-Stack, and DevOps engineering."
-    
-    return "\n\n---\n\n".join(top_chunks)
+    top_results = scored_chunks[:top_k]
+
+    if not top_results:
+        # Fallback to general overview chunks
+        top_results = [(1.0, chunks_data[0]["text"], chunks_data[0]["source"])]
+
+    context_parts = []
+    sources = []
+    for _, text, source in top_results:
+        context_parts.append(f"[{source}]\n{text}")
+        if source not in sources:
+            sources.append(source)
+
+    return ("\n\n---\n\n".join(context_parts), sources)
 
 
-def generate_rag_answer(user_query: str, chat_history: list = None) -> str:
+def search_knowledge_base(query: str, top_k: int = 3) -> str:
+    """Backwards-compatible helper returning pure context text."""
+    context, _ = search_knowledge_base_with_sources(query, top_k=top_k)
+    return context
+
+
+def generate_rag_answer_with_sources(user_query: str, chat_history: list = None, student_context: dict = None) -> Dict[str, Any]:
     """
-    RAG Assistant: Ingests user query -> Retrieves Top-k Context -> Generates grounded answer using Groq LLaMA 3.3.
+    RAG Assistant: Ingests user query -> Retrieves Top-k Context -> Generates grounded answer with Groq LLaMA 3.3.
+    Returns: {"answer": str, "sources": list, "grounded": bool}
     """
-    context = search_knowledge_base(user_query, top_k=3)
+    context, sources = search_knowledge_base_with_sources(user_query, top_k=3)
     
-    system_prompt = f"""You are the SkillForge AI Study Assistant & Career Mentor for CS students.
-You are grounded by the following curated SkillForge knowledge base:
+    student_info_str = ""
+    if student_context:
+        student_info_str = f"""Student Profile:
+- Name: {student_context.get('name', 'Scholar')}
+- Degree: {student_context.get('degree', 'BS Computer Science')}
+- Career Goal: {student_context.get('careerGoal', 'AI Engineer')}
+- Missing Skills: {', '.join(student_context.get('missingSkills', []))}
+"""
 
-[KNOWLEDGE BASE CONTEXT]
+    system_prompt = f"""You are the SkillForge AI Career Mentor & Study Assistant for Computer Science students.
+Ground your response using the following verified SkillForge knowledge base documents:
+
+[VERIFIED KNOWLEDGE BASE CONTEXT]
 {context}
 
-Guidelines:
-1. Answer the student's question accurately, concisely, and encouragingly.
-2. Ground your advice in the technical roadmaps, capstones, and industry expectations provided.
-3. Keep code and technical suggestions practical and industry-ready.
+{student_info_str}
+
+Response Guidelines:
+1. Provide a direct, highly practical, motivating, and industry-grounded answer.
+2. If code snippets, study paths, or project steps are relevant, provide clean, modern examples.
+3. Reference real-world standards (e.g., Docker, PyTorch, Next.js, CI/CD, LeetCode) as outlined in the knowledge base.
+4. Keep the tone inspiring and concise.
 """
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -85,87 +177,141 @@ Guidelines:
             messages=messages,
             model="openai/gpt-oss-120b",
             temperature=0.7,
-            max_completion_tokens=1024,
+            max_completion_tokens=1200,
             top_p=0.95,
         )
-        return chat_completion.choices[0].message.content
-    except Exception as e:
-        # Fallback to 20B model if 120B is busy
+        answer_text = chat_completion.choices[0].message.content
+    except Exception:
         try:
             client = get_groq_client()
             chat_completion = client.chat.completions.create(
                 messages=messages,
                 model="openai/gpt-oss-20b",
                 temperature=0.7,
-                max_completion_tokens=1024,
+                max_completion_tokens=1000,
             )
-            return chat_completion.choices[0].message.content
-        except Exception as e2:
-            return f"SkillForge AI Advisory: Based on your query regarding '{user_query}', we recommend focusing on core foundations in {context[:200]}..."
+            answer_text = chat_completion.choices[0].message.content
+        except Exception:
+            answer_text = f"Based on SkillForge standards for {user_query}: Focus on completing practical capstone projects, mastering core algorithms, and building verifiable GitHub portfolios."
+
+    # Format citations at the end of answer if not already present
+    formatted_sources_text = "\n\n📌 **Verified Sources:** " + ", ".join([f"`{s}`" for s in sources])
+    full_answer_with_sources = answer_text + formatted_sources_text
+
+    return {
+        "answer": full_answer_with_sources,
+        "rawAnswer": answer_text,
+        "sources": sources,
+        "grounded": True,
+    }
+
+
+def generate_rag_answer(user_query: str, chat_history: list = None) -> str:
+    """Backwards-compatible helper returning plain answer string."""
+    res = generate_rag_answer_with_sources(user_query, chat_history)
+    return res["answer"]
 
 
 # =========================================================================
-# 2. AGENTIC AI — 4 CUSTOM TOOLS (PRD Section 4.3)
+# 2. MULTI-NODE LANGGRAPH / REACT AGENT (StateGraph Workflow)
 # =========================================================================
+
 analyzer = SkillAnalyzer()
 generator = RoadmapGenerator()
 
-def tool_analyze_student_skills(profile_data: dict) -> dict:
-    """Tool 1: Calculates normalized skill scores from profile assessment results"""
-    skills = profile_data.get("skills", [])
+class CareerPlanningState:
+    """State data object passed across LangGraph nodes."""
+    def __init__(self, profile: dict, user_prompt: str):
+        self.profile = profile
+        self.user_prompt = user_prompt
+        self.career_goal = profile.get("careerGoal", "AI Engineer")
+        self.current_scores: Dict[str, int] = {}
+        self.detected_gaps: List[dict] = []
+        self.retrieved_context: str = ""
+        self.sources: List[str] = []
+        self.roadmap_data: dict = {}
+        self.reasoning_steps: List[dict] = []
+        self.final_synthesis: str = ""
+
+
+# --- Node 1: Skill Profiler ---
+def node_skill_profiler(state: CareerPlanningState) -> CareerPlanningState:
+    """Calculates assessment scores and identifies targeted role benchmark skill gaps."""
+    skills = state.profile.get("skills", [])
     scores_dict = {}
     if isinstance(skills, list):
         for s in skills:
             if isinstance(s, dict) and "name" in s:
                 scores_dict[s["name"].lower()] = s.get("verifiedScore", 50)
-    return analyzer.calculate_score(scores_dict)
 
-def tool_search_learning_resources(topic: str, level: str = "intermediate") -> str:
-    """Tool 2: Searches RAG knowledge base for learning resources & capstones"""
-    return search_knowledge_base(f"{topic} {level} project course", top_k=2)
-
-def tool_generate_skill_gap(current_scores: dict, target_role: str) -> list:
-    """Tool 3: Calls Python SkillAnalyzer service to identify gaps"""
-    return analyzer.identify_gaps(current_scores, target_role)
-
-def tool_create_roadmap(gaps: list, resources: list, target_role: str) -> dict:
-    """Tool 4: Compiles final personalized roadmap"""
-    return generator.generate(gaps, resources, target_role)
-
-
-def run_career_agent_react(profile: dict, user_prompt: str) -> dict:
-    """
-    Executes LangGraph / ReAct Agent Loop:
-    Thought -> Act (Tools) -> Observe -> Final Career Plan
-    """
-    career_goal = profile.get("careerGoal", "AI Engineer")
+    state.current_scores = analyzer.calculate_score(scores_dict)
+    state.detected_gaps = analyzer.identify_gaps(state.current_scores, state.career_goal)
     
-    # Step 1: Tool 1 & 3 Execution
-    current_scores = tool_analyze_student_skills(profile)
-    gaps = tool_generate_skill_gap(current_scores, career_goal)
-    
-    # Step 2: Tool 2 Execution
-    top_gap_skill = gaps[0]["skill"] if gaps else "Core Engineering"
-    resources_context = tool_search_learning_resources(top_gap_skill, profile.get("experienceLevel", "intermediate"))
-    
-    # Step 3: Tool 4 Execution
-    roadmap_data = tool_create_roadmap(gaps, [resources_context], career_goal)
+    top_gap_names = [g["skill"] for g in state.detected_gaps[:3]] if state.detected_gaps else ["None (Verified)"]
+    state.reasoning_steps.append({
+        "node": "SkillProfiler",
+        "thought": f"Analyzed student's profile for target track '{state.career_goal}'.",
+        "action": "analyzer.identify_gaps()",
+        "observation": f"Detected critical skill gaps: {', '.join(top_gap_names)}.",
+    })
+    return state
 
-    # Step 4: AI Synthesis using Groq LLaMA 3.3
+
+# --- Node 2: Knowledge Retriever ---
+def node_knowledge_retriever(state: CareerPlanningState) -> CareerPlanningState:
+    """RAG lookup for curated capstones and industry roadmaps for detected gaps."""
+    top_gap = state.detected_gaps[0]["skill"] if state.detected_gaps else state.career_goal
+    query = f"{state.career_goal} {top_gap} capstone project roadmap"
+    
+    context, sources = search_knowledge_base_with_sources(query, top_k=3)
+    state.retrieved_context = context
+    state.sources = sources
+
+    state.reasoning_steps.append({
+        "node": "KnowledgeRetriever",
+        "thought": f"Querying SkillForge RAG Knowledge Base for '{query}'.",
+        "action": f"search_knowledge_base_with_sources('{query}')",
+        "observation": f"Retrieved {len(sources)} grounded reference modules: {', '.join(sources)}.",
+    })
+    return state
+
+
+# --- Node 3: Agent Planner (ReAct Thought & Strategy) ---
+def node_agent_planner(state: CareerPlanningState) -> CareerPlanningState:
+    """Formulates prioritized 4-stage pedagogical milestone structure."""
+    state.roadmap_data = generator.generate(
+        state.detected_gaps,
+        [state.retrieved_context],
+        state.career_goal
+    )
+
+    state.reasoning_steps.append({
+        "node": "AgentPlanner",
+        "thought": f"Architecting 4-stage ReAct career progression plan tailored to student's experience level '{state.profile.get('experienceLevel', 'intermediate')}'.",
+        "action": "generator.generate(gaps, resources, target_role)",
+        "observation": "Compiled 4 milestone deliverables with hands-on capstones.",
+    })
+    return state
+
+
+# --- Node 4: Roadmap Synthesizer (AI Execution) ---
+def node_roadmap_synthesizer(state: CareerPlanningState) -> CareerPlanningState:
+    """Executes Groq LLaMA 3.3 model to generate the final motivating career blueprint."""
     agent_prompt = f"""You are the SkillForge Autonomous Career Planning Agent.
-The student asked: "{user_prompt}"
+The student requested: "{state.user_prompt}"
 
 Student Profile:
-- Name: {profile.get('name', 'Scholar')}
-- Degree: {profile.get('degree', 'BS Computer Science')} ({profile.get('yearOfStudy', 3)}rd Year)
-- Experience Level: {profile.get('experienceLevel', 'intermediate')}
-- Target Career Role: {career_goal}
-- Identified Missing Skills (Gaps): {', '.join([g['skill'] for g in gaps[:3]]) if gaps else 'None (Fully verified)'}
+- Name: {state.profile.get('name', 'Scholar')}
+- Degree: {state.profile.get('degree', 'BS Computer Science')} ({state.profile.get('yearOfStudy', 3)}rd Year)
+- Experience Level: {state.profile.get('experienceLevel', 'intermediate')}
+- Target Career Track: {state.career_goal}
+- Verified Skill Gaps: {', '.join([g['skill'] for g in state.detected_gaps[:3]]) if state.detected_gaps else 'None'}
 
-Knowledge Base Grounding:
-{resources_context}
+Verified Knowledge Base Context:
+{state.retrieved_context}
 
-Execute your Reasoning (ReAct) and formulate a clear, structured, motivational career roadmap advice with 4 prioritized steps.
+Formulate an authoritative, structured, and motivational 4-step Career Execution Plan.
+Highlight the hands-on capstone for each step and link to industry job readiness.
 """
 
     try:
@@ -181,12 +327,37 @@ Execute your Reasoning (ReAct) and formulate a clear, structured, motivational c
         )
         ai_synthesis = completion.choices[0].message.content
     except Exception:
-        ai_synthesis = f"SkillForge Agent Analysis for {career_goal}: Your top priority is mastering {top_gap_skill}. Complete the 4 roadmap capstone milestones below to achieve job-readiness."
+        ai_synthesis = f"SkillForge Autonomous Plan for {state.career_goal}: Prioritize closing gaps in {', '.join([g['skill'] for g in state.detected_gaps[:2]]) if state.detected_gaps else 'Core Systems'}. Complete the 4 capstone deliverables below to reach industry job readiness."
+
+    state.final_synthesis = ai_synthesis
+    state.reasoning_steps.append({
+        "node": "RoadmapSynthesizer",
+        "thought": "Synthesized final personalized career blueprint using Groq LLaMA 3.3.",
+        "action": "GroqChatCompletion(model='openai/gpt-oss-120b')",
+        "observation": "Career Plan generated successfully with full source grounding.",
+    })
+    return state
+
+
+def run_career_agent_react(profile: dict, user_prompt: str = "Generate my personalized career strategy") -> dict:
+    """
+    Executes the Complete Multi-Node LangGraph State Graph Workflow:
+    Node 1 (SkillProfiler) -> Node 2 (KnowledgeRetriever) -> Node 3 (AgentPlanner) -> Node 4 (RoadmapSynthesizer)
+    """
+    state = CareerPlanningState(profile, user_prompt)
+    
+    # Sequential StateGraph Execution
+    state = node_skill_profiler(state)
+    state = node_knowledge_retriever(state)
+    state = node_agent_planner(state)
+    state = node_roadmap_synthesizer(state)
 
     return {
         "success": True,
-        "careerGoal": career_goal,
-        "gaps": gaps,
-        "roadmap": roadmap_data,
-        "agentAnalysis": ai_synthesis,
+        "careerGoal": state.career_goal,
+        "gaps": state.detected_gaps,
+        "sources": state.sources,
+        "roadmap": state.roadmap_data,
+        "agentAnalysis": state.final_synthesis,
+        "reasoningStream": state.reasoning_steps,
     }

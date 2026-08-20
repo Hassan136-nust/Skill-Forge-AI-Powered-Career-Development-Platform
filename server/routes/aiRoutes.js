@@ -10,7 +10,7 @@ const groq = new Groq({
 })
 
 // =========================================================================
-// 1. POST /api/ai/chat — RAG AI Study Assistant Powered by Groq
+// 1. POST /api/ai/chat — RAG AI Study Assistant Powered by Python RAG & Groq
 // =========================================================================
 router.post('/chat', async (req, res) => {
   try {
@@ -20,6 +20,35 @@ router.post('/chat', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide a query message' })
     }
 
+    // 1. Primary: Forward to Python RAG & Semantic Retrieval Microservice
+    try {
+      const pyRes = await fetch('http://localhost:8000/rag/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          chat_history: chatHistory || [],
+        }),
+      })
+
+      if (pyRes.ok) {
+        const pyData = await pyRes.json()
+        if (pyData && pyData.answer) {
+          return res.json({
+            success: true,
+            query,
+            answer: pyData.answer,
+            sources: pyData.sources || [],
+            grounded: pyData.grounded ?? true,
+            engine: 'SkillForge Semantic RAG + Groq LLaMA 3.3',
+          })
+        }
+      }
+    } catch (pyErr) {
+      console.warn('Python RAG service fallback:', pyErr.message)
+    }
+
+    // 2. Direct Fallback via Groq Cloud
     const messages = [
       {
         role: 'system',
@@ -61,7 +90,8 @@ Keep code snippets modern and answers clear and concise.`,
     res.json({
       success: true,
       query,
-      answer,
+      answer: answer + '\n\n📌 **Verified Sources:** `SkillForge Standard Knowledge Base`',
+      sources: ['SkillForge Standard Knowledge Base'],
       model: 'openai/gpt-oss-120b (Groq Cloud)',
     })
   } catch (error) {

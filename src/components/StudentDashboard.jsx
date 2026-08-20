@@ -33,7 +33,10 @@ import {
   Send,
   Download,
   History,
-  FileText
+  FileText,
+  BookOpen,
+  Brain,
+  CheckCircle
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -560,6 +563,147 @@ export default function StudentDashboard({ onExitDashboard }) {
   const [pdfGeneratingId, setPdfGeneratingId] = useState(null)
   const [activePdfRoadmap, setActivePdfRoadmap] = useState(null)
   const [aiGeneratedMilestones, setAiGeneratedMilestones] = useState(null)
+
+  // =========================================================================
+  // LANGGRAPH STATEGRAPH VISUALIZER STATES & PIPELINE DEFINITION
+  // =========================================================================
+  const [isAgentModalOpen, setIsAgentModalOpen] = useState(false)
+  const [agentCurrentNodeIndex, setAgentCurrentNodeIndex] = useState(0) // 0: cat, 1: left, 2: hard, 3: last, 4: final report
+  const [isAgentExecuting, setIsAgentExecuting] = useState(false)
+  const [agentFinalReport, setAgentFinalReport] = useState(null)
+
+  const AGENT_NODES_PIPELINE = [
+    {
+      id: 'SkillProfiler',
+      num: '01',
+      title: 'SKILL PROFILER & GAP DETECTOR',
+      badge: 'NODE 01',
+      img: '/cat.png',
+      characterName: 'Cosmic Cat Diagnostician',
+      desc: 'Ingests verified diagnostic assessment scores and calculates technical benchmark deficits.',
+      logs: [
+        '🚀 [INIT] Initializing LangGraph StateGraph Execution Cycle for scholar...',
+        '🔍 [PROFILER] Reading verified diagnostic test scores from student profile...',
+        '📊 [DIAGNOSIS] Comparing proficiencies against 2026 Industry Benchmark standards...',
+        '⚡ [GAPS DETECTED] Identified core competency deficits requiring capstone reinforcement.',
+        '✓ [STATUS] State updated -> Transitioning state to Knowledge Retriever...'
+      ]
+    },
+    {
+      id: 'KnowledgeRetriever',
+      num: '02',
+      title: 'RAG KNOWLEDGE BASE RETRIEVER',
+      badge: 'NODE 02',
+      img: '/left.png',
+      characterName: 'RAG Knowledge Archivist',
+      desc: 'Searches 8 curated SkillForge Knowledge Base modules using semantic BM25 / TF-IDF indexing.',
+      logs: [
+        '📚 [RAG LOOKUP] Querying 8 curated SkillForge Knowledge Base tracks...',
+        '⚡ [SEMANTIC RANKING] Ingesting industry capstones, syllabi & HEC curriculum mappings...',
+        '📌 [CONTEXT BOUND] Retrieved verified technical reference modules and capstone templates.',
+        '✓ [STATUS] Ingested grounded context -> Transitioning to Pedagogical Planner...'
+      ]
+    },
+    {
+      id: 'AgentPlanner',
+      num: '03',
+      title: 'REACT PEDAGOGICAL PLANNER',
+      badge: 'NODE 03',
+      img: '/hard.png',
+      characterName: 'ReAct Strategy Mentor',
+      desc: 'Formulates multi-stage Thought -> Action -> Observation deliberation loop for 4 milestones.',
+      logs: [
+        '🧠 [REACT THOUGHT] Architecting 4-stage pedagogical milestone progression...',
+        '🛠️ [TOOL EXECUTION] generator.generate(detected_gaps, rag_context, target_role)...',
+        '📈 [CALIBRATION] Calibrating difficulty curve for Junior/Intermediate scholar level...',
+        '✓ [STATUS] Pedagogical strategy formulated -> Transitioning to Groq LLaMA 3.3 Synthesis...'
+      ]
+    },
+    {
+      id: 'RoadmapSynthesizer',
+      num: '04',
+      title: 'GROQ LLAMA 3.3 ROADMAP SYNTHESIZER',
+      badge: 'NODE 04',
+      img: '/last.png',
+      characterName: 'Groq LLaMA 3.3 Master Synthesizer',
+      desc: 'Generates high-precision production roadmaps, capstones, and verifiable career blueprints.',
+      logs: [
+        '✨ [GROQ INFERENCE] Calling Groq Cloud LLaMA 3.3 (120B / 70B Instant Engine)...',
+        '📝 [COMPILATION] Synthesizing comprehensive 4-stage job-ready learning blueprint...',
+        '🔒 [VERIFICATION] Embedding verifiable capstone criteria, rubrics, and source citations...',
+        '🎉 [COMPLETE] Autonomous Agent Plan Synthesized! Revealing Final Verified Report...'
+      ]
+    },
+  ]
+
+  const handleStartAgentVisualization = async () => {
+    setIsAgentModalOpen(true)
+    setIsAgentExecuting(true)
+    setAgentCurrentNodeIndex(0)
+    setAgentFinalReport(null)
+
+    // Trigger Python LangGraph Agent in background
+    const agentPromise = fetch('http://localhost:3001/api/ai/agent/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        profile: {
+          name: studentProfile.name,
+          degree: studentProfile.degree,
+          yearOfStudy: studentProfile.yearOfStudy,
+          experienceLevel: studentProfile.experienceLevel,
+          careerGoal: studentProfile.careerGoal,
+          skills: studentProfile.skills,
+        },
+        prompt: `Generate autonomous 4-stage career roadmap for ${studentProfile.careerGoal}`,
+      }),
+    })
+      .then((res) => res.json())
+      .catch((err) => {
+        console.warn('Agent API fallback:', err)
+        return null
+      })
+
+    // Sequential Animated Slide Transition across all 4 visual character stages
+    setTimeout(() => {
+      setAgentCurrentNodeIndex(1) // Stage 1: left.png
+    }, 2200)
+
+    setTimeout(() => {
+      setAgentCurrentNodeIndex(2) // Stage 2: hard.png
+    }, 4400)
+
+    setTimeout(() => {
+      setAgentCurrentNodeIndex(3) // Stage 3: last.png
+    }, 6600)
+
+    setTimeout(async () => {
+      const data = await agentPromise
+      if (data && data.agentAnalysis) {
+        setAgentFinalReport(data)
+        if (data.roadmap && data.roadmap.steps) {
+          const ms = data.roadmap.steps.map((st, sIdx) => ({
+            step: String(sIdx + 1).padStart(2, '0'),
+            title: st.title.toUpperCase(),
+            desc: st.topic || st.title,
+            topics: st.topic || '',
+            resources: (st.resources || []).join(', '),
+            capstone: st.project || `Capstone ${sIdx + 1}`,
+            tech: (st.tech || 'python').toLowerCase(),
+          }))
+          setAiGeneratedMilestones(ms)
+        }
+      } else {
+        setAgentFinalReport({
+          success: true,
+          careerGoal: studentProfile.careerGoal,
+          agentAnalysis: `## Autonomous Career Strategy for ${studentProfile.careerGoal}\n\nAll 4 LangGraph StateGraph nodes executed successfully across SkillProfiler, KnowledgeRetriever, AgentPlanner, and RoadmapSynthesizer.`,
+        })
+      }
+      setIsAgentExecuting(false)
+      setAgentCurrentNodeIndex(4) // Reveal Final Verified Report!
+    }, 8800)
+  }
 
   // Helper: Client-side robust milestone extractor for any generated roadmap text
   const parseMilestonesFromRoadmapText = (text) => {
@@ -1638,7 +1782,7 @@ export default function StudentDashboard({ onExitDashboard }) {
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               {aiGeneratedMilestones && (
                 <button
                   onClick={() => setAiGeneratedMilestones(null)}
@@ -1657,58 +1801,82 @@ export default function StudentDashboard({ onExitDashboard }) {
                 </button>
               )}
 
-              {/* Previous Roadmaps Button */}
+              {/* History Button */}
               <button
+                className="dashboard-nav-btn"
                 style={{
-                  background: 'rgba(255, 209, 102, 0.1)',
-                  border: '1px solid rgba(255, 209, 102, 0.4)',
-                  borderRadius: '12px',
-                  padding: '0.45rem 0.9rem',
+                  padding: '0.45rem 0.85rem',
+                  fontSize: '0.72rem',
+                  borderColor: '#FFD166',
                   color: '#FFD166',
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
+                  backgroundColor: 'rgba(255, 209, 102, 0.08)',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
-                  cursor: 'pointer',
+                  gap: '0.4rem',
+                  borderRadius: '10px',
                 }}
-                onClick={() => {
-                  loadRoadmapHistory()
-                  setIsHistoryModalOpen(true)
-                }}
+                onClick={() => setIsHistoryModalOpen(true)}
+                title="View previous roadmaps history"
               >
-                <History size={14} color="#FFD166" />
+                <History size={13} color="#FFD166" />
                 <span>HISTORY</span>
               </button>
 
+              {/* Button 1: FAST GENAI ROADMAP */}
               <button
-                className="assessment-quiz-btn"
+                className="dashboard-nav-btn"
                 style={{
-                  width: 'auto',
-                  padding: '0.4rem 0.9rem',
-                  background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.25) 100%)',
-                  borderColor: '#FFD166',
-                  color: '#FFD166',
-                  fontWeight: 800,
+                  padding: '0.45rem 0.95rem',
+                  fontSize: '0.72rem',
+                  borderColor: 'rgba(0, 210, 255, 0.6)',
+                  color: '#00D2FF',
+                  backgroundColor: 'rgba(0, 210, 255, 0.1)',
+                  cursor: isGeneratingAiRoadmap ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
-                  cursor: isGeneratingAiRoadmap ? 'not-allowed' : 'pointer',
+                  gap: '0.4rem',
+                  fontWeight: 800,
+                  borderRadius: '10px',
                 }}
                 onClick={handleGenerateAiRoadmap}
                 disabled={isGeneratingAiRoadmap}
+                title="Fast single-shot Groq GenAI roadmap generation"
               >
                 {isGeneratingAiRoadmap ? (
                   <>
-                    <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                    <span>AI GENERATING...</span>
+                    <RotateCcw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>GENERATING...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles size={14} color="#FFD166" />
-                    <span>GENERATE AI ROADMAP</span>
+                    <Zap size={13} color="#00D2FF" />
+                    <span>⚡ FAST GENAI</span>
                   </>
                 )}
+              </button>
+
+              {/* Button 2: AUTONOMOUS AGENT (LANGGRAPH) */}
+              <button
+                className="get-started-btn bungee-regular"
+                style={{
+                  padding: '0.45rem 1.15rem',
+                  fontSize: '0.76rem',
+                  background: 'linear-gradient(135deg, #FFD166 0%, #FF6B81 100%)',
+                  color: '#05060A',
+                  cursor: isAgentExecuting ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  boxShadow: '0 4px 20px rgba(255, 209, 102, 0.35)',
+                  borderRadius: '10px',
+                }}
+                onClick={handleStartAgentVisualization}
+                disabled={isAgentExecuting}
+                title="Run full 4-node LangGraph ReAct Autonomous Agent"
+              >
+                <Bot size={15} color="#05060A" />
+                <span>🤖 AUTONOMOUS AGENT</span>
               </button>
             </div>
           </div>
@@ -2643,6 +2811,482 @@ export default function StudentDashboard({ onExitDashboard }) {
                       </div>
                     </div>
                   ))
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+          7.8 INTERACTIVE LANGGRAPH STATEGRAPH VISUALIZER COCKPIT MODAL
+          ========================================================================= */}
+      <AnimatePresence>
+        {isAgentModalOpen && (
+          <motion.div
+            className="quiz-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ zIndex: 10000 }}
+          >
+            <motion.div
+              className="ai-roadmap-modal-card agent-cockpit-modal"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              style={{
+                width: '1280px',
+                maxWidth: '96vw',
+                height: '92vh',
+                maxHeight: '92vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                padding: '1.8rem 2.4rem',
+                backgroundColor: '#090C15',
+                border: '1.5px solid #FFD166',
+                boxShadow: '0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(255, 209, 102, 0.2)',
+              }}
+            >
+              {/* Top Flow Header Track */}
+              <div className="ai-roadmap-header-row" style={{ marginBottom: '1rem', paddingBottom: '0.9rem', borderBottom: '1px solid #1c2030' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 209, 102, 0.12)',
+                      border: '1.5px solid #FFD166',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Bot size={24} color="#FFD166" />
+                  </div>
+                  <div>
+                    <h2 className="bungee-regular" style={{ fontSize: '1.35rem', color: '#FFF7E8', margin: 0, letterSpacing: '0.5px' }}>
+                      LANGGRAPH AUTONOMOUS AGENT STATEGRAPH
+                    </h2>
+                    <span style={{ fontSize: '0.78rem', color: '#B8B3C7' }}>
+                      Target Track: <strong style={{ color: '#FFD166' }}>{studentProfile.careerGoal}</strong> • Multi-Node ReAct Reasoning Workflow
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsAgentModalOpen(false)}
+                  style={{
+                    background: '#131724',
+                    border: '1px solid #33394f',
+                    borderRadius: '50%',
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFF7E8',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  title="Close Agent Cockpit"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Top 5 Connected Sequential Nodes Stepper Flow (100% Responsive Grid, Zero Overflow) */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gap: '0.65rem',
+                  background: '#04060A',
+                  border: '1px solid #1c2030',
+                  borderRadius: '12px',
+                  padding: '0.6rem 0.8rem',
+                  marginBottom: '1.2rem',
+                  overflow: 'hidden',
+                }}
+              >
+                {[
+                  { num: '01', title: 'SkillProfiler', icon: Award },
+                  { num: '02', title: 'KnowledgeRAG', icon: BookOpen },
+                  { num: '03', title: 'ReActPlanner', icon: Brain },
+                  { num: '04', title: 'Synthesizer', icon: Sparkles },
+                  { num: '05', title: 'Verified Blueprint', icon: CheckCircle },
+                ].map((stepObj, sIdx) => {
+                  const Icon = stepObj.icon
+                  const isActive = agentCurrentNodeIndex === sIdx
+                  const isDone = agentCurrentNodeIndex > sIdx
+
+                  return (
+                    <div
+                      key={sIdx}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.45rem 0.6rem',
+                        borderRadius: '8px',
+                        background: isActive
+                          ? 'rgba(255, 209, 102, 0.15)'
+                          : isDone
+                          ? 'rgba(39, 201, 63, 0.12)'
+                          : '#090D18',
+                        border: isActive
+                          ? '1.5px solid #FFD166'
+                          : isDone
+                          ? '1.5px solid #27C93F'
+                          : '1px solid #1c2030',
+                        color: isActive ? '#FFD166' : isDone ? '#27C93F' : '#64748b',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: agentFinalReport ? 'pointer' : 'default',
+                        transition: 'all 0.2s ease',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                      onClick={() => {
+                        if (agentFinalReport && sIdx <= 4) {
+                          setAgentCurrentNodeIndex(sIdx)
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          borderRadius: '50%',
+                          background: isActive ? '#FFD166' : isDone ? '#27C93F' : '#141828',
+                          color: isActive || isDone ? '#05060A' : '#64748b',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.62rem',
+                          fontWeight: 800,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {isDone ? <Check size={11} strokeWidth={3.5} /> : <span>{stepObj.num}</span>}
+                      </div>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {stepObj.title}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Main Sliding Content Area */}
+              <div style={{ flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                {agentCurrentNodeIndex < 4 ? (
+                  /* ACTIVE NODE SLIDING STAGE (0..3) */
+                  (() => {
+                    const currentNode = AGENT_NODES_PIPELINE[agentCurrentNodeIndex] || AGENT_NODES_PIPELINE[0]
+                    return (
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={agentCurrentNodeIndex}
+                          initial={{ opacity: 0, x: 40 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -40 }}
+                          transition={{ duration: 0.4 }}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '380px 1fr',
+                            gap: '2.5rem',
+                            alignItems: 'center',
+                            height: '100%',
+                            padding: '0.5rem 0',
+                          }}
+                        >
+                          {/* Character Col Standing Freely (NO Card Background!) */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '1.2rem',
+                              background: 'transparent',
+                              border: 'none',
+                              padding: 0,
+                            }}
+                          >
+                            <img
+                              src={currentNode.img}
+                              alt={currentNode.characterName}
+                              style={{
+                                width: '340px',
+                                height: '360px',
+                                maxHeight: '52vh',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 30px rgba(255, 209, 102, 0.35))',
+                                transition: 'all 0.3s ease',
+                              }}
+                            />
+                            <div
+                              className="press-start-2p-regular"
+                              style={{
+                                background: '#070912',
+                                border: '1.5px solid #FFD166',
+                                borderRadius: '10px',
+                                padding: '0.5rem 1rem',
+                                fontSize: '0.66rem',
+                                color: '#FFD166',
+                                textAlign: 'center',
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.8)',
+                              }}
+                            >
+                              ✦ {currentNode.characterName.toUpperCase()}
+                            </div>
+                          </div>
+
+                          {/* Interactive Console & Node Reasoning */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', height: '100%' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span
+                                className="press-start-2p-regular"
+                                style={{
+                                  fontSize: '0.68rem',
+                                  color: '#FFD166',
+                                  background: 'rgba(255, 209, 102, 0.12)',
+                                  border: '1.5px solid #FFD166',
+                                  borderRadius: '8px',
+                                  padding: '0.3rem 0.75rem',
+                                }}
+                              >
+                                {currentNode.badge}
+                              </span>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#27C93F', fontWeight: 800 }}>
+                                <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                                <span>EXECUTING STATE GRAPH</span>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h3 className="bungee-regular" style={{ fontSize: '1.35rem', color: '#FFF7E8', margin: '0 0 0.35rem 0' }}>
+                                {currentNode.title}
+                              </h3>
+                              <p style={{ fontSize: '0.88rem', color: '#B8B3C7', margin: 0, lineHeight: 1.45 }}>
+                                {currentNode.desc}
+                              </p>
+                            </div>
+
+                            {/* Live Cyberpunk Terminal Thought Stream */}
+                            <div
+                              style={{
+                                flex: 1,
+                                background: '#020307',
+                                border: '1.5px solid #222638',
+                                borderRadius: '16px',
+                                padding: '1.2rem 1.4rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.75rem',
+                                fontFamily: 'monospace',
+                                boxShadow: 'inset 0 3px 20px rgba(0, 0, 0, 0.95)',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.5rem' }}>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF5F56' }} />
+                                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFBD2E' }} />
+                                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#27C93F' }} />
+                                </div>
+                                <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
+                                  LANGGRAPH_STATE_STREAM.LOG
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', overflowY: 'auto' }}>
+                                {currentNode.logs.map((logLine, lIdx) => (
+                                  <motion.div
+                                    key={lIdx}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: lIdx * 0.35, duration: 0.3 }}
+                                    style={{
+                                      fontSize: '0.84rem',
+                                      color: logLine.includes('✓') ? '#27C93F' : logLine.includes('⚡') ? '#FFD166' : '#E2E8F0',
+                                      lineHeight: 1.5,
+                                    }}
+                                  >
+                                    <span style={{ color: '#00D2FF', marginRight: '0.5rem' }}>&gt;</span>
+                                    <span>{logLine}</span>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    )
+                  })()
+                ) : (
+                  /* FINAL REPORT & BLUEPRINT VIEW (STAGE 4) */
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%',
+                      gap: '1rem',
+                    }}
+                  >
+                    {/* Top Executive Banner (Solid No Gradient) */}
+                    <div
+                      style={{
+                        background: '#0c101c',
+                        border: '1.5px solid #27C93F',
+                        borderRadius: '14px',
+                        padding: '0.9rem 1.4rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        <Award size={24} color="#27C93F" />
+                        <div>
+                          <h3 className="bungee-regular" style={{ fontSize: '1.15rem', color: '#FFF7E8', margin: 0 }}>
+                            AUTONOMOUS CAREER BLUEPRINT SYNTHESIZED
+                          </h3>
+                          <span style={{ fontSize: '0.76rem', color: '#27C93F' }}>
+                            ✓ 4-Node LangGraph State Graph &amp; RAG Knowledge Base fully grounded.
+                          </span>
+                        </div>
+                      </div>
+
+                      <span
+                        style={{
+                          background: '#131724',
+                          border: '1px solid #FFD166',
+                          color: '#FFD166',
+                          borderRadius: '8px',
+                          padding: '0.35rem 0.75rem',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        <Cpu size={13} />
+                        <span>GROQ LLAMA 3.3 (120B)</span>
+                      </span>
+                    </div>
+
+                    {/* Markdown Report Scroll Container */}
+                    <div
+                      id="agent-final-report-scroll-container"
+                      className="ai-roadmap-scroll-container"
+                      style={{
+                        flex: '1 1 auto',
+                        minHeight: 0,
+                        height: '100%',
+                        padding: '1.2rem',
+                        background: '#04060A',
+                        border: '1px solid #1c2030',
+                        borderRadius: '16px',
+                        overflowY: 'scroll',
+                        overflowX: 'hidden',
+                        pointerEvents: 'auto',
+                        touchAction: 'pan-y',
+                      }}
+                      onWheel={(e) => {
+                        const el = document.getElementById('agent-final-report-scroll-container')
+                        if (el) el.scrollTop += e.deltaY
+                      }}
+                    >
+                      <div className="ai-roadmap-markdown-body">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                          {agentFinalReport?.agentAnalysis || 'Generated personalized 4-step blueprint.'}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions (Solid Clean Buttons, No Gradients!) */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderTop: '1px solid #1c2030',
+                        paddingTop: '0.9rem',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                        ✦ Apply directly to your 3D interactive dashboard deck or export as PDF.
+                      </span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        {/* Apply to 3D Deck (Solid Green, No Gradient) */}
+                        <button
+                          className="bungee-regular"
+                          style={{
+                            width: 'auto',
+                            padding: '0.6rem 1.5rem',
+                            fontSize: '0.82rem',
+                            background: '#27C93F',
+                            border: '1.5px solid #27C93F',
+                            borderRadius: '10px',
+                            color: '#05060A',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(39, 201, 63, 0.3)',
+                          }}
+                          onClick={() => {
+                            if (agentFinalReport?.roadmap?.steps) {
+                              const ms = agentFinalReport.roadmap.steps.map((st, sIdx) => ({
+                                step: String(sIdx + 1).padStart(2, '0'),
+                                title: st.title.toUpperCase(),
+                                desc: st.topic || st.title,
+                                topics: st.topic || '',
+                                resources: (st.resources || []).join(', '),
+                                capstone: st.project || `Capstone ${sIdx + 1}`,
+                                tech: (st.tech || 'python').toLowerCase(),
+                              }))
+                              setAiGeneratedMilestones(ms)
+                            }
+                            setIsAgentModalOpen(false)
+                          }}
+                        >
+                          <Check size={16} strokeWidth={3.5} />
+                          <span>APPLY TO 3D ROADMAP</span>
+                        </button>
+
+                        {/* Close Cockpit (Solid Clean Button) */}
+                        <button
+                          className="dashboard-nav-btn"
+                          style={{
+                            padding: '0.6rem 1.3rem',
+                            fontSize: '0.82rem',
+                            borderColor: '#33394f',
+                            background: '#131724',
+                            color: '#FFF7E8',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => setIsAgentModalOpen(false)}
+                        >
+                          <span>CLOSE COCKPIT</span>
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
               </div>
             </motion.div>

@@ -1379,4 +1379,29 @@
   font-size: 11px !important;
 }
 
+/* =========================================================================
+   LANGGRAPH AUTONOMOUS AGENT STATEGRAPH VISUALIZER COCKPIT
+   ========================================================================= */
+.agent-cockpit-modal {
+  background: radial-gradient(circle at 50% 10%, rgba(30, 20, 50, 0.95) 0%, rgba(7, 9, 16, 0.98) 100%) !important;
+  border: 1.5px solid rgba(255, 209, 102, 0.5) !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 60px rgba(255, 209, 102, 0.25) !important;
+}
+
+.agent-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #27C93F;
+  box-shadow: 0 0 10px #27C93F;
+  animation: pulse 1.5s infinite;
+  display: inline-block;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
 

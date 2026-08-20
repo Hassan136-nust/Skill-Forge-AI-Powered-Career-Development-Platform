@@ -21,8 +21,7 @@ import {
   Briefcase
 } from 'lucide-react'
 import './AuthModal.css'
-
-const API_BASE = 'http://localhost:3001/api'
+import { API_URL as API_BASE } from '../config/api.js'
 
 export default function AuthModal({
   isOpen,

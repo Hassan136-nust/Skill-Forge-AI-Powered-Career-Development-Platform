@@ -33,6 +33,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import './AiMentorPage.css'
 import './Navbar.css'
+import { API_BASE_URL } from '../config/api.js'
 
 export default function AiMentorPage({ onBackToDashboard, currentUser }) {
   // 1. Core Profile & Context State
@@ -75,7 +76,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
 
     try {
       // Fetch live context (GitHub repos, quiz radar, active milestones)
-      const ctxRes = await fetch(`http://localhost:3001/api/mentor/context/${encodeURIComponent(email)}`)
+      const ctxRes = await fetch(`${API_BASE_URL}/api/mentor/context/${encodeURIComponent(email)}`)
       if (ctxRes.ok) {
         const ctxData = await ctxRes.json()
         if (ctxData.success && ctxData.context) {
@@ -84,7 +85,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
       }
 
       // Fetch user's previous chat sessions
-      const sessRes = await fetch(`http://localhost:3001/api/mentor/sessions/${encodeURIComponent(email)}`)
+      const sessRes = await fetch(`${API_BASE_URL}/api/mentor/sessions/${encodeURIComponent(email)}`)
       if (sessRes.ok) {
         const sessData = await sessRes.json()
         if (sessData.success && Array.isArray(sessData.sessions)) {
@@ -117,7 +118,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
     if (!sessionId) return
     try {
       setActiveSessionId(sessionId)
-      const res = await fetch(`http://localhost:3001/api/mentor/session/${sessionId}`)
+      const res = await fetch(`${API_BASE_URL}/api/mentor/session/${sessionId}`)
       if (res.ok) {
         const data = await res.json()
         if (data.success && data.session) {
@@ -130,12 +131,11 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
   }
 
   // 4. Create New Session
-  // 4. Create New Session
   const handleCreateNewSession = async () => {
     try {
       const email = studentProfile.email
       const activeMilestonesList = getActiveMilestones()
-      const res = await fetch('http://localhost:3001/api/mentor/session/new', {
+      const res = await fetch(`${API_BASE_URL}/api/mentor/session/new`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -173,7 +173,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
   const handleDeleteSession = async (e, sessionId) => {
     e.stopPropagation()
     try {
-      const res = await fetch(`http://localhost:3001/api/mentor/session/${sessionId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/mentor/session/${sessionId}`, {
         method: 'DELETE',
       })
       if (res.ok) {
@@ -211,7 +211,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
     const activeMilestonesToSend = getActiveMilestones()
 
     try {
-      const res = await fetch('http://localhost:3001/api/mentor/chat', {
+      const res = await fetch(`${API_BASE_URL}/api/mentor/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -43,6 +43,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import html2pdf from 'html2pdf.js'
 import AuthModal from './AuthModal'
+import { API_BASE_URL } from '../config/api.js'
 import './StudentDashboard.css'
 import './Navbar.css'
 
@@ -509,7 +510,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
         }))
       }
 
-      const res = await fetch(`http://localhost:3001/api/profile/${storedUser._id || encodeURIComponent(userEmail)}`)
+      const res = await fetch(`${API_BASE_URL}/api/profile/${storedUser._id || encodeURIComponent(userEmail)}`)
       if (res.ok) {
         const data = await res.json()
         if (data.profile) {
@@ -552,7 +553,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
           }
 
           try {
-            const assessRes = await fetch(`http://localhost:3001/api/assessment/results/${encodeURIComponent(userEmail)}`)
+            const assessRes = await fetch(`${API_BASE_URL}/api/assessment/results/${encodeURIComponent(userEmail)}`)
             if (assessRes.ok) {
               const assessData = await assessRes.json()
               if (assessData.scores && typeof assessData.scores === 'object') {
@@ -631,7 +632,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
     try {
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      await fetch('http://localhost:3001/api/profile', {
+      await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -776,7 +777,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
     setAgentFinalReport(null)
 
     // Trigger Python LangGraph Agent in background
-    const agentPromise = fetch('http://localhost:3001/api/ai/agent/analyze', {
+    const agentPromise = fetch(`${API_BASE_URL}/api/ai/agent/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -923,7 +924,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
       if (!email) return
 
       const activeRole = (roleOverride || studentProfile.careerGoal || 'AI Engineer').toLowerCase().trim()
-      const res = await fetch(`http://localhost:3001/api/ai/roadmap/history/${encodeURIComponent(email)}`)
+      const res = await fetch(`${API_BASE_URL}/api/ai/roadmap/history/${encodeURIComponent(email)}`)
       if (res.ok) {
         const data = await res.json()
         if (data.history && data.history.length > 0) {
@@ -961,7 +962,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
     const startTime = Date.now()
 
     try {
-      const res = await fetch('http://localhost:3001/api/ai/roadmap/generate', {
+      const res = await fetch(`${API_BASE_URL}/api/ai/roadmap/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1192,7 +1193,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
     setIsAiChatLoading(true)
 
     try {
-      const res = await fetch('http://localhost:3001/api/ai/chat', {
+      const res = await fetch(`${API_BASE_URL}/api/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1230,7 +1231,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
     setIsSubmittingQuiz(false)
 
     try {
-      const res = await fetch(`http://localhost:3001/api/assessment/questions`)
+      const res = await fetch(`${API_BASE_URL}/api/assessment/questions`)
       if (res.ok) {
         const data = await res.json()
         if (data.questions) {
@@ -1345,7 +1346,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
         selectedIndex: updatedAnswers[idx],
       }))
 
-      await fetch(`http://localhost:3001/api/assessment/submit`, {
+      await fetch(`${API_BASE_URL}/api/assessment/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1356,7 +1357,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
         }),
       })
 
-      await fetch(`http://localhost:3001/api/profile`, {
+      await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1645,7 +1646,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                     try {
                       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
                       localStorage.setItem('skillforge_user', JSON.stringify({ ...storedUser, careerGoal: newRole }))
-                      await fetch('http://localhost:3001/api/profile', {
+                      await fetch(`${API_BASE_URL}/api/profile`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

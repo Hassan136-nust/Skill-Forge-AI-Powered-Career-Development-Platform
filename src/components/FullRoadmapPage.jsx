@@ -21,6 +21,7 @@ import {
   Star
 } from 'lucide-react'
 import './StudentDashboard.css'
+import { API_BASE_URL } from '../config/api.js'
 
 // Default Fallback Track Data
 const TRACK_ROADMAPS_FALLBACK = {
@@ -193,7 +194,7 @@ export default function FullRoadmapPage({ onBackToDashboard, initialMilestones =
 
     try {
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      await fetch('http://localhost:3001/api/profile', {
+      await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -14,6 +14,8 @@ import { protect, requireAdmin } from '../middleware/authMiddleware.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+const PYTHON_SERVICE_URL = (process.env.PYTHON_SERVICE_URL || 'http://localhost:8000').replace(/\/+$/, '')
+
 const router = express.Router()
 
 // Secure all admin routes with JWT Auth + Admin Role Check
@@ -65,12 +67,12 @@ router.get('/stats', async (req, res) => {
     })
 
     // Microservices Health Check
-    let pythonHealth = { status: 'healthy', port: '8000' }
+    let pythonHealth = { status: 'healthy', url: PYTHON_SERVICE_URL }
     try {
-      const pyCheck = await fetch('http://localhost:8000/docs', { signal: AbortSignal.timeout(1500) })
-      if (!pyCheck.ok) pythonHealth = { status: 'unhealthy', port: '8000' }
+      const pyCheck = await fetch(`${PYTHON_SERVICE_URL}/docs`, { signal: AbortSignal.timeout(1500) })
+      if (!pyCheck.ok) pythonHealth = { status: 'unhealthy', url: PYTHON_SERVICE_URL }
     } catch {
-      pythonHealth = { status: 'offline', port: '8000' }
+      pythonHealth = { status: 'offline', url: PYTHON_SERVICE_URL }
     }
 
     // Platform-wide AI Invocations & Token Telemetry
@@ -427,7 +429,7 @@ router.put('/knowledge-base/:filename', (req, res) => {
 // =========================================================================
 router.post('/knowledge-base/rebuild', async (req, res) => {
   try {
-    const pyRes = await fetch('http://localhost:8000/vectorstore/rebuild', {
+    const pyRes = await fetch(`${PYTHON_SERVICE_URL}/vectorstore/rebuild`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -457,7 +459,7 @@ router.post('/rag/test-search', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide a search query' })
     }
 
-    const pyRes = await fetch('http://localhost:8000/vectorstore/search', {
+    const pyRes = await fetch(`${PYTHON_SERVICE_URL}/vectorstore/search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, top_k: topK }),

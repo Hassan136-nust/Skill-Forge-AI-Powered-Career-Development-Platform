@@ -43,6 +43,7 @@ import rehypeRaw from 'rehype-raw'
 import './AdminDashboard.css'
 import './Navbar.css'
 import './StudentDashboard.css'
+import { API_BASE_URL } from '../config/api.js'
 
 const CATEGORY_NAMES = {
   python: 'Python & Vector Algorithms',
@@ -164,7 +165,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   const fetchStats = async () => {
     setIsLoadingStats(true)
     try {
-      const res = await fetch('http://localhost:3001/api/admin/stats', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/stats`, {
         headers: getAuthHeaders(),
       })
       if (res.status === 401 || res.status === 403) {
@@ -193,7 +194,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
       if (userSearch) query.append('search', userSearch)
       if (userRoleFilter !== 'all') query.append('role', userRoleFilter)
 
-      const res = await fetch(`http://localhost:3001/api/admin/users?${query.toString()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users?${query.toString()}`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -213,7 +214,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   const fetchQuestions = async () => {
     setIsLoadingQuestions(true)
     try {
-      const res = await fetch('http://localhost:3001/api/assessment/questions')
+      const res = await fetch(`${API_BASE_URL}/api/assessment/questions`)
       if (res.ok) {
         const data = await res.json()
         if (data.success && data.questions) {
@@ -236,7 +237,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   // 4. Fetch Knowledge Base Files
   const fetchKbFiles = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/admin/knowledge-base', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/knowledge-base`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -258,7 +259,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   const fetchRoadmaps = async () => {
     setIsLoadingRoadmaps(true)
     try {
-      const res = await fetch('http://localhost:3001/api/admin/roadmaps', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/roadmaps`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -278,7 +279,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   const fetchChats = async () => {
     setIsLoadingChats(true)
     try {
-      const res = await fetch('http://localhost:3001/api/admin/chats', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/chats`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -301,7 +302,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
     setDrilldownTab('scores')
     setIsLoadingDetails(true)
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/users/${student._id || student.id}/details`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${student._id || student.id}/details`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -329,7 +330,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   // Update Role
   const handleUpdateRole = async (userId, newRole) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/users/${userId}/role`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ role: newRole }),
@@ -350,7 +351,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   const handleDeleteUser = async (userId, userName) => {
     if (!window.confirm(`Delete user "${userName}"?`)) return
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -369,8 +370,8 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
     e.preventDefault()
     try {
       const url = editingQuestion
-        ? `http://localhost:3001/api/admin/questions/${editingQuestion._id || editingQuestion.id}`
-        : 'http://localhost:3001/api/admin/questions'
+        ? `${API_BASE_URL}/api/admin/questions/${editingQuestion._id || editingQuestion.id}`
+        : `${API_BASE_URL}/api/admin/questions`
       const method = editingQuestion ? 'PUT' : 'POST'
 
       const res = await fetch(url, {
@@ -397,7 +398,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
   const handleDeleteQuestion = async (qId) => {
     if (!window.confirm('Delete this question from bank?')) return
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/questions/${qId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/questions/${qId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -415,7 +416,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
     if (!selectedKbFile) return
     setIsSavingKb(true)
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/knowledge-base/${selectedKbFile.name}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/knowledge-base/${selectedKbFile.name}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ content: kbContent }),
@@ -436,7 +437,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
     setIsRebuildingChroma(true)
     setChromaStatusMsg('Triggering ChromaDB index rebuild via Python service...')
     try {
-      const res = await fetch('http://localhost:3001/api/admin/knowledge-base/rebuild', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/knowledge-base/rebuild`, {
         method: 'POST',
         headers: getAuthHeaders(),
       })
@@ -460,7 +461,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
     if (!ragQuery.trim()) return
     setIsSearchingRag(true)
     try {
-      const res = await fetch('http://localhost:3001/api/admin/rag/test-search', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/rag/test-search`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ query: ragQuery, topK: 3 }),
@@ -481,7 +482,7 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
     if (!sandboxUserPrompt.trim()) return
     setIsSandboxRunning(true)
     try {
-      const res = await fetch('http://localhost:3001/api/admin/ai/sandbox', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/ai/sandbox`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({

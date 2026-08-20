@@ -9,6 +9,8 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
+const PYTHON_SERVICE_URL = (process.env.PYTHON_SERVICE_URL || 'http://localhost:8000').replace(/\/+$/, '')
+
 // =========================================================================
 // 1. POST /api/ai/chat — RAG AI Study Assistant Powered by Python RAG & Groq
 // =========================================================================
@@ -22,7 +24,7 @@ router.post('/chat', async (req, res) => {
 
     // 1. Primary: Forward to Python RAG & Semantic Retrieval Microservice
     try {
-      const pyRes = await fetch('http://localhost:8000/rag/chat', {
+      const pyRes = await fetch(`${PYTHON_SERVICE_URL}/rag/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -248,7 +250,7 @@ router.post('/roadmap/generate', async (req, res) => {
         verifiedScore: score,
       }))
 
-      const pyAgentRes = await fetch('http://localhost:8000/agent/plan', {
+      const pyAgentRes = await fetch(`${PYTHON_SERVICE_URL}/agent/plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -286,7 +288,7 @@ router.post('/roadmap/generate', async (req, res) => {
     // 2. Secondary Engine: Direct Skill Analyzer & ChromaDB Search
     if (!generatedRoadmapText) {
       try {
-        const pyRes = await fetch('http://localhost:8000/analyze', {
+        const pyRes = await fetch(`${PYTHON_SERVICE_URL}/analyze`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -392,7 +394,7 @@ router.post('/agent/analyze', async (req, res) => {
 
     // Forward to Python LangGraph Agent service
     try {
-      const pyRes = await fetch('http://localhost:8000/agent/plan', {
+      const pyRes = await fetch(`${PYTHON_SERVICE_URL}/agent/plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

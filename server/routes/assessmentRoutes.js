@@ -1,5 +1,6 @@
 import express from 'express'
 import Profile from '../models/Profile.js'
+import User from '../models/User.js'
 
 const router = express.Router()
 
@@ -322,12 +323,31 @@ router.post('/submit', async (req, res) => {
 
     // Persist result to MongoDB Profile if user email or ID provided
     if (email || userId) {
-      const filter = userId ? { userId } : { email: email.toLowerCase().trim() }
-      let profile = await Profile.findOne(filter)
+      let targetUserId = userId
+      const cleanEmail = email ? email.toLowerCase().trim() : 'student@nust.edu.pk'
+
+      let user = null
+      if (targetUserId) {
+        user = await User.findById(targetUserId).catch(() => null)
+      }
+      if (!user && cleanEmail) {
+        user = await User.findOne({ email: cleanEmail })
+      }
+      if (!user) {
+        user = await User.create({
+          name: 'Scholar Student',
+          email: cleanEmail,
+          password: 'temp_password_' + Date.now(),
+          role: 'student',
+          isVerified: true,
+        })
+      }
+      targetUserId = user._id
+
+      let profile = await Profile.findOne({ userId: targetUserId })
       if (!profile) {
         profile = new Profile({
-          email: email ? email.toLowerCase().trim() : 'student@nust.edu.pk',
-          userId: userId || undefined,
+          userId: targetUserId,
           university: 'NUST',
           degree: 'BS Computer Science',
           yearOfStudy: 3,

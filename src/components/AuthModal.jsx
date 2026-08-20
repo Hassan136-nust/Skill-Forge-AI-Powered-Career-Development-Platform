@@ -73,6 +73,8 @@ export default function AuthModal({
     }
   }, [isOpen, initialMode, initialData])
 
+
+
   // OTP
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
 
@@ -314,7 +316,21 @@ export default function AuthModal({
       }
 
       const savedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      completeAuth(localStorage.getItem('skillforge_token'), savedUser, 'SCHOLAR PROFILE UPDATED SUCCESSFULLY!')
+      const mergedUser = {
+        ...savedUser,
+        name: savedUser.name || fullName || 'Scholar Student',
+        email: email || savedUser.email,
+        careerGoal: targetRole,
+        university,
+        degree,
+        yearOfStudy,
+        experienceLevel,
+        skills,
+        projects: githubRepos,
+      }
+      localStorage.setItem('skillforge_user', JSON.stringify(mergedUser))
+      localStorage.setItem('skillforge_career_goal', targetRole)
+      completeAuth(localStorage.getItem('skillforge_token'), mergedUser, 'SCHOLAR PROFILE CONFIGURED! LAUNCHING DASHBOARD...')
     } catch (err) {
       setErrorMessage(err.message)
     } finally {
@@ -346,43 +362,77 @@ export default function AuthModal({
     }
   }
 
-  // Google OAuth Direct One-Click Auth
-  const handleGoogleAuth = async () => {
+  // Verify Google ID token with our backend
+  const handleGoogleCredential = async (idToken) => {
     setErrorMessage('')
-    setInfoMessage('Authenticating with Google Identity...')
+    setInfoMessage('Verifying Google identity...')
     setIsLoading(true)
-
     try {
-      const googleUserEmail = email || (fullName ? `${fullName.toLowerCase().replace(/\s+/g, '')}@gmail.com` : 'scholar.student@gmail.com')
-      const googleUserName = fullName || 'Scholar Student'
-
       const res = await fetch(`${API_BASE}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: googleUserEmail,
-          name: googleUserName,
-          googleId: 'google_oauth_' + Date.now(),
-          picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-        }),
+        body: JSON.stringify({ credential: idToken }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Google authentication failed')
 
-      if (data.token) {
-        localStorage.setItem('skillforge_token', data.token)
-        localStorage.setItem('skillforge_user', JSON.stringify(data.user))
-      }
+      localStorage.setItem('skillforge_token', data.token)
+      localStorage.setItem('skillforge_user', JSON.stringify(data.user))
 
-      setEmail(googleUserEmail)
-      setFullName(googleUserName)
-      setInfoMessage('Google authenticated! Complete your scholar profile.')
-      setMode('profile_setup')
+      setEmail(data.user.email || '')
+      setFullName(data.user.name || '')
+
+      if (data.isNewUser) {
+        setInfoMessage('Google account verified! Complete your scholar profile.')
+        setMode('profile_setup')
+      } else {
+        completeAuth(data.token, data.user, `WELCOME BACK, ${data.user?.name?.toUpperCase() || 'SCHOLAR'}!`)
+      }
     } catch (err) {
       setErrorMessage(err.message)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Open real Google OAuth popup — no JavaScript origins required, uses redirect_uri flow
+  const handleGoogleAuth = () => {
+    setErrorMessage('')
+    const CLIENT_ID = '49288154829-jlf7pr3u05nugthtldts6rh3evluhh36.apps.googleusercontent.com'
+    const REDIRECT_URI = encodeURIComponent(`${window.location.origin}`)
+    const nonce = Math.random().toString(36).substring(2, 18)
+    const scope = encodeURIComponent('openid email profile')
+
+    const authUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth` +
+      `?client_id=${CLIENT_ID}` +
+      `&redirect_uri=${REDIRECT_URI}` +
+      `&response_type=id_token` +
+      `&scope=${scope}` +
+      `&nonce=${nonce}` +
+      `&prompt=select_account`
+
+    const popup = window.open(authUrl, 'google-oauth', 'width=520,height=620,scrollbars=yes,resizable=yes,left=400,top=100')
+
+    // Listen for postMessage from the popup (sent by App.jsx on callback)
+    const handleMessage = (event) => {
+      if (event.origin !== window.location.origin) return
+      if (event.data?.type === 'google-auth-token' && event.data.idToken) {
+        window.removeEventListener('message', handleMessage)
+        clearInterval(closedCheck)
+        handleGoogleCredential(event.data.idToken)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+
+    // Cleanup if user closes popup without completing auth
+    const closedCheck = setInterval(() => {
+      if (popup?.closed) {
+        clearInterval(closedCheck)
+        window.removeEventListener('message', handleMessage)
+        setIsLoading(false)
+      }
+    }, 800)
   }
 
   // Universal card wheel handler so scrolling anywhere over characters/card scrolls the center form

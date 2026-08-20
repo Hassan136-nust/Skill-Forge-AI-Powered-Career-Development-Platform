@@ -226,37 +226,55 @@ export const resendOtp = async (req, res) => {
   }
 }
 
-// @desc    Seamless Google OAuth Login / Registration (Direct, no OTP)
+// @desc    Seamless Google OAuth Login / Registration (Real ID Token Verification)
 // @route   POST /api/auth/google
 // @access  Public
 export const googleAuth = async (req, res) => {
   try {
-    const { email, name, picture, googleId } = req.body
+    const { credential, email: fallbackEmail, name: fallbackName, picture: fallbackPicture, googleId: fallbackGId } = req.body
 
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Google authentication requires email' })
+    let googleEmail, googleName, googlePicture, googleId, isNewUser = false
+
+    if (credential) {
+      // Verify real Google ID token
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      })
+      const payload = ticket.getPayload()
+      googleEmail = payload.email
+      googleName = payload.name
+      googlePicture = payload.picture
+      googleId = payload.sub
+    } else if (fallbackEmail) {
+      // Legacy / direct call (kept for backwards compat)
+      googleEmail = fallbackEmail
+      googleName = fallbackName || 'Google Scholar'
+      googlePicture = fallbackPicture || ''
+      googleId = fallbackGId || 'g_' + Date.now()
+    } else {
+      return res.status(400).json({ success: false, message: 'Google credential or email is required' })
     }
 
-    let user = await User.findOne({ email: email.toLowerCase() })
+    let user = await User.findOne({ email: googleEmail.toLowerCase() })
 
     if (!user) {
-      // Direct registration via Google
+      isNewUser = true
       user = await User.create({
-        name: name || 'Google Scholar',
-        email: email.toLowerCase(),
-        googleId: googleId || 'g_' + Date.now(),
-        avatar: picture || '',
+        name: googleName || 'Google Scholar',
+        email: googleEmail.toLowerCase(),
+        googleId,
+        avatar: googlePicture || '',
         isVerified: true,
         role: 'student',
       })
-
       await Profile.create({
         userId: user._id,
         careerGoal: 'AI Engineer',
       })
     } else {
       if (googleId) user.googleId = googleId
-      if (picture && !user.avatar) user.avatar = picture
+      if (googlePicture && !user.avatar) user.avatar = googlePicture
       user.isVerified = true
       await user.save()
     }
@@ -266,8 +284,9 @@ export const googleAuth = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Google login successful',
+      message: isNewUser ? 'Google registration successful' : 'Google login successful',
       token,
+      isNewUser,
       user: {
         id: user._id,
         name: user.name,

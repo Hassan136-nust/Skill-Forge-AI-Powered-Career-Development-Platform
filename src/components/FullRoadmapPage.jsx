@@ -32,24 +32,45 @@ const TRACK_ROADMAPS_FALLBACK = {
   ]
 }
 
-export default function FullRoadmapPage({
-  onBackToDashboard,
-  studentProfile: initialProfile,
-  aiGeneratedMilestones: initialMilestones,
-  onTriggerFastGenAi,
-  onTriggerAgent
-}) {
-  const [studentProfile, setStudentProfile] = useState(initialProfile || {
-    name: 'Scholar Student',
-    email: 'student@nust.edu.pk',
-    careerGoal: 'AI Engineer',
-    skills: []
+// User-Scoped LocalStorage Helper
+const getUserScopedKey = (baseKey, overrideUser = null) => {
+  try {
+    const u = overrideUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    const id = u?.email || u?._id || u?.id
+    if (!id) return baseKey
+    const cleanId = String(id).toLowerCase().replace(/[^a-z0-9]/g, '_')
+    return `${baseKey}_${cleanId}`
+  } catch {
+    return baseKey
+  }
+}
+
+export default function FullRoadmapPage({ onBackToDashboard, initialMilestones = null }) {
+  const [studentProfile, setStudentProfile] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      return {
+        name: stored?.name || 'Scholar Student',
+        email: stored?.email || '',
+        careerGoal: stored?.careerGoal || 'AI Engineer',
+        skills: stored?.skills || []
+      }
+    } catch {
+      return {
+        name: 'Scholar Student',
+        email: '',
+        careerGoal: 'AI Engineer',
+        skills: []
+      }
+    }
   })
 
   const [milestones, setMilestones] = useState(() => {
     if (initialMilestones && initialMilestones.length > 0) return initialMilestones
     try {
-      const cached = JSON.parse(localStorage.getItem('skillforge_current_milestones') || 'null')
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      const userKey = getUserScopedKey('skillforge_current_milestones', storedUser)
+      const cached = JSON.parse(localStorage.getItem(userKey) || 'null')
       if (cached && cached.length > 0) return cached
     } catch {}
     return TRACK_ROADMAPS_FALLBACK['AI Engineer']
@@ -57,7 +78,9 @@ export default function FullRoadmapPage({
 
   const [completedTasks, setCompletedTasks] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      const userKey = getUserScopedKey('skillforge_completed_tasks', storedUser)
+      return JSON.parse(localStorage.getItem(userKey) || '[]')
     } catch {
       return []
     }
@@ -70,8 +93,8 @@ export default function FullRoadmapPage({
   // Sync profile & completedTasks from localStorage and backend
   useEffect(() => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      if (storedUser.name) {
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (storedUser?.name) {
         setStudentProfile(prev => ({
           ...prev,
           name: storedUser.name,
@@ -80,14 +103,18 @@ export default function FullRoadmapPage({
         }))
       }
 
-      const cachedTasks = JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
-      if (Array.isArray(cachedTasks)) {
-        setCompletedTasks(cachedTasks)
-      }
+      if (storedUser) {
+        const userTaskKey = getUserScopedKey('skillforge_completed_tasks', storedUser)
+        const cachedTasks = JSON.parse(localStorage.getItem(userTaskKey) || '[]')
+        if (Array.isArray(cachedTasks)) {
+          setCompletedTasks(cachedTasks)
+        }
 
-      const cachedMilestones = JSON.parse(localStorage.getItem('skillforge_current_milestones') || 'null')
-      if (cachedMilestones && cachedMilestones.length > 0) {
-        setMilestones(cachedMilestones)
+        const userMsKey = getUserScopedKey('skillforge_current_milestones', storedUser)
+        const cachedMilestones = JSON.parse(localStorage.getItem(userMsKey) || 'null')
+        if (cachedMilestones && cachedMilestones.length > 0) {
+          setMilestones(cachedMilestones)
+        }
       }
     } catch (e) {}
   }, [])
@@ -96,11 +123,17 @@ export default function FullRoadmapPage({
   useEffect(() => {
     const handleStorageChange = () => {
       try {
-        const cachedTasks = JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
-        setCompletedTasks(cachedTasks)
-        const cachedMilestones = JSON.parse(localStorage.getItem('skillforge_current_milestones') || 'null')
-        if (cachedMilestones && cachedMilestones.length > 0) {
-          setMilestones(cachedMilestones)
+        const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+        if (storedUser) {
+          const userTaskKey = getUserScopedKey('skillforge_completed_tasks', storedUser)
+          const cachedTasks = JSON.parse(localStorage.getItem(userTaskKey) || '[]')
+          setCompletedTasks(cachedTasks)
+
+          const userMsKey = getUserScopedKey('skillforge_current_milestones', storedUser)
+          const cachedMilestones = JSON.parse(localStorage.getItem(userMsKey) || 'null')
+          if (cachedMilestones && cachedMilestones.length > 0) {
+            setMilestones(cachedMilestones)
+          }
         }
       } catch (e) {}
     }
@@ -156,7 +189,7 @@ export default function FullRoadmapPage({
       : [...completedTasks, taskId]
 
     setCompletedTasks(updated)
-    localStorage.setItem('skillforge_completed_tasks', JSON.stringify(updated))
+    localStorage.setItem(getUserScopedKey('skillforge_completed_tasks'), JSON.stringify(updated))
 
     try {
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')

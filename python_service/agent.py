@@ -13,14 +13,19 @@ Implements:
 import os
 from typing import Dict, List, Any
 from groq import Groq
+from dotenv import load_dotenv
+
+# Load environment variables from project root .env
+load_dotenv("/home/hassan/Downloads/my-app/.env")
+load_dotenv()
+
 from skill_analyzer import SkillAnalyzer
 from roadmap_generator import RoadmapGenerator
 from vectorstore import vector_store  # ChromaDB singleton
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
-
 def get_groq_client() -> Groq:
-    return Groq(api_key=GROQ_API_KEY)
+    key = os.getenv("GROQ_API_KEY", "")
+    return Groq(api_key=key)
 
 
 # =========================================================================

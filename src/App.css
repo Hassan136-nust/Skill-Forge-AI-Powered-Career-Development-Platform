@@ -35,7 +35,7 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at center, transparent 30%, rgba(3, 4, 8, 0.4) 100%),
-              linear-gradient(180deg, rgba(5, 7, 18, 0.5) 0%, transparent 20%, transparent 80%, rgba(5, 7, 18, 0.7) 100%);
+    linear-gradient(180deg, rgba(5, 7, 18, 0.5) 0%, transparent 20%, transparent 80%, rgba(5, 7, 18, 0.7) 100%);
   pointer-events: none;
   z-index: 2;
 }
@@ -60,7 +60,7 @@
 
 /* Extended Scroll Track */
 .scroll-track {
-  height: 400vh;
+  height: 600vh;
   width: 100%;
   pointer-events: none;
   visibility: hidden;
@@ -88,7 +88,7 @@
 
 @media (max-width: 860px) {
   .scroll-track {
-    height: 350vh;
+    height: 500vh;
   }
 }
 
@@ -189,7 +189,7 @@
   position: fixed;
   inset: 0;
   background: radial-gradient(circle at 50% 30%, rgba(123, 47, 247, 0.18) 0%, rgba(8, 9, 20, 0.85) 75%),
-              linear-gradient(180deg, rgba(8, 9, 20, 0.6) 0%, rgba(8, 9, 20, 0.95) 100%);
+    linear-gradient(180deg, rgba(8, 9, 20, 0.6) 0%, rgba(8, 9, 20, 0.95) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -838,6 +838,7 @@
   .full-roadmap-hud-banner {
     grid-template-columns: 1fr 1fr;
   }
+
   .hud-progress-wide {
     grid-column: span 2;
   }

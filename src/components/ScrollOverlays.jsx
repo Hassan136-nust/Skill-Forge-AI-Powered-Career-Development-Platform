@@ -35,7 +35,7 @@ export default function ScrollOverlays({ progress }) {
           <span>SECTOR 03 // TRAJECTORY MATRIX</span>
         </div>
         <h2 className="cinematic-title bungee-regular">
-          FORGE YOUR <span className="highlight-cyan">DESTINY.</span>
+          FORGE YOUR <span style={{ color: "#FFD166" }}>DESTINY.</span>
         </h2>
         <p className="cinematic-subtext">
           Generative AI roadmaps translating missing skills into step-by-step capstone projects and production milestones.

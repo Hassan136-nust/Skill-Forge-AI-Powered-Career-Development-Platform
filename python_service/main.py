@@ -8,6 +8,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+import os
+from dotenv import load_dotenv
+
+load_dotenv("/home/hassan/Downloads/my-app/.env")
+load_dotenv()
 
 from skill_analyzer import SkillAnalyzer
 from roadmap_generator import RoadmapGenerator

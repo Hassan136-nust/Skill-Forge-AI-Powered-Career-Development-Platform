@@ -382,16 +382,46 @@ const getQuizForSkill = (skillName) => {
   }
 }
 
+// User-Scoped LocalStorage Helper to ensure strict 100% per-user data isolation
+const getUserScopedKey = (baseKey, overrideUser = null) => {
+  try {
+    const u = overrideUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    const id = u?.email || u?._id || u?.id
+    if (!id) return baseKey
+    const cleanId = String(id).toLowerCase().replace(/[^a-z0-9]/g, '_')
+    return `${baseKey}_${cleanId}`
+  } catch {
+    return baseKey
+  }
+}
+
 export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, onOpenAiMentor }) {
   const DEFAULT_AVATAR = 'https://imgs.search.brave.com/en8GueUwEke4A7ecDjpRnIpFR8Y-WWOEbjzD2xCNTu0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn'
 
   const [studentProfile, setStudentProfile] = useState(() => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      const savedGoal = localStorage.getItem('skillforge_career_goal') || storedUser.careerGoal || 'AI Engineer'
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (!storedUser) {
+        return {
+          name: 'Scholar Student',
+          email: '',
+          university: 'NUST',
+          degree: 'BS Computer Science',
+          yearOfStudy: 3,
+          experienceLevel: 'intermediate',
+          careerGoal: 'AI Engineer',
+          avatar: DEFAULT_AVATAR,
+          githubUser: '',
+          reposCount: 0,
+          skills: [],
+          projects: [],
+        }
+      }
+      const userGoalKey = getUserScopedKey('skillforge_career_goal', storedUser)
+      const savedGoal = localStorage.getItem(userGoalKey) || storedUser.careerGoal || 'AI Engineer'
       return {
         name: storedUser.name || 'Scholar Student',
-        email: storedUser.email || 'student@nust.edu.pk',
+        email: storedUser.email || '',
         university: storedUser.university || 'NUST',
         degree: storedUser.degree || 'BS Computer Science',
         yearOfStudy: storedUser.yearOfStudy || 3,
@@ -400,13 +430,13 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
         avatar: storedUser.avatar || DEFAULT_AVATAR,
         githubUser: storedUser.githubUser || '',
         reposCount: 0,
-        skills: [],
-        projects: [],
+        skills: storedUser.skills || [],
+        projects: storedUser.projects || [],
       }
     } catch {
       return {
         name: 'Scholar Student',
-        email: 'student@nust.edu.pk',
+        email: '',
         university: 'NUST',
         degree: 'BS Computer Science',
         yearOfStudy: 3,
@@ -423,44 +453,63 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showRepos, setShowRepos] = useState(false)
-  const [skillScores, setSkillScores] = useState({})
+  
+  // User-Isolated Skill Scores (0/100 default for new users)
+  const [skillScores, setSkillScores] = useState(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (!storedUser) return {}
+      const key = getUserScopedKey('skillforge_scores', storedUser)
+      return JSON.parse(localStorage.getItem(key) || '{}')
+    } catch {
+      return {}
+    }
+  })
+
   const [activeMilestone, setActiveMilestone] = useState(2)
+
+  // User-Isolated Completed Tasks
   const [completedTasks, setCompletedTasks] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (!storedUser) return []
+      const key = getUserScopedKey('skillforge_completed_tasks', storedUser)
+      return JSON.parse(localStorage.getItem(key) || '[]')
     } catch {
       return []
     }
   })
 
-  // Load profile from MongoDB Atlas API & LocalStorage Cache
+  // Load profile from MongoDB Atlas API & LocalStorage Cache with strict User Isolation
   const loadProfile = async () => {
     try {
-      const cachedScores = JSON.parse(localStorage.getItem('skillforge_scores') || '{}')
-      if (Object.keys(cachedScores).length > 0) {
-        setSkillScores((prev) => ({ ...prev, ...cachedScores }))
-      }
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (!storedUser || !storedUser.email) return
 
-      const cachedTasks = JSON.parse(localStorage.getItem('skillforge_completed_tasks') || '[]')
-      if (Array.isArray(cachedTasks) && cachedTasks.length > 0) {
-        setCompletedTasks(cachedTasks)
-      }
+      const userScoresKey = getUserScopedKey('skillforge_scores', storedUser)
+      const userTasksKey = getUserScopedKey('skillforge_completed_tasks', storedUser)
+      const userGoalKey = getUserScopedKey('skillforge_career_goal', storedUser)
 
-      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      const userEmail = storedUser.email || 'student@nust.edu.pk'
-      const savedGoal = localStorage.getItem('skillforge_career_goal') || storedUser.careerGoal
+      const cachedScores = JSON.parse(localStorage.getItem(userScoresKey) || '{}')
+      setSkillScores(cachedScores)
+
+      const cachedTasks = JSON.parse(localStorage.getItem(userTasksKey) || '[]')
+      setCompletedTasks(cachedTasks)
+
+      const userEmail = storedUser.email
+      const savedGoal = localStorage.getItem(userGoalKey) || storedUser.careerGoal
 
       if (storedUser.name) {
         setStudentProfile((prev) => ({
           ...prev,
           name: storedUser.name,
-          email: storedUser.email || prev.email,
+          email: storedUser.email,
           avatar: storedUser.avatar || prev.avatar || DEFAULT_AVATAR,
           careerGoal: savedGoal || prev.careerGoal,
         }))
       }
 
-      const res = await fetch(`http://localhost:3001/api/profile/${storedUser._id || userEmail}`)
+      const res = await fetch(`http://localhost:3001/api/profile/${storedUser._id || encodeURIComponent(userEmail)}`)
       if (res.ok) {
         const data = await res.json()
         if (data.profile) {
@@ -480,27 +529,47 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             reposCount: p.projects?.length || 0,
           }))
 
-          if (Array.isArray(p.completedTasks)) {
-            const merged = Array.from(new Set([...cachedTasks, ...p.completedTasks]))
-            setCompletedTasks(merged)
-            localStorage.setItem('skillforge_completed_tasks', JSON.stringify(merged))
-          }
+          // Strict DB syncing: Only this user's completed tasks
+          const dbTasks = Array.isArray(p.completedTasks) ? p.completedTasks : []
+          setCompletedTasks(dbTasks)
+          localStorage.setItem(userTasksKey, JSON.stringify(dbTasks))
 
-          const mergedScores = { ...cachedScores }
+          // Strict DB syncing: Only this user's verified scores
+          const verifiedScores = { ...cachedScores }
           if (Array.isArray(p.skills)) {
             p.skills.forEach((s) => {
               if (s && s.name) {
                 const sKey = s.name.toLowerCase()
-                if (s.isVerified && typeof s.verifiedScore === 'number') {
-                  mergedScores[sKey] = s.verifiedScore
+                if (typeof s.verifiedScore === 'number' && s.verifiedScore > 0) {
+                  verifiedScores[sKey] = s.verifiedScore
+                } else if (s.isVerified && typeof s.verifiedScore === 'number') {
+                  verifiedScores[sKey] = s.verifiedScore
+                } else if (s.isVerified) {
+                  verifiedScores[sKey] = 80
                 }
               }
             })
           }
-          setSkillScores(mergedScores)
-          localStorage.setItem('skillforge_scores', JSON.stringify(mergedScores))
+
+          try {
+            const assessRes = await fetch(`http://localhost:3001/api/assessment/results/${encodeURIComponent(userEmail)}`)
+            if (assessRes.ok) {
+              const assessData = await assessRes.json()
+              if (assessData.scores && typeof assessData.scores === 'object') {
+                Object.entries(assessData.scores).forEach(([sk, sc]) => {
+                  if (typeof sc === 'number' && sc > 0) {
+                    verifiedScores[sk.toLowerCase()] = sc
+                  }
+                })
+              }
+            }
+          } catch {}
+
+          setSkillScores(verifiedScores)
+          localStorage.setItem(userScoresKey, JSON.stringify(verifiedScores))
+
           if (resolvedGoal) {
-            loadRoadmapHistory(resolvedGoal)
+            loadRoadmapHistory(resolvedGoal, userEmail)
           }
         }
       }
@@ -558,7 +627,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
       : [...completedTasks, taskId]
 
     setCompletedTasks(updated)
-    localStorage.setItem('skillforge_completed_tasks', JSON.stringify(updated))
+    localStorage.setItem(getUserScopedKey('skillforge_completed_tasks'), JSON.stringify(updated))
 
     try {
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
@@ -591,16 +660,19 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
   const [pdfGeneratingId, setPdfGeneratingId] = useState(null)
   const [activePdfRoadmap, setActivePdfRoadmap] = useState(null)
   
-  // Persistent AI-generated milestones initialized from localStorage so refresh never resets it
+  // Persistent AI-generated milestones initialized from user-scoped localStorage
   const [aiGeneratedMilestones, setAiGeneratedMilestones] = useState(() => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (!storedUser) return null
       const targetRole = (storedUser.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
-      const cachedRoleRoadmap = JSON.parse(localStorage.getItem(`skillforge_roadmap_${targetRole}`) || 'null')
+      const userRoadmapRoleKey = getUserScopedKey(`skillforge_roadmap_${targetRole}`, storedUser)
+      const cachedRoleRoadmap = JSON.parse(localStorage.getItem(userRoadmapRoleKey) || 'null')
       if (Array.isArray(cachedRoleRoadmap) && cachedRoleRoadmap.length > 0) {
         return cachedRoleRoadmap
       }
-      const genericCached = JSON.parse(localStorage.getItem('skillforge_current_milestones') || 'null')
+      const genericKey = getUserScopedKey('skillforge_current_milestones', storedUser)
+      const genericCached = JSON.parse(localStorage.getItem(genericKey) || 'null')
       if (Array.isArray(genericCached) && genericCached.length > 0) {
         return genericCached
       }
@@ -608,19 +680,21 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
     return null
   })
 
-  // Helper to keep state and localStorage strictly synchronized per career track
+  // Helper to keep state and localStorage strictly synchronized per career track and user
   const saveAndSetMilestones = (ms, role = null) => {
+    const currentRole = (role || studentProfile.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
+    const genericKey = getUserScopedKey('skillforge_current_milestones')
+    const roleKey = getUserScopedKey(`skillforge_roadmap_${currentRole}`)
+
     if (!ms || ms.length === 0) {
       setAiGeneratedMilestones(null)
-      localStorage.removeItem('skillforge_current_milestones')
-      const currentRole = (role || studentProfile.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
-      localStorage.removeItem(`skillforge_roadmap_${currentRole}`)
+      localStorage.removeItem(genericKey)
+      localStorage.removeItem(roleKey)
       return
     }
     setAiGeneratedMilestones(ms)
-    localStorage.setItem('skillforge_current_milestones', JSON.stringify(ms))
-    const currentRole = (role || studentProfile.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
-    localStorage.setItem(`skillforge_roadmap_${currentRole}`, JSON.stringify(ms))
+    localStorage.setItem(genericKey, JSON.stringify(ms))
+    localStorage.setItem(roleKey, JSON.stringify(ms))
   }
 
   // =========================================================================
@@ -708,6 +782,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
       body: JSON.stringify({
         profile: {
           name: studentProfile.name,
+          email: studentProfile.email,
           degree: studentProfile.degree,
           yearOfStudy: studentProfile.yearOfStudy,
           experienceLevel: studentProfile.experienceLevel,
@@ -723,51 +798,57 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
         return null
       })
 
-    // Sequential Animated Slide Transition across all 4 visual character stages
+    // Sequential Animated Realistic Pacing across all 4 visual character stages
+    // Node 0: Skill Profiler (0s - 4.5s)
     setTimeout(() => {
-      setAgentCurrentNodeIndex(1) // Stage 1: left.png
-    }, 2200)
+      setAgentCurrentNodeIndex(1) // Node 1: ChromaDB Semantic Knowledge Retriever (4.5s - 9.0s)
+    }, 4500)
 
+    // Node 1: Knowledge Retriever (4.5s - 9.0s)
     setTimeout(() => {
-      setAgentCurrentNodeIndex(2) // Stage 2: hard.png
-    }, 4400)
+      setAgentCurrentNodeIndex(2) // Node 2: ReAct Multi-Stage Planner (9.0s - 13.5s)
+    }, 9000)
 
+    // Node 2: ReAct Agent Planner (9.0s - 13.5s)
     setTimeout(() => {
-      setAgentCurrentNodeIndex(3) // Stage 3: last.png
-    }, 6600)
+      setAgentCurrentNodeIndex(3) // Node 3: Groq LLM Master Synthesizer (13.5s - 18.0s)
+    }, 13500)
 
+    // Node 3: Final Synthesis -> Reveal Verified Report (18.0s)
     setTimeout(async () => {
       const data = await agentPromise
-      if (data && data.agentAnalysis) {
+      if (data && (data.agentAnalysis || data.roadmap)) {
         setAgentFinalReport(data)
-        const parsed = parseMilestonesFromRoadmapText(data.agentAnalysis)
-        let ms = parsed && parsed.length > 0 ? parsed : null
-        if (!ms && data.roadmap && data.roadmap.steps) {
+        let ms = null
+        if (data.roadmap && data.roadmap.steps && data.roadmap.steps.length > 0) {
           ms = data.roadmap.steps.map((st, sIdx) => ({
             step: String(sIdx + 1).padStart(2, '0'),
-            title: st.title.toUpperCase(),
-            desc: st.topic || st.title,
+            title: (st.title || `Milestone ${sIdx + 1}`).toUpperCase(),
+            desc: st.topic || st.title || '',
             topics: st.topic || '',
             resources: (st.resources || []).join(', '),
             capstone: st.project || `Capstone ${sIdx + 1}`,
             tech: (st.tech || 'python').toLowerCase(),
           }))
+        } else if (data.agentAnalysis) {
+          ms = parseMilestonesFromRoadmapText(data.agentAnalysis)
         }
+
         if (ms && ms.length > 0) {
           saveAndSetMilestones(ms, studentProfile.careerGoal)
         }
-        loadRoadmapHistory() // Sync into Previous History list immediately!
+        loadRoadmapHistory(studentProfile.careerGoal, studentProfile.email) // Sync into Previous History list immediately!
       } else {
         setAgentFinalReport({
           success: true,
           careerGoal: studentProfile.careerGoal,
           agentAnalysis: `## Autonomous Career Strategy for ${studentProfile.careerGoal}\n\nAll 4 LangGraph StateGraph nodes executed successfully across SkillProfiler, KnowledgeRetriever, AgentPlanner, and RoadmapSynthesizer.`,
         })
-        loadRoadmapHistory()
+        loadRoadmapHistory(studentProfile.careerGoal, studentProfile.email)
       }
       setIsAgentExecuting(false)
       setAgentCurrentNodeIndex(4) // Reveal Final Verified Report!
-    }, 8800)
+    }, 18000)
   }
 
   // Helper: Client-side robust milestone extractor for any generated roadmap text
@@ -835,9 +916,12 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
   }
 
   // Fetch Previous Roadmaps History from MongoDB Atlas and auto-apply recent roadmap for target career track
-  const loadRoadmapHistory = async (roleOverride = null) => {
+  const loadRoadmapHistory = async (roleOverride = null, emailOverride = null) => {
     try {
-      const email = studentProfile.email || 'student@nust.edu.pk'
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      const email = emailOverride || studentProfile.email || storedUser?.email
+      if (!email) return
+
       const activeRole = (roleOverride || studentProfile.careerGoal || 'AI Engineer').toLowerCase().trim()
       const res = await fetch(`http://localhost:3001/api/ai/roadmap/history/${encodeURIComponent(email)}`)
       if (res.ok) {
@@ -858,8 +942,13 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             }
             if (ms && ms.length > 0) {
               saveAndSetMilestones(ms, activeRole)
+              return
             }
           }
+        } else {
+          // Fresh user account with 0 generated roadmaps in history -> Reset to standard blueprint
+          setRoadmapHistoryList([])
+          saveAndSetMilestones(null, activeRole)
         }
       }
     } catch (e) {
@@ -1217,7 +1306,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
     setSkillScores((prev) => {
       const updated = { ...prev, [sKey]: finalScore }
-      localStorage.setItem('skillforge_scores', JSON.stringify(updated))
+      localStorage.setItem(getUserScopedKey('skillforge_scores'), JSON.stringify(updated))
       return updated
     })
 
@@ -1443,8 +1532,14 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
               e.currentTarget.style.boxShadow = 'none'
             }}
             onClick={() => {
-              localStorage.removeItem('skillforge_token')
-              localStorage.removeItem('skillforge_user')
+              try {
+                localStorage.removeItem('skillforge_token')
+                localStorage.removeItem('skillforge_user')
+                localStorage.removeItem('skillforge_scores')
+                localStorage.removeItem('skillforge_completed_tasks')
+                localStorage.removeItem('skillforge_current_milestones')
+                localStorage.removeItem('skillforge_career_goal')
+              } catch {}
               if (onExitDashboard) onExitDashboard()
             }}
             title="Sign Out of Session"
@@ -1515,7 +1610,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                   onChange={async (e) => {
                     const newRole = e.target.value
                     setStudentProfile((prev) => ({ ...prev, careerGoal: newRole }))
-                    localStorage.setItem('skillforge_career_goal', newRole)
+                    localStorage.setItem(getUserScopedKey('skillforge_career_goal'), newRole)
                     try {
                       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
                       localStorage.setItem('skillforge_user', JSON.stringify({ ...storedUser, careerGoal: newRole }))
@@ -3471,16 +3566,16 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                                 </span>
                               </div>
 
-                              <div data-lenis-prevent="true" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', overflowY: 'auto' }}>
+                              <div data-lenis-prevent="true" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', overflowY: 'auto' }}>
                                 {currentNode.logs.map((logLine, lIdx) => (
                                   <motion.div
                                     key={lIdx}
-                                    initial={{ opacity: 0, x: -10 }}
+                                    initial={{ opacity: 0, x: -12 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: lIdx * 0.35, duration: 0.3 }}
+                                    transition={{ delay: lIdx * 0.95, duration: 0.4 }}
                                     style={{
                                       fontSize: '0.84rem',
-                                      color: logLine.includes('✓') ? '#27C93F' : logLine.includes('⚡') ? '#FFD166' : '#E2E8F0',
+                                      color: logLine.includes('✓') || logLine.includes('COMPLETE') ? '#27C93F' : logLine.includes('⚡') || logLine.includes('GROQ') ? '#FFD166' : '#E2E8F0',
                                       lineHeight: 1.5,
                                     }}
                                   >
@@ -3488,6 +3583,22 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                                     <span>{logLine}</span>
                                   </motion.div>
                                 ))}
+
+                                <motion.div
+                                  animate={{ opacity: [0.2, 1, 0.2] }}
+                                  transition={{ repeat: Infinity, duration: 1.1 }}
+                                  style={{
+                                    fontSize: '0.76rem',
+                                    color: '#00D2FF',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.45rem',
+                                    marginTop: '0.3rem',
+                                  }}
+                                >
+                                  <span style={{ display: 'inline-block', width: '6px', height: '13px', background: '#00D2FF' }} />
+                                  <span>Evaluating LangGraph tensor state...</span>
+                                </motion.div>
                               </div>
                             </div>
                           </div>
@@ -3654,17 +3765,22 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                             boxShadow: '0 4px 15px rgba(39, 201, 63, 0.3)',
                           }}
                           onClick={() => {
-                            if (agentFinalReport?.roadmap?.steps) {
-                              const ms = agentFinalReport.roadmap.steps.map((st, sIdx) => ({
+                            let ms = null
+                            if (agentFinalReport?.roadmap?.steps && agentFinalReport.roadmap.steps.length > 0) {
+                              ms = agentFinalReport.roadmap.steps.map((st, sIdx) => ({
                                 step: String(sIdx + 1).padStart(2, '0'),
-                                title: st.title.toUpperCase(),
-                                desc: st.topic || st.title,
+                                title: (st.title || `Milestone ${sIdx + 1}`).toUpperCase(),
+                                desc: st.topic || st.title || '',
                                 topics: st.topic || '',
                                 resources: (st.resources || []).join(', '),
                                 capstone: st.project || `Capstone ${sIdx + 1}`,
                                 tech: (st.tech || 'python').toLowerCase(),
                               }))
-                              setAiGeneratedMilestones(ms)
+                            } else if (agentFinalReport?.agentAnalysis) {
+                              ms = parseMilestonesFromRoadmapText(agentFinalReport.agentAnalysis)
+                            }
+                            if (ms && ms.length > 0) {
+                              saveAndSetMilestones(ms, studentProfile.careerGoal)
                             }
                             setIsAgentModalOpen(false)
                           }}

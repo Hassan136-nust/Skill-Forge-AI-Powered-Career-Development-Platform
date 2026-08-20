@@ -50,7 +50,7 @@ export default function App() {
     const isMentorRoute = path.endsWith('/mentor') || path.includes('/mentor')
     const isRoadmapRoute = path.endsWith('/roadmap') || path.includes('/roadmap')
     const isDashboardRoute = path.endsWith('/dashboard') || path.includes('/dashboard')
-    
+
     if (isMentorRoute) {
       setCurrentView('mentor')
     } else if (isRoadmapRoute) {
@@ -64,13 +64,24 @@ export default function App() {
 
   // Check existing session & sync URL route
   useEffect(() => {
+    // Handle Google OAuth popup callback (id_token in URL hash)
+    if (window.opener && window.location.hash.includes('id_token')) {
+      const params = new URLSearchParams(window.location.hash.substring(1))
+      const idToken = params.get('id_token')
+      if (idToken) {
+        window.opener.postMessage({ type: 'google-auth-token', idToken }, window.location.origin)
+        window.close()
+        return
+      }
+    }
+
     try {
       const token = localStorage.getItem('skillforge_token')
       const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
       if (token && user) {
         setCurrentUser(user)
       }
-    } catch (e) {}
+    } catch (e) { }
 
     syncViewFromUrl()
 
@@ -184,7 +195,7 @@ export default function App() {
 
     const updateScrollTarget = () => {
       const scrollY = window.scrollY || window.pageYOffset
-      const videoTrackHeight = window.innerHeight * 4
+      const videoTrackHeight = window.innerHeight * 5
       if (videoTrackHeight > 0) {
         const progress = Math.min(1, Math.max(0, scrollY / videoTrackHeight))
         targetProgress = progress
@@ -243,7 +254,7 @@ export default function App() {
 
   // Smooth scroll helper using Lenis
   const scrollToVideoProgress = (prog) => {
-    const videoTrackHeight = window.innerHeight * 4
+    const videoTrackHeight = window.innerHeight * 5
     if (lenisRef.current) {
       lenisRef.current.scrollTo(prog * videoTrackHeight, { duration: 1.4 })
     } else {
@@ -272,7 +283,7 @@ export default function App() {
   const handleOpenDashboard = () => {
     const token = localStorage.getItem('skillforge_token')
     const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-    
+
     if (token || user) {
       const targetUrl = getDashboardPathForUser(user || currentUser)
       window.history.pushState({}, '', targetUrl)

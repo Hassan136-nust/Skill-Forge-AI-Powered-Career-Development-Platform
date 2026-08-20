@@ -7,18 +7,24 @@ import User from '../models/User.js'
 export const getProfileByUserId = async (req, res) => {
   try {
     let profile = null
-    const param = req.params.userId
+    const param = decodeURIComponent(req.params.userId || '').trim()
 
     if (param.includes('@')) {
-      const user = await User.findOne({ email: param.toLowerCase().trim() })
+      const user = await User.findOne({ email: param.toLowerCase() })
       if (user) {
         profile = await Profile.findOne({ userId: user._id }).populate('userId', 'name email role avatar')
       }
-      if (!profile) {
-        profile = await Profile.findOne({ email: param.toLowerCase().trim() })
-      }
     } else {
-      profile = await Profile.findOne({ userId: param }).populate('userId', 'name email role avatar')
+      profile = await Profile.findOne({ userId: param }).populate('userId', 'name email role avatar').catch(() => null)
+      if (!profile) {
+        const user = await User.findById(param).catch(() => null)
+        if (user) {
+          profile = await Profile.findOne({ userId: user._id }).populate('userId', 'name email role avatar')
+        }
+      }
+      if (!profile) {
+        profile = await Profile.findById(param).populate('userId', 'name email role avatar').catch(() => null)
+      }
     }
 
     if (!profile) {

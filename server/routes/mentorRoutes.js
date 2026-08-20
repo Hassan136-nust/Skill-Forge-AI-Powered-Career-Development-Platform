@@ -9,7 +9,7 @@ import Roadmap from '../models/Roadmap.js'
 const router = express.Router()
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || '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',
+  apiKey: process.env.GROQ_API_KEY,
 })
 
 // Helper: Parse structured milestones from markdown table

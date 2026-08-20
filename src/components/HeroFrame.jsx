@@ -16,7 +16,7 @@ export default function HeroFrame({ visible, onStartJourney, onExploreMissions, 
 
           {/* Main Title with Bungee font */}
           <h1 className="hero-forge-title bungee-regular">
-            SKILLFORGE
+            <span style={{ color: "#FFD166" }}>SKILL</span>FORGE
           </h1>
 
           {/* Subtitle & PRD Problem/Solution description */}

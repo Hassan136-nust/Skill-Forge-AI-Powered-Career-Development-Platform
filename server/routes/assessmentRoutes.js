@@ -398,8 +398,26 @@ router.post('/submit', async (req, res) => {
 // GET /api/assessment/results/:userId — Retrieve assessment scores
 router.get('/results/:userId', async (req, res) => {
   try {
-    const { userId } = req.params
-    const profile = await Profile.findOne({ $or: [{ userId }, { email: userId }] })
+    const rawParam = decodeURIComponent(req.params.userId || '').trim()
+    let profile = null
+
+    if (rawParam.includes('@')) {
+      const user = await User.findOne({ email: rawParam.toLowerCase() })
+      if (user) {
+        profile = await Profile.findOne({ userId: user._id })
+      }
+    } else {
+      profile = await Profile.findOne({ userId: rawParam }).catch(() => null)
+      if (!profile) {
+        const user = await User.findById(rawParam).catch(() => null)
+        if (user) {
+          profile = await Profile.findOne({ userId: user._id })
+        }
+      }
+      if (!profile) {
+        profile = await Profile.findById(rawParam).catch(() => null)
+      }
+    }
 
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Profile not found' })
@@ -408,13 +426,15 @@ router.get('/results/:userId', async (req, res) => {
     const scores = {}
     if (Array.isArray(profile.skills)) {
       profile.skills.forEach((s) => {
-        scores[s.name.toLowerCase()] = s.isVerified ? (s.verifiedScore || 100) : 0
+        if (s && s.name) {
+          scores[s.name.toLowerCase()] = typeof s.verifiedScore === 'number' ? s.verifiedScore : (s.isVerified ? 80 : 0)
+        }
       })
     }
 
     res.json({
       success: true,
-      userId,
+      userId: rawParam,
       scores,
       profile,
     })

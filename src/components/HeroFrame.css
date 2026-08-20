@@ -91,15 +91,16 @@
   max-width: 700px;
 }
 
-/* Description in Soft Ivory */
+/* Description in High-Contrast Floating Warm Ivory (No Box) */
 .hero-forge-desc {
   font-family: var(--font-sans);
-  font-size: clamp(0.95rem, 1.4vw, 1.12rem);
+  font-size: clamp(0.98rem, 1.45vw, 1.18rem);
+  font-weight: 600;
   line-height: 1.65;
-  color: #F4F1EA;
-  max-width: 620px;
+  color: #FFF7E8;
+  max-width: 660px;
   margin: 0 auto 2rem auto;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 4px 16px rgba(0, 0, 0, 0.95), 0 0 25px rgba(0, 0, 0, 0.9);
 }
 
 /* Action Buttons with Solid Palette (No Gradients) */

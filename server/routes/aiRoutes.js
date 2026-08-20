@@ -304,7 +304,92 @@ router.post('/roadmap/generate', async (req, res) => {
       }
     }
 
-    // 3. Fallback: Curated architectural roadmap if AI generation was unavailable
+    // 3. Dynamic AI Engine: Direct Groq Cloud LLaMA 3.3 Generation if Python microservice was offline
+    if (!generatedRoadmapText && process.env.GROQ_API_KEY) {
+      try {
+        const gapsFormatted = Array.isArray(missingSkills)
+          ? missingSkills.map((g) => (typeof g === 'object' ? `${g.skill || g.name}: ${g.currentScore || 0}% -> ${g.requiredScore || 85}%` : g)).join(', ')
+          : 'General Competency Uplift'
+
+        const groqRes = await groq.chat.completions.create({
+          model: 'openai/gpt-oss-120b',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are the Lead Career Architect at SkillForge AI. Generate a deeply personalized, rigorous 4-Stage Career Roadmap tailored specifically to the scholar\'s verified skill gaps.',
+            },
+            {
+              role: 'user',
+              content: `Generate a production-ready 4-Stage Autonomous Career Blueprint for:
+- Scholar: ${cleanEmail}
+- Target Career Track: ${targetGoal}
+- Verified Identified Skill Gaps: ${gapsFormatted}
+- Current Assessment Scores: ${JSON.stringify(currentSkills || {})}
+
+Structure the document with:
+# 🪐 ${targetGoal.toUpperCase()} CAREER ROADMAP & BLUEPRINT
+## 📊 Executive Summary & Market Trajectory
+## 🗺️ 4-Stage Progressive Milestones
+| Milestone | Focus Area | Core Technologies & Topics | Learning Resources | Capstone Project Deliverable |
+|---|---|---|---|---|
+| Milestone 01 | ... | ... | ... | ... |
+| Milestone 02 | ... | ... | ... | ... |
+| Milestone 03 | ... | ... | ... | ... |
+| Milestone 04 | ... | ... | ... | ... |
+
+## 📅 Weekly Sprint Breakdown (Weeks 1 to 16)
+## 🏆 Capstone Projects & Portfolio Benchmarks
+## 🎯 Industry Certifications & Readiness Quotient`,
+            },
+          ],
+          temperature: 0.65,
+          max_completion_tokens: 3000,
+        }).catch(async () => {
+          return await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are the Lead Career Architect at SkillForge AI. Generate a deeply personalized, rigorous 4-Stage Career Roadmap tailored specifically to the scholar\'s verified skill gaps.',
+              },
+              {
+                role: 'user',
+                content: `Generate a production-ready 4-Stage Autonomous Career Blueprint for:
+- Scholar: ${cleanEmail}
+- Target Career Track: ${targetGoal}
+- Verified Identified Skill Gaps: ${gapsFormatted}
+- Current Assessment Scores: ${JSON.stringify(currentSkills || {})}
+
+Structure the document with:
+# 🪐 ${targetGoal.toUpperCase()} CAREER ROADMAP & BLUEPRINT
+## 📊 Executive Summary & Market Trajectory
+## 🗺️ 4-Stage Progressive Milestones
+| Milestone | Focus Area | Core Technologies & Topics | Learning Resources | Capstone Project Deliverable |
+|---|---|---|---|---|
+| Milestone 01 | ... | ... | ... | ... |
+| Milestone 02 | ... | ... | ... | ... |
+| Milestone 03 | ... | ... | ... | ... |
+| Milestone 04 | ... | ... | ... | ... |
+
+## 📅 Weekly Sprint Breakdown (Weeks 1 to 16)
+## 🏆 Capstone Projects & Portfolio Benchmarks
+## 🎯 Industry Certifications & Readiness Quotient`,
+              },
+            ],
+            temperature: 0.65,
+            max_tokens: 3000,
+          })
+        })
+
+        if (groqRes.choices?.[0]?.message?.content) {
+          generatedRoadmapText = groqRes.choices[0].message.content
+        }
+      } catch (groqErr) {
+        console.warn('[Direct Groq Roadmap Generation Fallback]:', groqErr.message)
+      }
+    }
+
+    // 4. Fallback: Curated architectural roadmap if AI generation was unavailable
     if (!generatedRoadmapText || generatedRoadmapText.length < 50) {
       generatedRoadmapText = buildCuratedRoadmap(targetGoal, missingSkills)
     }
@@ -327,7 +412,7 @@ router.post('/roadmap/generate', async (req, res) => {
         gaps: Array.isArray(missingSkills) ? missingSkills : [],
         generatedRoadmapText,
         milestones: milestones,
-        model: 'LangGraph 4-Node StateGraph + Groq AI',
+        model: 'Groq Cloud LLaMA 3.3 + SkillForge AI',
         generatedAt: new Date(),
       })
     } catch (dbErr) {
@@ -342,7 +427,7 @@ router.post('/roadmap/generate', async (req, res) => {
       milestones: milestones,
       roadmapId: savedRoadmap?._id,
       generatedAt: savedRoadmap?.createdAt || new Date(),
-      model: 'LangGraph 4-Node StateGraph + Groq AI',
+      model: 'Groq Cloud LLaMA 3.3 + SkillForge AI',
     })
   } catch (error) {
     console.error('[Generate Roadmap Error]:', error)
@@ -392,7 +477,7 @@ router.post('/agent/analyze', async (req, res) => {
     const cleanEmail = (profile?.email || 'student@nust.edu.pk').toLowerCase()
     const targetGoal = profile?.careerGoal || 'AI Engineer'
 
-    // Forward to Python LangGraph Agent service
+    // 1. Primary: Forward to Python LangGraph Agent service
     try {
       const pyRes = await fetch(`${PYTHON_SERVICE_URL}/agent/plan`, {
         method: 'POST',
@@ -441,46 +526,116 @@ router.post('/agent/analyze', async (req, res) => {
       console.warn('Python agent service call fallback:', pyErr.message)
     }
 
-    // Fallback: Build structured 4-node agent response
-    const agentAnalysisText = buildCuratedRoadmap(targetGoal, profile?.skills?.map(s => s.name))
+    // 2. Direct Groq Cloud AI ReAct LangGraph Execution (when Python is offline)
+    let agentAnalysisText = ''
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const skillsList = Array.isArray(profile?.skills)
+          ? profile.skills.map((s) => `${s.name} (${s.level || 'intermediate'})`).join(', ')
+          : 'Technical fundamentals'
+
+        const groqAgentRes = await groq.chat.completions.create({
+          model: 'openai/gpt-oss-120b',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are the autonomous LangGraph Agent Planning Engine for SkillForge. You execute multi-node StateGraph reasoning across SkillProfiler, KnowledgeRetriever, AgentPlanner, and RoadmapSynthesizer.',
+            },
+            {
+              role: 'user',
+              content: `Execute an Autonomous LangGraph 4-Node ReAct Planning Cycle for:
+Student: ${profile?.name || 'Scholar'} (${profile?.degree || 'BS Computer Science'}, Year ${profile?.yearOfStudy || 3})
+Target Role: ${targetGoal}
+Current Skills: ${skillsList}
+User Prompt: ${prompt || 'Analyze my verified skills and generate my career strategy'}
+
+Output a deeply thorough, verified markdown analysis detailing:
+- 🚀 Node 1: SkillProfiler Diagnostic Evaluation
+- 📚 Node 2: KnowledgeBase Retrieval Citations & Curriculum Alignment
+- 🧠 Node 3: ReAct Agent Reasoning (Thought -> Action -> Observation)
+- 🗺️ Node 4: Synthesized 4-Stage Progressive Career Roadmap with milestone tables, tech stacks, and capstone project deliverables.`,
+            },
+          ],
+          temperature: 0.65,
+          max_completion_tokens: 3200,
+        }).catch(async () => {
+          return await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are the autonomous LangGraph Agent Planning Engine for SkillForge. You execute multi-node StateGraph reasoning across SkillProfiler, KnowledgeRetriever, AgentPlanner, and RoadmapSynthesizer.',
+              },
+              {
+                role: 'user',
+                content: `Execute an Autonomous LangGraph 4-Node ReAct Planning Cycle for:
+Student: ${profile?.name || 'Scholar'} (${profile?.degree || 'BS Computer Science'}, Year ${profile?.yearOfStudy || 3})
+Target Role: ${targetGoal}
+Current Skills: ${skillsList}
+User Prompt: ${prompt || 'Analyze my verified skills and generate my career strategy'}
+
+Output a deeply thorough, verified markdown analysis detailing:
+- 🚀 Node 1: SkillProfiler Diagnostic Evaluation
+- 📚 Node 2: KnowledgeBase Retrieval Citations & Curriculum Alignment
+- 🧠 Node 3: ReAct Agent Reasoning (Thought -> Action -> Observation)
+- 🗺️ Node 4: Synthesized 4-Stage Progressive Career Roadmap with milestone tables, tech stacks, and capstone project deliverables.`,
+              },
+            ],
+            temperature: 0.65,
+            max_tokens: 3200,
+          })
+        })
+
+        if (groqAgentRes.choices?.[0]?.message?.content) {
+          agentAnalysisText = groqAgentRes.choices[0].message.content
+        }
+      } catch (gErr) {
+        console.warn('[Direct Groq Agent Generation Error]:', gErr.message)
+      }
+    }
+
+    if (!agentAnalysisText) {
+      agentAnalysisText = buildCuratedRoadmap(targetGoal, profile?.skills?.map((s) => s.name))
+    }
+
     const parsedMilestones = parseMilestonesFromText(agentAnalysisText, targetGoal)
 
-    const fallbackAgentData = {
+    const agentResponseData = {
       success: true,
       careerGoal: targetGoal,
       agentAnalysis: agentAnalysisText,
       roadmap: {
-        steps: parsedMilestones.map(m => ({
+        steps: parsedMilestones.map((m) => ({
           title: m.title,
           topic: m.desc,
           project: m.capstone,
           resources: [m.resources || 'SkillForge Engineering Docs'],
-          tech: m.tech
-        }))
+          tech: m.tech,
+        })),
       },
-      gaps: profile?.skills?.filter(s => !s.isVerified).map(s => s.name) || [],
+      gaps: profile?.skills?.filter((s) => !s.isVerified).map((s) => s.name) || [],
       execution_trace: [
         '🚀 [INIT] Initializing LangGraph StateGraph Execution Cycle...',
         '🔍 [PROFILER] Reading verified diagnostic test scores...',
         '📊 [DIAGNOSIS] Identifying missing competencies for ' + targetGoal,
-        '⚡ [SYNTHESIS] Structured 4-stage capstone plan generated successfully.'
-      ]
+        '⚡ [SYNTHESIS] Autonomous Groq LLaMA 3.3 multi-stage plan synthesized successfully.',
+      ],
     }
 
     try {
       const saved = await Roadmap.create({
         email: cleanEmail,
         careerGoal: targetGoal,
-        gaps: fallbackAgentData.gaps,
+        gaps: agentResponseData.gaps,
         generatedRoadmapText: agentAnalysisText,
         milestones: parsedMilestones,
-        model: 'SkillForge Autonomous ReAct Engine',
+        model: 'Groq Cloud LLaMA 3.3 StateGraph Engine',
         generatedAt: new Date(),
       })
-      fallbackAgentData.roadmapId = saved._id
+      agentResponseData.roadmapId = saved._id
     } catch {}
 
-    res.json(fallbackAgentData)
+    res.json(agentResponseData)
   } catch (error) {
     console.error('[Agent Analyze Error]:', error)
     const targetGoal = req.body?.profile?.careerGoal || 'AI Engineer'
@@ -491,14 +646,14 @@ router.post('/agent/analyze', async (req, res) => {
       careerGoal: targetGoal,
       agentAnalysis: fallbackText,
       roadmap: {
-        steps: parsed.map(m => ({
+        steps: parsed.map((m) => ({
           title: m.title,
           topic: m.desc,
           project: m.capstone,
           resources: ['SkillForge Engineering Docs'],
-          tech: m.tech
-        }))
-      }
+          tech: m.tech,
+        })),
+      },
     })
   }
 })

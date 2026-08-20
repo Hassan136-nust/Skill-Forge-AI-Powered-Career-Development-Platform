@@ -39,3 +39,13 @@ services:
       - .env
     environment:
       - PORT=8000
+    volumes:
+      # ChromaDB: Persist vector index between container restarts
+      - chroma_data:/app/chroma_db
+      # Knowledge Base: Mount source files for indexing
+      - ./rag/knowledge-base:/app/../rag/knowledge-base:ro
+
+# Named volumes
+volumes:
+  chroma_data:
+    driver: local

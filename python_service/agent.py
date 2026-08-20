@@ -23,109 +23,32 @@ def get_groq_client() -> Groq:
     return Groq(api_key=GROQ_API_KEY)
 
 
-def search_knowledge_base_with_sources(query: str, top_k: int = 3) -> Tuple[str, List[str]]:
+# =========================================================================
+# 1. RAG RETRIEVER — ChromaDB Semantic Search (BM25 fallback inside vectorstore)
+# =========================================================================
+
+def search_knowledge_base_with_sources(query: str, top_k: int = 3) -> tuple:
     """
-    Advanced TF-IDF / BM25 style semantic ranking across all knowledge base files.
+    Semantic search via ChromaDB vector_store singleton.
+    Automatically falls back to BM25 if ChromaDB is unavailable.
     Returns: (context_string, list_of_unique_source_titles)
     """
-    base_dir = os.path.join(os.path.dirname(__file__), "..", "rag", "knowledge-base")
-    kb_files = glob.glob(os.path.join(base_dir, "*.txt"))
-    
-    if not kb_files:
-        return ("SkillForge Knowledge Base: Comprehensive technical standards for software engineering.", ["SkillForge Standard Curriculum"])
-
-    # Extract query tokens and remove punctuation
-    raw_q_words = re.findall(r'\b\w+\b', query.lower())
-    stop_words = {"the", "a", "an", "is", "in", "for", "to", "and", "or", "of", "with", "on", "at", "by", "from", "i", "me", "my", "how", "what", "can", "you", "tell"}
-    q_words = [w for w in raw_q_words if w not in stop_words and len(w) > 1]
-    
-    if not q_words:
-        q_words = raw_q_words
-
-    chunks_data = []
-
-    # First pass: collect all paragraphs and compute term frequencies
-    doc_freq = {}
-    total_chunks = 0
-
-    for fpath in kb_files:
-        doc_title = get_clean_doc_title(fpath)
-        try:
-            with open(fpath, "r", encoding="utf-8") as f:
-                content = f.read()
-                # Split content by double newlines or markdown headers
-                paragraphs = [p.strip() for p in re.split(r'\n\s*\n|(?=##\s)', content) if len(p.strip()) > 35]
-                for p in paragraphs:
-                    total_chunks += 1
-                    words_in_p = set(re.findall(r'\b\w+\b', p.lower()))
-                    for qw in q_words:
-                        if qw in words_in_p:
-                            doc_freq[qw] = doc_freq.get(qw, 0) + 1
-                    chunks_data.append({
-                        "text": p,
-                        "source": doc_title,
-                        "words": words_in_p,
-                        "raw_text_lower": p.lower()
-                    })
-        except Exception:
-            continue
-
-    if not chunks_data:
-        return ("SkillForge Core Engineering Curriculum & Benchmarks.", ["SkillForge Standard Knowledge Base"])
-
-    # Second pass: Score chunks using TF-IDF / BM25 weighting with header bonus
-    scored_chunks = []
-    for chunk in chunks_data:
-        score = 0.0
-        for qw in q_words:
-            if qw in chunk["words"]:
-                # Inverse document frequency
-                df = doc_freq.get(qw, 1)
-                idf = math.log((total_chunks + 1) / (df + 0.5)) + 1.0
-                
-                # Frequency count in chunk
-                tf = chunk["raw_text_lower"].count(qw)
-                term_score = (tf / (tf + 1.5)) * idf
-                
-                # Exact phrase or heading bonus
-                if chunk["text"].startswith("#") and qw in chunk["text"].lower():
-                    term_score *= 2.0
-                
-                score += term_score
-
-        if score > 0.1:
-            scored_chunks.append((score, chunk["text"], chunk["source"]))
-
-    scored_chunks.sort(key=lambda x: x[0], reverse=True)
-    top_results = scored_chunks[:top_k]
-
-    if not top_results:
-        # Fallback to general overview chunks
-        top_results = [(1.0, chunks_data[0]["text"], chunks_data[0]["source"])]
-
-    context_parts = []
-    sources = []
-    for _, text, source in top_results:
-        context_parts.append(f"[{source}]\n{text}")
-        if source not in sources:
-            sources.append(source)
-
-    return ("\n\n---\n\n".join(context_parts), sources)
+    return vector_store.search(query, top_k=top_k)
 
 
 def search_knowledge_base(query: str, top_k: int = 3) -> str:
     """Backwards-compatible helper returning pure context text."""
-    context, _ = search_knowledge_base_with_sources(query, top_k=top_k)
+    context, _ = vector_store.search(query, top_k=top_k)
     return context
 
 
 def generate_rag_answer_with_sources(user_query: str, chat_history: list = None, student_context: dict = None) -> Dict[str, Any]:
     """
-    RAG Assistant: Ingests user query -> Retrieves Top-k Context -> Generates grounded answer with Groq LLaMA 3.3.
+    RAG Assistant: Query → ChromaDB Semantic Search → Groq LLaMA 3.3 → Grounded Answer.
     Returns: {"answer": str, "sources": list, "grounded": bool}
     """
-    context, sources = search_knowledge_base_with_sources(user_query, top_k=3)
-    
+    context, sources = vector_store.search(user_query, top_k=3)
+
     student_info_str = ""
     if student_context:
         student_info_str = f"""Student Profile:
@@ -138,7 +61,7 @@ def generate_rag_answer_with_sources(user_query: str, chat_history: list = None,
     system_prompt = f"""You are the SkillForge AI Career Mentor & Study Assistant for Computer Science students.
 Ground your response using the following verified SkillForge knowledge base documents:
 
-[VERIFIED KNOWLEDGE BASE CONTEXT]
+[VERIFIED KNOWLEDGE BASE CONTEXT — Semantically Retrieved via ChromaDB]
 {context}
 
 {student_info_str}

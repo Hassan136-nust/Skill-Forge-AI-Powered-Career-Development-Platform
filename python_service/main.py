@@ -3,6 +3,7 @@ FastAPI Python Microservice for SkillForge (Port 8000)
 Implements PRD Section 5.3 (API Endpoints)
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -11,11 +12,29 @@ from typing import List, Dict, Any, Optional
 from skill_analyzer import SkillAnalyzer
 from roadmap_generator import RoadmapGenerator
 from agent import generate_rag_answer, run_career_agent_react
+from vectorstore import vector_store
+
+
+# ── Startup: build ChromaDB index once when service starts ──────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Build the ChromaDB vector index at startup — runs once, skipped if already indexed."""
+    print("⚡ SkillForge: Building ChromaDB knowledge base index...")
+    try:
+        vector_store.build_index()
+        status = vector_store.status()
+        print(f"✅ ChromaDB ready | mode={status['mode']} | chunks={status['indexed_chunks']}")
+    except Exception as e:
+        print(f"⚠️  ChromaDB index build warning: {e} — BM25 fallback active.")
+    yield
+    # Cleanup on shutdown (nothing needed for ChromaDB persistent)
+
 
 app = FastAPI(
     title="SkillForge Python AI & SkillAnalyzer Service",
-    version="1.0.0",
-    description="Python microservice providing OOP SkillAnalyzer, RoadmapGenerator, RAG Chatbot & LangGraph ReAct Agent.",
+    version="2.0.0",
+    description="Python microservice — SkillAnalyzer, RoadmapGenerator, ChromaDB RAG Chatbot & LangGraph ReAct Agent.",
+    lifespan=lifespan,
 )
 
 # Enable CORS for React frontend & Express API Gateway
@@ -56,13 +75,25 @@ class AgentRequest(BaseModel):
 # =========================================================================
 @app.get("/health")
 def health_check():
-    """GET /health — Service health check"""
+    """GET /health — Service health check with ChromaDB status"""
+    vs_status = vector_store.status()
     return {
         "status": "healthy",
         "service": "SkillForge Python AI Microservice",
+        "version": "2.0.0",
         "port": 8000,
-        "ai_engine": "Groq LLaMA 3.3 70B & 8B Instant"
+        "ai_engine": "Groq LLaMA 3.3 70B & 8B Instant",
+        "vector_store": vs_status,
     }
+
+@app.post("/vectorstore/rebuild")
+def rebuild_index():
+    """POST /vectorstore/rebuild — Force re-index all knowledge base files into ChromaDB"""
+    try:
+        vector_store.build_index(force_rebuild=True)
+        return {"success": True, "status": vector_store.status()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/analyze")
 def analyze_skills(req: AnalyzeRequest):
@@ -95,20 +126,21 @@ def generate_roadmap(req: RoadmapRequest):
 
 @app.post("/rag/chat")
 def rag_chat(req: ChatRequest):
-    """POST /rag/chat — RAG AI Study Assistant with Groq LLaMA 3.3"""
+    """POST /rag/chat — ChromaDB Semantic RAG + Groq LLaMA 3.3 Study Assistant"""
     try:
         answer = generate_rag_answer(req.query, req.chat_history)
         return {
             "success": True,
             "query": req.query,
             "answer": answer,
+            "retrieval_mode": vector_store.status()["mode"],
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/agent/plan")
 def agent_plan(req: AgentRequest):
-    """POST /agent/plan — ReAct Autonomous Career Agent with 4 Tools"""
+    """POST /agent/plan — ReAct Autonomous Career Agent with 4 Tools + ChromaDB RAG"""
     try:
         result = run_career_agent_react(req.profile, req.prompt)
         return result

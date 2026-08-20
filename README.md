@@ -261,8 +261,7 @@ MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/skillforge?
 JWT_SECRET=skillforge_super_secure_jwt_secret_key_2026
 GROQ_API_KEY=gsk_your_groq_api_key_here
 PYTHON_SERVICE_URL=http://localhost:8000
-ADMIN_EMAIL=hjamal.bscs24seecs@seecs.edu.pk
-ADMIN_PASSWORD=Password123
+
 ```
 
 ---

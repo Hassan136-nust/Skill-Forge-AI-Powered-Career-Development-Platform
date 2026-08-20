@@ -25,9 +25,18 @@ app.use(
 )
 app.use(express.json())
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() })
+// Health check endpoints for UptimeRobot & Cloud Observability
+app.get(['/', '/health', '/api/health'], (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'SkillForge Express Backend Gateway',
+    timestamp: new Date().toISOString(),
+    uptime: `${Math.floor(process.uptime())}s`,
+  })
+})
+
+app.head(['/', '/health', '/api/health'], (req, res) => {
+  res.status(200).end()
 })
 
 // API Routes

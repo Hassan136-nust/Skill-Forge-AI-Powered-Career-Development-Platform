@@ -78,11 +78,15 @@ class AgentRequest(BaseModel):
 
 
 # =========================================================================
-# Endpoints (PRD Section 5.3)
+# Endpoints (PRD Section 5.3 & Uptime Monitoring)
 # =========================================================================
+@app.get("/")
 @app.get("/health")
+@app.get("/api/health")
+@app.head("/")
+@app.head("/health")
 def health_check():
-    """GET /health — Service health check with ChromaDB status"""
+    """Service health check with ChromaDB status for UptimeRobot"""
     vs_status = vector_store.status()
     return {
         "status": "healthy",

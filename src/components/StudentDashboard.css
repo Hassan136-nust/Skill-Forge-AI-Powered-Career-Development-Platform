@@ -836,3 +836,359 @@
     transform: rotate(360deg);
   }
 }
+
+/* =========================================================================
+   6. LUXURY AI PERSONALIZED ROADMAP MODAL & MARKDOWN STYLES
+   ========================================================================= */
+.ai-roadmap-modal-card {
+  width: 96%;
+  max-width: 1080px;
+  max-height: 88vh;
+  background: rgba(7, 9, 16, 0.96);
+  backdrop-filter: blur(35px);
+  border: 1.5px solid #FFD166;
+  border-radius: 24px;
+  padding: 2rem 2.4rem;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.98), 0 0 60px rgba(255, 209, 102, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.ai-roadmap-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1c2030;
+  padding-bottom: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.ai-roadmap-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(39, 201, 63, 0.15);
+  border: 1px solid #27C93F;
+  border-radius: 12px;
+  padding: 0.35rem 0.8rem;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.62rem;
+  color: #27C93F;
+}
+
+.ai-roadmap-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.8rem;
+}
+
+/* Custom Sleek Cyan/Gold Scrollbar */
+.ai-roadmap-scroll-container::-webkit-scrollbar {
+  width: 7px;
+}
+.ai-roadmap-scroll-container::-webkit-scrollbar-track {
+  background: rgba(13, 16, 26, 0.6);
+  border-radius: 4px;
+}
+.ai-roadmap-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FFD166 0%, #FF6B81 100%);
+  border-radius: 4px;
+}
+
+/* Markdown Rendering Elements */
+.ai-roadmap-markdown-body {
+  color: #FFF7E8;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  text-align: left;
+}
+
+.ai-roadmap-markdown-body h1 {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.35rem;
+  color: #FFD166;
+  margin: 1.5rem 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 209, 102, 0.3);
+  padding-bottom: 0.5rem;
+}
+
+.ai-roadmap-markdown-body h2 {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.15rem;
+  color: #FFF7E8;
+  margin: 1.4rem 0 0.8rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ai-roadmap-markdown-body h3 {
+  font-size: 1rem;
+  color: #FFD166;
+  margin: 1.2rem 0 0.6rem 0;
+  font-weight: 800;
+}
+
+.ai-roadmap-markdown-body p {
+  margin: 0.8rem 0;
+  color: #E2E8F0;
+}
+
+.ai-roadmap-markdown-body strong {
+  color: #FFD166;
+  font-weight: 800;
+}
+
+.ai-roadmap-markdown-body hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #FFD166, transparent);
+  margin: 1.8rem 0;
+}
+
+.ai-roadmap-markdown-body blockquote {
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.12) 0%, rgba(255, 107, 129, 0.08) 100%);
+  border-left: 4px solid #FFD166;
+  border-radius: 0 14px 14px 0;
+  padding: 1rem 1.4rem;
+  margin: 1.2rem 0;
+  font-style: italic;
+  color: #FFF7E8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ai-roadmap-markdown-body ul,
+.ai-roadmap-markdown-body ol {
+  padding-left: 1.6rem;
+  margin: 0.8rem 0;
+}
+
+.ai-roadmap-markdown-body li {
+  margin-bottom: 0.55rem;
+  color: #CBD5E1;
+}
+
+.ai-roadmap-markdown-body code {
+  background: #030408;
+  border: 1px solid #33394f;
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: #A3E635;
+}
+
+/* Styled Markdown Tables */
+.ai-roadmap-markdown-body table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.5rem 0;
+  background: rgba(13, 16, 26, 0.85);
+  border: 1px solid #222638;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+}
+
+.ai-roadmap-markdown-body th {
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.2) 100%);
+  color: #FFD166;
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.76rem;
+  padding: 1rem 1.2rem;
+  text-align: left;
+  border-bottom: 2px solid #FFD166;
+}
+
+.ai-roadmap-markdown-body td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid #1c2030;
+  color: #E2E8F0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  vertical-align: top;
+}
+
+.ai-roadmap-markdown-body tr:last-child td {
+  border-bottom: none;
+}
+
+.ai-roadmap-markdown-body tr:hover td {
+  background: rgba(255, 209, 102, 0.05);
+}
+
+/* =========================================================================
+   7. AI CHAT COCKPIT MARKDOWN STYLING
+   ========================================================================= */
+.ai-chat-markdown {
+  color: #FFF7E8;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.ai-chat-markdown h1,
+.ai-chat-markdown h2,
+.ai-chat-markdown h3,
+.ai-chat-markdown h4 {
+  color: #FFD166;
+  font-size: 0.88rem;
+  font-weight: 800;
+  margin: 0.6rem 0 0.3rem 0;
+}
+
+.ai-chat-markdown p {
+  margin: 0.4rem 0;
+}
+
+.ai-chat-markdown strong {
+  color: #FFD166;
+  font-weight: 800;
+}
+
+.ai-chat-markdown ul,
+.ai-chat-markdown ol {
+  padding-left: 1.2rem;
+  margin: 0.4rem 0;
+}
+
+.ai-chat-markdown li {
+  margin-bottom: 0.25rem;
+}
+
+.ai-chat-markdown code {
+  background: #030408;
+  border: 1px solid #33394f;
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-family: monospace;
+  font-size: 0.76rem;
+  color: #A3E635;
+}
+
+.ai-chat-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.6rem 0;
+  font-size: 0.76rem;
+  background: rgba(7, 9, 16, 0.8);
+  border: 1px solid #222638;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ai-chat-markdown th {
+  background: rgba(255, 209, 102, 0.18);
+  color: #FFD166;
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid #FFD166;
+}
+
+.ai-chat-markdown td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid #1c2030;
+  color: #CBD5E1;
+}
+
+/* =========================================================================
+   8. CRISP, HIGH-CONTRAST PROFESSIONAL PDF EXPORT TEMPLATE
+   ========================================================================= */
+.pdf-export-template {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  padding: 30px 35px !important;
+  line-height: 1.55 !important;
+}
+
+.pdf-export-template * {
+  color: #0F172A;
+}
+
+.pdf-export-template h1 {
+  font-size: 18px !important;
+  color: #0F172A !important;
+  border-bottom: 2px solid #0284C7 !important;
+  padding-bottom: 6px !important;
+  margin: 18px 0 10px 0 !important;
+  font-weight: 800 !important;
+}
+
+.pdf-export-template h2 {
+  font-size: 15px !important;
+  color: #0369A1 !important;
+  margin: 16px 0 8px 0 !important;
+  font-weight: 700 !important;
+}
+
+.pdf-export-template h3 {
+  font-size: 13px !important;
+  color: #0F172A !important;
+  margin: 12px 0 6px 0 !important;
+  font-weight: 700 !important;
+}
+
+.pdf-export-template p {
+  font-size: 12px !important;
+  color: #334155 !important;
+  margin: 6px 0 !important;
+}
+
+.pdf-export-template strong {
+  color: #0F172A !important;
+  font-weight: 800 !important;
+}
+
+.pdf-export-template blockquote {
+  background: #F8FAFC !important;
+  border-left: 4px solid #0284C7 !important;
+  border-radius: 0 8px 8px 0 !important;
+  padding: 8px 14px !important;
+  margin: 10px 0 !important;
+  font-style: italic !important;
+  color: #334155 !important;
+}
+
+.pdf-export-template table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 14px 0 !important;
+  font-size: 11px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  page-break-inside: avoid !important;
+}
+
+.pdf-export-template th {
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
+  font-weight: 800 !important;
+  padding: 8px 10px !important;
+  text-align: left !important;
+  border: 1px solid #CBD5E1 !important;
+}
+
+.pdf-export-template td {
+  padding: 8px 10px !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #334155 !important;
+  vertical-align: top !important;
+}
+
+.pdf-export-template code {
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0284C7 !important;
+  padding: 2px 4px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+}
+
+

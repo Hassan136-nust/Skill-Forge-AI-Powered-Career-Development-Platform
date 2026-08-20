@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # 1. React Frontend Service (Port 5173)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+
+  # 2. Express Backend API Service (Port 3001)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      - PORT=3001
+      - PYTHON_SERVICE_URL=http://python-service:8000
+    depends_on:
+      - python-service
+
+  # 3. Python AI & SkillAnalyzer Service (Port 8000)
+  python-service:
+    build:
+      context: ./python_service
+      dockerfile: Dockerfile.python
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000

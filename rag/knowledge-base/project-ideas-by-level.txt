@@ -1,0 +1,18 @@
+# Project Ideas by Difficulty Level (All Roles)
+
+## Beginner Projects:
+- AI Engineer: Text Sentiment Classifier with Scikit-Learn & Flask.
+- Backend Developer: RESTful Task Management API with JWT Auth & SQLite/PostgreSQL.
+- Frontend Developer: Interactive Financial Analytics Dashboard with Tailwind & React.
+- DevOps Engineer: Automated Linux Server Provisioning CLI in Bash & Git CI/CD.
+
+## Intermediate Projects:
+- AI Engineer: Multi-Document RAG Knowledge Search Engine with ChromaDB & FastAPI.
+- Backend Developer: Distributed Rate-Limited Payment Gateway with Redis & PostgreSQL.
+- Frontend Developer: Next.js 14 Full-Stack SaaS Dashboard with Server Components.
+- DevOps Engineer: Kubernetes Multi-Tier Application Cluster with Ingress & Prometheus.
+
+## Advanced & Capstone Projects:
+- AI Engineer: Autonomous Multi-Agent Research Assistant with LangGraph, Groq LLaMA 3.3, and Tool Execution.
+- Backend Developer: High-Throughput Event-Driven Microservices Architecture with Kafka & Docker.
+- Full-Stack Developer: Enterprise AI Career Development Platform (SkillForge).

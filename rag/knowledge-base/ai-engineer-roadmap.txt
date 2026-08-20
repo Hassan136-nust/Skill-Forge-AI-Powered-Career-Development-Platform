@@ -1,0 +1,16 @@
+# AI Engineer Learning Roadmap & Core Competencies
+
+## Core Foundations:
+1. Python Object-Oriented Programming, Vectorization, NumPy, and Pandas.
+2. Machine Learning Fundamentals: Supervised/Unsupervised Learning, Loss Functions, Optimization (SGD, Adam).
+3. Deep Learning Architectures: PyTorch, Multi-Layer Perceptrons, CNNs, Transformers, Attention Mechanisms.
+4. Generative AI & LLMs: Prompt Engineering, Fine-Tuning (LoRA, QLoRA), Vector Databases (ChromaDB, Pinecone, FAISS).
+5. Retrieval-Augmented Generation (RAG): Document Ingestion, Semantic Chunking, Dense Vector Embeddings, Hybrid Search.
+6. Autonomous AI Agents: LangGraph, LangChain, ReAct loop (Reason + Act), Multi-Agent Tool Calling.
+7. Model Deployment & Production: FastAPI, Docker multi-stage builds, ONNX runtime, vLLM, Prometheus monitoring.
+
+## Recommended Capstone Projects:
+- Level 1: Exploratory Neural Base Engine & Sentiment Classifier.
+- Level 2: End-to-End Deep Learning Predictive Vision/NLP Pipeline in PyTorch.
+- Level 3: Production RAG Knowledge Assistant over Enterprise PDFs using ChromaDB & FastAPI.
+- Level 4: Autonomous Multi-Agent Research Assistant using LangGraph with Web Search & Code Execution tools.

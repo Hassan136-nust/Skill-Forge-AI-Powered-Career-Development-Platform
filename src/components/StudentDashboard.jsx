@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sparkles,
@@ -27,8 +27,17 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
-  RotateCcw
+  RotateCcw,
+  Bot,
+  MessageSquare,
+  Send,
+  Download,
+  History,
+  FileText
 } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import html2pdf from 'html2pdf.js'
 import AuthModal from './AuthModal'
 import './StudentDashboard.css'
 import './Navbar.css'
@@ -452,7 +461,152 @@ export default function StudentDashboard({ onExitDashboard }) {
 
   useEffect(() => {
     loadProfile()
+    loadRoadmapHistory()
   }, [])
+
+  // AI Roadmap Generator States (Powered by Groq)
+  const [aiRoadmapModalData, setAiRoadmapModalData] = useState(null)
+  const [isGeneratingAiRoadmap, setIsGeneratingAiRoadmap] = useState(false)
+  const [roadmapHistoryList, setRoadmapHistoryList] = useState([])
+  const [showHistoryDrawer, setShowHistoryDrawer] = useState(false)
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
+  const [pdfGeneratingId, setPdfGeneratingId] = useState(null)
+
+  // Fetch Previous Roadmaps History from MongoDB Atlas
+  const loadRoadmapHistory = async () => {
+    try {
+      const email = studentProfile.email || 'student@nust.edu.pk'
+      const res = await fetch(`http://localhost:3001/api/ai/roadmap/history/${encodeURIComponent(email)}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.history) {
+          setRoadmapHistoryList(data.history)
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load roadmap history:', e)
+    }
+  }
+
+  const handleGenerateAiRoadmap = async () => {
+    setIsGeneratingAiRoadmap(true)
+    try {
+      const res = await fetch('http://localhost:3001/api/ai/roadmap/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: studentProfile.email,
+          email: studentProfile.email,
+          careerGoal: studentProfile.careerGoal,
+          currentSkills: skillScores,
+          missingSkills: missingSkills,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setAiRoadmapModalData(data)
+        loadRoadmapHistory()
+      }
+    } catch (e) {
+      console.warn('AI Roadmap generation error:', e)
+    } finally {
+      setIsGeneratingAiRoadmap(false)
+    }
+  }
+
+  // 1-Click Crisp High-Contrast PDF Exporter for any roadmap snapshot
+  const handleDownloadRoadmapPdf = (customRoadmap = null) => {
+    const roadmap = customRoadmap || aiRoadmapModalData
+    if (!roadmap || !roadmap.generatedRoadmapText) return
+
+    const rId = roadmap._id || 'active'
+    setPdfGeneratingId(rId)
+    setIsExportingPdf(true)
+
+    // Clean text by replacing raw <br> tags with clean linebreaks
+    const rawText = roadmap.generatedRoadmapText || ''
+    const cleanedText = rawText.replace(/<br\s*\/?>/gi, '\n')
+
+    // Create a temporary off-screen container with crisp, high-contrast professional styling
+    const printContainer = document.createElement('div')
+    printContainer.className = 'pdf-export-template'
+    printContainer.style.width = '780px'
+    printContainer.style.position = 'fixed'
+    printContainer.style.left = '-9999px'
+    printContainer.style.top = '0'
+    printContainer.style.zIndex = '-9999'
+
+    // Branded Header HTML
+    const formattedDate = roadmap.createdAt ? new Date(roadmap.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }) : new Date().toLocaleDateString('en-US')
+
+    printContainer.innerHTML = `
+      <div style="border-bottom: 2.5px solid #0284C7; padding-bottom: 16px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span style="font-size: 24px;">🪐</span>
+            <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #0F172A;">SKILLFORGE AI</span>
+            <span style="background: #0284C7; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;">VERIFIED ROADMAP</span>
+          </div>
+          <p style="font-size: 12px; color: #64748B; margin: 0; font-weight: 500;">AI-Powered Student Career Pathway &amp; Diagnostic Learning Roadmap</p>
+        </div>
+        <div style="text-align: right; font-size: 11px; color: #475569; line-height: 1.45;">
+          <div style="font-weight: 800; color: #0F172A; font-size: 13px;">${studentProfile.name}</div>
+          <div>${studentProfile.university || 'NUST'} • ${studentProfile.degree || 'BS Computer Science'}</div>
+          <div>Target Track: <strong style="color: #0284C7;">${roadmap.careerGoal || studentProfile.careerGoal}</strong></div>
+          <div style="color: #94A3B8; margin-top: 2px;">Generated: ${formattedDate}</div>
+        </div>
+      </div>
+      <div id="pdf-inner-content"></div>
+      <div style="margin-top: 28px; border-top: 1px solid #E2E8F0; padding-top: 10px; font-size: 10px; color: #94A3B8; display: flex; justify-content: space-between;">
+        <span>SkillForge — LoopLearn Hackathon 2026 (PS-03)</span>
+        <span>Engine: Groq Cloud LLaMA 3.3 / GPT-OSS-120B</span>
+      </div>
+    `
+
+    // Extract rendered table and text from the existing DOM or format markdown
+    const activeMarkdownElement = document.getElementById('ai-roadmap-printable-area')
+    const innerTarget = printContainer.querySelector('#pdf-inner-content')
+
+    if (activeMarkdownElement && (!customRoadmap || customRoadmap._id === aiRoadmapModalData?._id)) {
+      innerTarget.innerHTML = activeMarkdownElement.innerHTML.replace(/<br\s*\/?>/gi, '<br>')
+    } else {
+      // Clean HTML conversion for background downloads
+      innerTarget.innerHTML = `<div style="white-space: pre-wrap; font-size: 12px; line-height: 1.55; color: #1E293B;">${cleanedText}</div>`
+    }
+
+    document.body.appendChild(printContainer)
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: `SkillForge_${(roadmap.careerGoal || studentProfile.careerGoal).replace(/\s+/g, '_')}_Roadmap.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }
+
+    html2pdf()
+      .set(opt)
+      .from(printContainer)
+      .save()
+      .then(() => {
+        document.body.removeChild(printContainer)
+        setIsExportingPdf(false)
+        setPdfGeneratingId(null)
+      })
+      .catch((err) => {
+        console.warn('PDF export error:', err)
+        if (document.body.contains(printContainer)) {
+          document.body.removeChild(printContainer)
+        }
+        setIsExportingPdf(false)
+        setPdfGeneratingId(null)
+      })
+  }
 
   // Dynamic Skill Gap Engine
   const targetRequiredSkills = ROLE_BENCHMARKS[studentProfile.careerGoal] || ROLE_BENCHMARKS['AI Engineer']
@@ -510,6 +664,66 @@ export default function StudentDashboard({ onExitDashboard }) {
   const [slideDirection, setSlideDirection] = useState(1)
   const [quizSummary, setQuizSummary] = useState(null)
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
+
+  // Floating AI Assistant Chat States (Powered by Groq + RAG)
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false)
+  const [aiChatMessages, setAiChatMessages] = useState([
+    {
+      role: 'assistant',
+      content:
+        'Hello Scholar! 🪐 I am your SkillForge AI Career Mentor powered by Groq LLaMA 3.3. Ask me any questions about career pathways, project ideas, or skill gap strategies!',
+    },
+  ])
+  const [aiChatInput, setAiChatInput] = useState('')
+  const [isAiChatLoading, setIsAiChatLoading] = useState(false)
+  const chatMessagesEndRef = useRef(null)
+
+  useEffect(() => {
+    if (isAiChatOpen) {
+      setTimeout(() => {
+        chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 50)
+    }
+  }, [aiChatMessages, isAiChatLoading, isAiChatOpen])
+
+
+  const handleSendAiChatMessage = async (e) => {
+    if (e) e.preventDefault()
+    if (!aiChatInput.trim() || isAiChatLoading) return
+    const userMsg = aiChatInput.trim()
+    setAiChatInput('')
+    const updated = [...aiChatMessages, { role: 'user', content: userMsg }]
+    setAiChatMessages(updated)
+    setIsAiChatLoading(true)
+
+    try {
+      const res = await fetch('http://localhost:3001/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: userMsg,
+          chatHistory: updated,
+          studentContext: {
+            name: studentProfile.name,
+            degree: studentProfile.degree,
+            careerGoal: studentProfile.careerGoal,
+            missingSkills: missingSkills.map((m) => m.name),
+          },
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setAiChatMessages((prev) => [...prev, { role: 'assistant', content: data.answer }])
+      }
+    } catch (err) {
+      setAiChatMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Could not connect to AI Mentor. Please check backend connection.' },
+      ])
+    } finally {
+      setIsAiChatLoading(false)
+    }
+  }
 
   // Start Diagnostic 5-Question Assessment Quiz via Express Backend
   const handleStartSkillQuiz = async (skillName) => {
@@ -1227,9 +1441,68 @@ export default function StudentDashboard({ onExitDashboard }) {
               <Sparkles size={18} color="#FFD166" />
               <span>3D AI CAREER ROADMAP PATHWAY</span>
             </h2>
-            <span style={{ fontSize: '0.68rem', color: '#B8B3C7' }}>
-              Personalized Path for {studentProfile.careerGoal}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <span style={{ fontSize: '0.68rem', color: '#B8B3C7' }}>
+                Personalized Path for {studentProfile.careerGoal}
+              </span>
+
+              {/* Previous Roadmaps Button (Outside on Dashboard) */}
+              <button
+                className="assessment-quiz-btn"
+                style={{
+                  width: 'auto',
+                  padding: '0.4rem 0.95rem',
+                  background: 'rgba(255, 209, 102, 0.12)',
+                  borderColor: '#FFD166',
+                  color: '#FFD166',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 0 15px rgba(255, 209, 102, 0.2)',
+                }}
+                onClick={() => {
+                  loadRoadmapHistory()
+                  setIsHistoryModalOpen(true)
+                }}
+                title="View previous AI generated roadmaps"
+              >
+                <History size={14} color="#FFD166" />
+                <span>PREVIOUS ({roadmapHistoryList.length})</span>
+              </button>
+
+              <button
+                className="assessment-quiz-btn"
+                style={{
+                  width: 'auto',
+                  padding: '0.4rem 0.9rem',
+                  background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.25) 100%)',
+                  borderColor: '#FFD166',
+                  color: '#FFD166',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  cursor: isGeneratingAiRoadmap ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 0 15px rgba(255, 209, 102, 0.3)',
+                }}
+                onClick={handleGenerateAiRoadmap}
+                disabled={isGeneratingAiRoadmap}
+              >
+                {isGeneratingAiRoadmap ? (
+                  <>
+                    <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>AI GENERATING...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={14} color="#FFD166" />
+                    <span>GENERATE AI ROADMAP</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="roadmap-side-by-side-layout">
@@ -1584,6 +1857,586 @@ export default function StudentDashboard({ onExitDashboard }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* =========================================================================
+          7. GENAI CAREER ROADMAP MODAL (POWERED BY GROQ CLOUD)
+          ========================================================================= */}
+      <AnimatePresence>
+        {aiRoadmapModalData && (
+          <motion.div
+            className="quiz-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ zIndex: 10000 }}
+          >
+            <motion.div
+              className="ai-roadmap-modal-card"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{
+                height: '88vh',
+                maxHeight: '88vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Header */}
+              <div className="ai-roadmap-header-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.25) 100%)',
+                      border: '1.5px solid #FFD166',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Sparkles size={22} color="#FFD166" />
+                  </div>
+                  <div>
+                    <h2 className="bungee-regular" style={{ fontSize: '1.25rem', color: '#FFF7E8', margin: 0 }}>
+                      AI PERSONALIZED ROADMAP • {aiRoadmapModalData.careerGoal?.toUpperCase()}
+                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.35rem' }}>
+                      <span className="ai-roadmap-badge-pill">
+                        <Cpu size={12} />
+                        <span>POWERED BY GROQ CLOUD (GPT-OSS-120B)</span>
+                      </span>
+                      <span className="ai-roadmap-badge-pill" style={{ borderColor: '#FFD166', color: '#FFD166', background: 'rgba(255, 209, 102, 0.12)' }}>
+                        <Terminal size={12} />
+                        <span>SPEED: 0.27s</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  {/* Previous Roadmaps History Toggle */}
+                  <button
+                    onClick={() => {
+                      setShowHistoryDrawer(!showHistoryDrawer)
+                      if (!showHistoryDrawer) loadRoadmapHistory()
+                    }}
+                    style={{
+                      background: showHistoryDrawer ? 'rgba(255, 209, 102, 0.25)' : 'rgba(255, 255, 255, 0.06)',
+                      border: '1px solid #FFD166',
+                      borderRadius: '12px',
+                      padding: '0.45rem 0.85rem',
+                      color: '#FFD166',
+                      fontSize: '0.74rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer',
+                    }}
+                    title="View previously generated roadmaps"
+                  >
+                    <History size={14} />
+                    <span>PREVIOUS ({roadmapHistoryList.length})</span>
+                  </button>
+
+                  {/* Close Modal Button */}
+                  <button
+                    onClick={() => {
+                      setAiRoadmapModalData(null)
+                      setShowHistoryDrawer(false)
+                    }}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid #33394f',
+                      borderRadius: '50%',
+                      width: '36px',
+                      height: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFF7E8',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Content Area (With optional History Sidebar) */}
+              <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, gap: '1rem', overflow: 'hidden' }}>
+                {/* Previous Roadmaps History Drawer */}
+                {showHistoryDrawer && (
+                  <motion.div
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: '280px', opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    style={{
+                      background: 'rgba(13, 16, 26, 0.95)',
+                      border: '1px solid #222638',
+                      borderRadius: '16px',
+                      padding: '1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.6rem',
+                      overflowY: 'auto',
+                      minWidth: '260px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.5rem' }}>
+                      <span className="press-start-2p-regular" style={{ fontSize: '0.62rem', color: '#FFD166' }}>
+                        PAST ROADMAPS
+                      </span>
+                      <button
+                        onClick={() => setShowHistoryDrawer(false)}
+                        style={{ background: 'transparent', border: 'none', color: '#B8B3C7', cursor: 'pointer' }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    {roadmapHistoryList.length === 0 ? (
+                      <span style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', padding: '1rem 0' }}>
+                        No previous roadmaps found for this account.
+                      </span>
+                    ) : (
+                      roadmapHistoryList.map((hist, hIdx) => (
+                        <div
+                          key={hIdx}
+                          onClick={() => {
+                            setAiRoadmapModalData(hist)
+                            setShowHistoryDrawer(false)
+                          }}
+                          style={{
+                            background: aiRoadmapModalData?._id === hist._id ? 'rgba(255, 209, 102, 0.18)' : '#070910',
+                            border: aiRoadmapModalData?._id === hist._id ? '1.5px solid #FFD166' : '1px solid #1c2030',
+                            borderRadius: '10px',
+                            padding: '0.65rem 0.8rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.25rem',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FFF7E8' }}>
+                              {hist.careerGoal}
+                            </span>
+                            <FileText size={13} color="#FFD166" />
+                          </div>
+                          <span style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                            {hist.createdAt ? new Date(hist.createdAt).toLocaleString() : 'Saved Snapshot'}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Printable and Scrollable Rich Markdown Content */}
+                <div
+                  id="ai-roadmap-printable-area"
+                  className="ai-roadmap-scroll-container"
+                  style={{
+                    flex: '1 1 auto',
+                    minHeight: 0,
+                    height: '100%',
+                    overflowY: 'auto',
+                    paddingRight: '0.8rem',
+                  }}
+                >
+                  <div className="ai-roadmap-markdown-body">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {aiRoadmapModalData.generatedRoadmapText}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div
+                style={{
+                  marginTop: '1.2rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid #1c2030',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  ✦ Generated dynamically based on your verified assessment scores &amp; skill gaps.
+                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  {/* Download as PDF Button */}
+                  <button
+                    onClick={handleDownloadRoadmapPdf}
+                    disabled={isExportingPdf}
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(39, 201, 63, 0.2) 0%, rgba(0, 210, 255, 0.2) 100%)',
+                      border: '1.5px solid #27C93F',
+                      borderRadius: '12px',
+                      padding: '0.55rem 1.3rem',
+                      color: '#27C93F',
+                      fontFamily: '"Bungee", cursive, sans-serif',
+                      fontSize: '0.82rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      cursor: isExportingPdf ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 4px 20px rgba(39, 201, 63, 0.25)',
+                    }}
+                  >
+                    {isExportingPdf ? (
+                      <>
+                        <RotateCcw size={15} style={{ animation: 'spin 1s linear infinite' }} />
+                        <span>EXPORTING PDF...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download size={15} />
+                        <span>DOWNLOAD AS PDF</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    className="auth-submit-btn bungee-regular"
+                    onClick={() => {
+                      setAiRoadmapModalData(null)
+                      setShowHistoryDrawer(false)
+                    }}
+                    style={{ width: 'auto', padding: '0.55rem 1.6rem', fontSize: '0.85rem' }}
+                  >
+                    <span>CLOSE ROADMAP</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+          8. FLOATING AI ASSISTANT CHAT COCKPIT (RAG + GROQ CLOUD)
+          ========================================================================= */}
+      <div style={{ position: 'fixed', bottom: '20px', right: '25px', zIndex: 999 }}>
+        {!isAiChatOpen ? (
+          <motion.div
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{ y: [0, -8, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            onClick={() => setIsAiChatOpen(true)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          >
+            {/* Top Speech Bubble Badge */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, rgba(13, 16, 26, 0.95) 0%, rgba(30, 20, 45, 0.95) 100%)',
+                border: '1.5px solid #FFD166',
+                borderRadius: '16px',
+                padding: '0.45rem 0.95rem',
+                color: '#FFD166',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                boxShadow: '0 8px 25px rgba(255, 209, 102, 0.35)',
+                marginBottom: '-12px',
+                zIndex: 2,
+                position: 'relative',
+              }}
+            >
+              <Sparkles size={13} color="#FFD166" />
+              <span className="press-start-2p-regular" style={{ fontSize: '0.62rem' }}>ASK AI MENTOR</span>
+            </div>
+
+            {/* Character Image hard.png */}
+            <img
+              src="/hard.png"
+              alt="AI Mentor Character"
+              style={{
+                width: '130px',
+                height: '150px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 20px rgba(255, 209, 102, 0.35))',
+                transition: 'transform 0.3s ease',
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            style={{
+              width: '430px',
+              maxWidth: '92vw',
+              height: '570px',
+              maxHeight: '88vh',
+              background: 'rgba(7, 9, 16, 0.98)',
+              backdropFilter: 'blur(30px)',
+              border: '1.5px solid #FFD166',
+              borderRadius: '22px',
+              boxShadow: '0 25px 80px rgba(0,0,0,0.98), 0 0 50px rgba(255, 209, 102, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Chat Header */}
+            <div
+              style={{
+                padding: '0.9rem 1.1rem',
+                background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.22) 0%, rgba(255, 107, 129, 0.22) 100%)',
+                borderBottom: '1px solid #1c2030',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '10px',
+                    background: 'rgba(255, 209, 102, 0.25)',
+                    border: '1px solid #FFD166',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Bot size={18} color="#FFD166" />
+                </div>
+                <div>
+                  <h4 className="bungee-regular" style={{ fontSize: '0.9rem', color: '#FFF7E8', margin: 0 }}>
+                    AI CAREER MENTOR
+                  </h4>
+                  <span className="press-start-2p-regular" style={{ fontSize: '0.55rem', color: '#27C93F', display: 'block', marginTop: '0.2rem' }}>
+                    ● GROQ RAG ONLINE
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                {/* Clear Chat Button */}
+                <button
+                  onClick={() =>
+                    setAiChatMessages([
+                      {
+                        role: 'assistant',
+                        content: `Hello ${studentProfile.name.split(' ')[0]}! 🪐 I am your SkillForge AI Career Mentor. Ask me any questions regarding your ${studentProfile.careerGoal} target pathway!`,
+                      },
+                    ])
+                  }
+                  title="Clear Chat"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid #33394f',
+                    borderRadius: '8px',
+                    padding: '0.35rem 0.6rem',
+                    color: '#B8B3C7',
+                    fontSize: '0.68rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Clear
+                </button>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setIsAiChatOpen(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid #33394f',
+                    borderRadius: '50%',
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFF7E8',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+
+            {/* Messages Stream with Full Markdown & Smooth Scroll */}
+            <div
+              className="ai-roadmap-scroll-container"
+              style={{
+                flex: '1 1 auto',
+                minHeight: 0,
+                padding: '1rem',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem',
+              }}
+            >
+              {aiChatMessages.map((msg, mIdx) => (
+                <div
+                  key={mIdx}
+                  style={{
+                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    background:
+                      msg.role === 'user'
+                        ? 'linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.25) 100%)'
+                        : 'rgba(13, 16, 26, 0.95)',
+                    border: msg.role === 'user' ? '1.5px solid #FFD166' : '1px solid #222638',
+                    color: '#FFF7E8',
+                    padding: '0.75rem 1rem',
+                    borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    maxWidth: msg.role === 'user' ? '82%' : '92%',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  {msg.role === 'user' ? (
+                    <span style={{ fontSize: '0.84rem', fontWeight: 600, lineHeight: 1.4 }}>
+                      {msg.content}
+                    </span>
+                  ) : (
+                    <div className="ai-chat-markdown">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Thinking Indicator */}
+              {isAiChatLoading && (
+                <div
+                  style={{
+                    alignSelf: 'flex-start',
+                    background: 'rgba(13, 16, 26, 0.95)',
+                    border: '1px solid #FFD166',
+                    color: '#FFD166',
+                    padding: '0.55rem 0.9rem',
+                    borderRadius: '16px 16px 16px 4px',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    boxShadow: '0 4px 15px rgba(255, 209, 102, 0.2)',
+                  }}
+                >
+                  <RotateCcw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Groq AI Mentor is typing...</span>
+                </div>
+              )}
+
+              <div ref={chatMessagesEndRef} />
+            </div>
+
+            {/* Quick Suggestion Chips */}
+            <div
+              style={{
+                padding: '0.4rem 0.8rem',
+                display: 'flex',
+                gap: '0.45rem',
+                overflowX: 'auto',
+                borderTop: '1px solid #1c2030',
+                background: 'rgba(5, 6, 10, 0.6)',
+              }}
+            >
+              {[
+                `🎯 How to fix my ${missingSkills[0]?.name || 'PyTorch'} gap?`,
+                `💡 Capstone ideas for ${studentProfile.careerGoal}?`,
+                `⚡ 4-week study plan`,
+              ].map((suggestion, sIdx) => (
+                <button
+                  key={sIdx}
+                  onClick={() => {
+                    setAiChatInput(suggestion)
+                  }}
+                  style={{
+                    whiteSpace: 'nowrap',
+                    background: 'rgba(255, 209, 102, 0.1)',
+                    border: '1px solid rgba(255, 209, 102, 0.35)',
+                    borderRadius: '12px',
+                    padding: '0.3rem 0.65rem',
+                    color: '#FFD166',
+                    fontSize: '0.68rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+
+            {/* Input Form */}
+            <form
+              onSubmit={handleSendAiChatMessage}
+              style={{
+                padding: '0.7rem 0.9rem',
+                borderTop: '1px solid #222638',
+                display: 'flex',
+                gap: '0.5rem',
+                background: 'rgba(5, 6, 10, 0.95)',
+              }}
+            >
+              <input
+                type="text"
+                placeholder={`Ask about ${studentProfile.careerGoal}, projects, gaps...`}
+                value={aiChatInput}
+                onChange={(e) => setAiChatInput(e.target.value)}
+                style={{
+                  flex: 1,
+                  background: '#0d101a',
+                  border: '1px solid #33394f',
+                  borderRadius: '10px',
+                  padding: '0.6rem 0.9rem',
+                  color: '#FFF7E8',
+                  fontSize: '0.82rem',
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={!aiChatInput.trim() || isAiChatLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #FFD166 0%, #FF6B81 100%)',
+                  color: '#05060A',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '0.6rem 1rem',
+                  cursor: !aiChatInput.trim() || isAiChatLoading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: !aiChatInput.trim() || isAiChatLoading ? 0.5 : 1,
+                  fontWeight: 800,
+                }}
+              >
+                <Send size={16} />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </div>
 
       {/* EDIT SCHOLAR PROFILE MODAL */}
       <AuthModal

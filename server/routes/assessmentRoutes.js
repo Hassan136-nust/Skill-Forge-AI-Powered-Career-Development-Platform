@@ -12,6 +12,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `class NeuralNode:\n    def __init__(self, weights):\n        self.weights = weights\n    \n    def __repr__(self):\n        return f"NeuralNode(w={self.weights})"`,
       options: ['__str__()', '__repr__()', '__format__()', '__init__()'],
       correctIndex: 1,
+      difficulty: 'easy',
     },
     {
       id: 'py_2',
@@ -24,6 +25,7 @@ const ASSESSMENT_QUESTION_BANK = {
         'sorted() only accepts dictionary keys'
       ],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'py_3',
@@ -31,6 +33,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `class Vector:\n    @classmethod\n    def from_dict(cls, data):\n        return cls(data["x"], data["y"])`,
       options: ['@staticmethod', '@classmethod', '@property', '@abstractmethod'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'py_4',
@@ -38,6 +41,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `def count_stream(n):\n    for i in range(n):\n        yield i * 2`,
       options: ['Memory array of all items', 'Generator iterator computing items on demand (lazy loading)', 'Tuple of fixed references', 'JSON stream buffer'],
       correctIndex: 1,
+      difficulty: 'hard',
     },
     {
       id: 'py_5',
@@ -45,6 +49,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `from concurrent.futures import ThreadPoolExecutor\nwith ThreadPoolExecutor(max_workers=4) as executor:\n    results = executor.map(fetch_url, urls)`,
       options: ['asyncio', 'concurrent.futures', 'multiprocessing.raw', 'threading.Pool'],
       correctIndex: 1,
+      difficulty: 'hard',
     }
   ],
   webDev: [
@@ -54,6 +59,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `import { useEffect } from 'react';\n\nuseEffect(() => {\n  fetchData();\n}, []);`,
       options: ['useState', 'useEffect', 'useMemo', 'useCallback'],
       correctIndex: 1,
+      difficulty: 'easy',
     },
     {
       id: 'web_2',
@@ -61,6 +67,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `interface Scholar {\n  name: string;\n  score: number;\n}\n\ntype PartialScholar = Partial<Scholar>;`,
       options: ['Required<T>', 'Partial<T>', 'Readonly<T>', 'Record<K, T>'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'web_3',
@@ -68,6 +75,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `.dashboard-grid {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 1rem;\n}`,
       options: ['Flexbox', 'CSS Grid', 'Float Layout', 'Absolute Positioning'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'web_4',
@@ -75,6 +83,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `// app/dashboard/page.tsx\nexport default function Page() {\n  return <h1>Dashboard</h1>;\n}`,
       options: ['index.js', 'page.tsx', 'route.js', 'layout.tsx'],
       correctIndex: 1,
+      difficulty: 'hard',
     },
     {
       id: 'web_5',
@@ -82,6 +91,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `const scores = [80, 90, 95];\nconst boosted = scores.map(s => s + 5);`,
       options: ['forEach()', 'map()', 'filter()', 'reduce()'],
       correctIndex: 1,
+      difficulty: 'hard',
     }
   ],
   git: [
@@ -91,6 +101,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `git checkout feature/ai-quiz\ngit rebase main`,
       options: ['git merge --no-ff', 'git rebase', 'git cherry-pick', 'git stash pop'],
       correctIndex: 1,
+      difficulty: 'easy',
     },
     {
       id: 'git_2',
@@ -98,6 +109,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `git stash save "work in progress"\ngit checkout main\ngit stash pop`,
       options: ['git commit -m "temp"', 'git stash', 'git reset --hard', 'git branch -d'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'git_3',
@@ -105,6 +117,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `git revert <commit-hash>`,
       options: ['git reset --hard', 'git revert', 'git checkout --force', 'git rebase -i'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'git_4',
@@ -117,6 +130,7 @@ const ASSESSMENT_QUESTION_BANK = {
         'Compiles TypeScript into JavaScript'
       ],
       correctIndex: 1,
+      difficulty: 'hard',
     },
     {
       id: 'git_5',
@@ -124,6 +138,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `git pull origin main`,
       options: ['git push', 'git pull', 'git fetch --bare', 'git clone'],
       correctIndex: 1,
+      difficulty: 'hard',
     }
   ],
   devops: [
@@ -138,6 +153,7 @@ const ASSESSMENT_QUESTION_BANK = {
         'Compiles JavaScript into WebAssembly'
       ],
       correctIndex: 1,
+      difficulty: 'easy',
     },
     {
       id: 'devops_2',
@@ -145,6 +161,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3`,
       options: ['ConfigMap', 'Deployment', 'Service', 'Ingress'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'devops_3',
@@ -152,6 +169,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `chmod 755 deploy.sh`,
       options: ['chown', 'chmod', 'chgrp', 'umask'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'devops_4',
@@ -159,6 +177,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `services:\n  web:\n    build: .\n    depends_on:\n      - db`,
       options: ['links', 'depends_on', 'network_mode', 'volumes'],
       correctIndex: 1,
+      difficulty: 'hard',
     },
     {
       id: 'devops_5',
@@ -166,6 +185,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `resource "aws_instance" "app_server" {\n  ami = "ami-830c0fef"\n  instance_type = "t2.micro"\n}`,
       options: ['Ansible', 'Terraform', 'Puppet', 'Chef'],
       correctIndex: 1,
+      difficulty: 'hard',
     }
   ],
   ai: [
@@ -175,6 +195,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `optimizer.zero_grad()\noutputs = model(inputs)\nloss = criterion(outputs, targets)\nloss.backward()`,
       options: ['optimizer.reset()', 'optimizer.zero_grad()', 'model.clear()', 'loss.flush()'],
       correctIndex: 1,
+      difficulty: 'easy',
     },
     {
       id: 'ai_2',
@@ -182,6 +203,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `collection.add(\n  documents=["AI Agent Architecture"],\n  metadatas=[{"source": "paper"}],\n  ids=["id1"]\n)`,
       options: ['collection.insert_row()', 'collection.add()', 'collection.push()', 'collection.write()'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'ai_3',
@@ -194,6 +216,7 @@ const ASSESSMENT_QUESTION_BANK = {
         'Replaces Python with C++'
       ],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'ai_4',
@@ -201,6 +224,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `import torch.nn as nn\nself.relu = nn.ReLU()`,
       options: ['Sigmoid', 'ReLU (Rectified Linear Unit)', 'Softmax', 'Tanh'],
       correctIndex: 1,
+      difficulty: 'hard',
     },
     {
       id: 'ai_5',
@@ -208,6 +232,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `Thought: I need student skills.\nAction: analyze_student_skills()\nObservation: { python: 80, docker: 40 }\nThought: I will suggest Docker roadmap step.`,
       options: ['Plan-And-Solve', 'ReAct (Reason + Act)', 'Zero-Shot Prompting', 'Chain-Of-Thought'],
       correctIndex: 1,
+      difficulty: 'hard',
     }
   ],
   databases: [
@@ -217,6 +242,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `SELECT department, COUNT(*) FROM scholars GROUP BY department HAVING COUNT(*) > 5;`,
       options: ['WHERE', 'HAVING', 'GROUP BY', 'FILTER'],
       correctIndex: 1,
+      difficulty: 'easy',
     },
     {
       id: 'db_2',
@@ -224,6 +250,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `ZADD scholar_leaderboard 95 "Alex" 100 "Hassan"`,
       options: ['Hash', 'Sorted Set (ZSET)', 'List', 'Set'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'db_3',
@@ -231,6 +258,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `db.profiles.aggregate([\n  { $match: { careerGoal: "AI Engineer" } }\n])`,
       options: ['$group', '$match', '$project', '$unwind'],
       correctIndex: 1,
+      difficulty: 'intermediate',
     },
     {
       id: 'db_4',
@@ -238,6 +266,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `SELECT * FROM students S LEFT JOIN grades G ON S.id = G.student_id;`,
       options: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'CROSS JOIN'],
       correctIndex: 1,
+      difficulty: 'hard',
     },
     {
       id: 'db_5',
@@ -245,6 +274,7 @@ const ASSESSMENT_QUESTION_BANK = {
       code: `BEGIN TRANSACTION;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;`,
       options: ['Atomicity', 'Consistency', 'Isolation', 'Durability'],
       correctIndex: 0,
+      difficulty: 'hard',
     }
   ]
 }
@@ -292,26 +322,42 @@ router.post('/submit', async (req, res) => {
 
     // Persist result to MongoDB Profile if user email or ID provided
     if (email || userId) {
-      const filter = userId ? { userId } : { email }
+      const filter = userId ? { userId } : { email: email.toLowerCase().trim() }
       let profile = await Profile.findOne(filter)
-      if (profile) {
-        if (!Array.isArray(profile.skills)) profile.skills = []
-
-        const sIdx = profile.skills.findIndex(s => s.name.toLowerCase() === category.toLowerCase())
-        if (sIdx >= 0) {
-          profile.skills[sIdx].verifiedScore = calculatedScore
-          profile.skills[sIdx].isVerified = true
-          profile.skills[sIdx].level = calculatedScore >= 80 ? 'advanced' : 'intermediate'
-        } else {
-          profile.skills.push({
-            name: category.charAt(0).toUpperCase() + category.slice(1),
-            level: calculatedScore >= 80 ? 'advanced' : 'intermediate',
-            isVerified: true,
-            verifiedScore: calculatedScore,
-          })
-        }
-        await profile.save()
+      if (!profile) {
+        profile = new Profile({
+          email: email ? email.toLowerCase().trim() : 'student@nust.edu.pk',
+          userId: userId || undefined,
+          university: 'NUST',
+          degree: 'BS Computer Science',
+          yearOfStudy: 3,
+          experienceLevel: 'intermediate',
+          careerGoal: 'AI Engineer',
+          skills: [],
+          projects: []
+        })
       }
+
+      if (!Array.isArray(profile.skills)) profile.skills = []
+
+      let sIdx = profile.skills.findIndex(s => 
+        s.name.toLowerCase() === category.toLowerCase() ||
+        s.name.toLowerCase().includes(category.toLowerCase()) ||
+        category.toLowerCase().includes(s.name.toLowerCase())
+      )
+      if (sIdx >= 0) {
+        profile.skills[sIdx].verifiedScore = calculatedScore
+        profile.skills[sIdx].isVerified = true
+        profile.skills[sIdx].level = calculatedScore >= 80 ? 'advanced' : 'intermediate'
+      } else {
+        profile.skills.push({
+          name: category.charAt(0).toUpperCase() + category.slice(1),
+          level: calculatedScore >= 80 ? 'advanced' : 'intermediate',
+          isVerified: true,
+          verifiedScore: calculatedScore,
+        })
+      }
+      await profile.save()
     }
 
     res.json({

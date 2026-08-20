@@ -14,6 +14,9 @@ export const getProfileByUserId = async (req, res) => {
       if (user) {
         profile = await Profile.findOne({ userId: user._id }).populate('userId', 'name email role avatar')
       }
+      if (!profile) {
+        profile = await Profile.findOne({ email: param.toLowerCase().trim() })
+      }
     } else {
       profile = await Profile.findOne({ userId: param }).populate('userId', 'name email role avatar')
     }

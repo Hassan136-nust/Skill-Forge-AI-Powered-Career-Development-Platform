@@ -26,7 +26,8 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Check
+  Check,
+  RotateCcw
 } from 'lucide-react'
 import AuthModal from './AuthModal'
 import './StudentDashboard.css'
@@ -40,6 +41,190 @@ const ROLE_BENCHMARKS = {
   'Full-Stack Developer': ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Docker', 'PostgreSQL', 'Git'],
   'DevOps Engineer': ['Docker', 'Kubernetes', 'Linux', 'Git', 'Python', 'CI/CD', 'Bash'],
   'Data Scientist': ['Python', 'SQL', 'PyTorch', 'Pandas', 'NumPy', 'Git', 'Scikit-Learn']
+}
+
+// 100% Track-Grounded Dynamic 4-Step Roadmaps for all PRD Career Roles
+const TRACK_ROADMAPS = {
+  'AI Engineer': [
+    {
+      step: '01',
+      title: 'PYTHON & ALGORITHMS',
+      desc: 'Master Python async, OOP, vectorized arrays & data structures.',
+      capstone: 'Capstone 1: Neural Base Engine',
+      tech: 'python'
+    },
+    {
+      step: '02',
+      title: 'PYTORCH & NEURAL NETWORKS',
+      desc: 'Train deep neural networks, transformer architectures & fine-tune LLMs.',
+      capstone: 'Capstone 2: Deep Learning Pipeline',
+      tech: 'pytorch'
+    },
+    {
+      step: '03',
+      title: 'FASTAPI & VECTOR DATABASES',
+      desc: 'Build high-throughput AI microservices with ChromaDB, Redis & Pydantic.',
+      capstone: 'Capstone 3: RAG Retrieval API',
+      tech: 'fastapi'
+    },
+    {
+      step: '04',
+      title: 'AUTONOMOUS AI AGENTS & DOCKER',
+      desc: 'Deploy multi-agent orchestration systems with Docker multi-stage builds & SLA monitoring.',
+      capstone: 'Capstone 4: Enterprise Autonomous Agent',
+      tech: 'docker'
+    }
+  ],
+  'Backend Developer': [
+    {
+      step: '01',
+      title: 'TYPESCRIPT & NODE.JS CORE',
+      desc: 'Master asynchronous event loops, REST API design & clean architectural patterns.',
+      capstone: 'Capstone 1: High-Performance Gateway',
+      tech: 'typescript'
+    },
+    {
+      step: '02',
+      title: 'POSTGRESQL & DATABASE SCHEMAS',
+      desc: 'Design relational schemas, complex SQL indexing, ORMs & ACID transactions.',
+      capstone: 'Capstone 2: Relational Data Platform',
+      tech: 'postgresql'
+    },
+    {
+      step: '03',
+      title: 'FASTAPI & REDIS CACHING',
+      desc: 'Build scalable microservices, pub/sub queues & in-memory caching layers.',
+      capstone: 'Capstone 3: Distributed Microservice',
+      tech: 'fastapi'
+    },
+    {
+      step: '04',
+      title: 'DOCKER & CI/CD DEPLOYMENT',
+      desc: 'Containerize backend services, manage environment secrets & automated test pipelines.',
+      capstone: 'Capstone 4: Enterprise Production Backend',
+      tech: 'docker'
+    }
+  ],
+  'Frontend Developer': [
+    {
+      step: '01',
+      title: 'JAVASCRIPT & CSS ARCHITECTURE',
+      desc: 'Master modern ES6+, DOM manipulation, responsive Flexbox & CSS Grid design systems.',
+      capstone: 'Capstone 1: Interactive UI Component System',
+      tech: 'javascript'
+    },
+    {
+      step: '02',
+      title: 'REACT & STATE MANAGEMENT',
+      desc: 'Master React hook lifecycles, Redux/Zustand global state & reusable component design.',
+      capstone: 'Capstone 2: Dynamic Web Dashboard',
+      tech: 'react'
+    },
+    {
+      step: '03',
+      title: 'NEXT.JS & TYPESCRIPT INTERFACES',
+      desc: 'Implement Server-Side Rendering (SSR), App Router navigation & strict type safety.',
+      capstone: 'Capstone 3: Full-Fledged Next.js Web App',
+      tech: 'nextjs'
+    },
+    {
+      step: '04',
+      title: 'PERFORMANCE & TAILWIND STYLING',
+      desc: 'Optimize Web Vitals, dynamic Framer Motion animations & production builds.',
+      capstone: 'Capstone 4: Enterprise Web Platform',
+      tech: 'tailwind'
+    }
+  ],
+  'Full-Stack Developer': [
+    {
+      step: '01',
+      title: 'JAVASCRIPT & REACT FRONTEND',
+      desc: 'Build responsive interactive web UIs with modern React & state management.',
+      capstone: 'Capstone 1: Single-Page Web App',
+      tech: 'react'
+    },
+    {
+      step: '02',
+      title: 'NODE.JS & EXPRESS REST API',
+      desc: 'Engineer robust server API endpoints, authentication (JWT/OAuth) & middleware.',
+      capstone: 'Capstone 2: Secure RESTful Backend',
+      tech: 'nodejs'
+    },
+    {
+      step: '03',
+      title: 'POSTGRESQL & DATABASE INTEGRATION',
+      desc: 'Connect relational databases, design schemas & write efficient ORM queries.',
+      capstone: 'Capstone 3: Full-Stack Data Engine',
+      tech: 'postgresql'
+    },
+    {
+      step: '04',
+      title: 'DOCKER & FULL-STACK DEPLOYMENT',
+      desc: 'Containerize frontend & backend services, set up CI/CD & deploy to cloud infrastructure.',
+      capstone: 'Capstone 4: Enterprise Full-Stack Web Platform',
+      tech: 'docker'
+    }
+  ],
+  'DevOps Engineer': [
+    {
+      step: '01',
+      title: 'LINUX & BASH SCRIPTING',
+      desc: 'Master Linux system administration, shell scripting & server automation.',
+      capstone: 'Capstone 1: System Automation CLI',
+      tech: 'linux'
+    },
+    {
+      step: '02',
+      title: 'GIT & CI/CD PIPELINES',
+      desc: 'Build automated GitHub Actions workflows, linting, build matrix & regression tests.',
+      capstone: 'Capstone 2: Automated Delivery Pipeline',
+      tech: 'git'
+    },
+    {
+      step: '03',
+      title: 'DOCKER & CONTAINERIZATION',
+      desc: 'Write multi-stage Dockerfiles, Docker Compose orchestrations & security hardening.',
+      capstone: 'Capstone 3: Container Orchestration Suite',
+      tech: 'docker'
+    },
+    {
+      step: '04',
+      title: 'KUBERNETES & CLOUD CLUSTERS',
+      desc: 'Deploy Kubernetes Pods, Ingress controllers, Helm charts & monitoring stack.',
+      capstone: 'Capstone 4: Self-Healing Enterprise Cluster',
+      tech: 'kubernetes'
+    }
+  ],
+  'Data Scientist': [
+    {
+      step: '01',
+      title: 'PYTHON & NUMPY / PANDAS',
+      desc: 'Master data manipulation, clean dataframes, vectorization & exploratory analysis.',
+      capstone: 'Capstone 1: Exploratory Data Pipeline',
+      tech: 'pandas'
+    },
+    {
+      step: '02',
+      title: 'SQL & RELATIONAL ANALYTICS',
+      desc: 'Write complex SQL aggregations, window functions & statistical analytical queries.',
+      capstone: 'Capstone 2: Business Analytics Engine',
+      tech: 'sql'
+    },
+    {
+      step: '03',
+      title: 'SCIKIT-LEARN & MACHINE LEARNING',
+      desc: 'Build predictive models, feature engineering, classification & regression pipelines.',
+      capstone: 'Capstone 3: Predictive ML Pipeline',
+      tech: 'python'
+    },
+    {
+      step: '04',
+      title: 'PYTORCH & DEEP LEARNING',
+      desc: 'Train neural networks, natural language models & deploy inference API endpoints.',
+      capstone: 'Capstone 4: Production Predictive Analytics System',
+      tech: 'pytorch'
+    }
+  ]
 }
 
 // Real Diagnostic Questions Generator for Any Technology across all Track Benchmarks
@@ -199,17 +384,19 @@ export default function StudentDashboard({ onExitDashboard }) {
     projects: [],
   })
 
-  const [activeQuiz, setActiveQuiz] = useState(null)
-  const [selectedOption, setSelectedOption] = useState(null)
-  const [quizFeedback, setQuizFeedback] = useState(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showRepos, setShowRepos] = useState(false)
   const [skillScores, setSkillScores] = useState({})
   const [activeMilestone, setActiveMilestone] = useState(2)
 
-  // Load profile from MongoDB Atlas API
+  // Load profile from MongoDB Atlas API & LocalStorage Cache
   const loadProfile = async () => {
     try {
+      const cachedScores = JSON.parse(localStorage.getItem('skillforge_scores') || '{}')
+      if (Object.keys(cachedScores).length > 0) {
+        setSkillScores((prev) => ({ ...prev, ...cachedScores }))
+      }
+
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
       const userEmail = storedUser.email || 'student@nust.edu.pk'
 
@@ -238,17 +425,19 @@ export default function StudentDashboard({ onExitDashboard }) {
             reposCount: p.projects?.length || 0,
           }))
 
-          // Initialize REAL skill scores strictly from database (default 0 UNTESTED for un-quiz-tested skills!)
-          const initialScores = {}
+          const mergedScores = { ...cachedScores }
           if (Array.isArray(p.skills)) {
             p.skills.forEach((s) => {
               if (s && s.name) {
-                const realScore = s.isVerified && typeof s.verifiedScore === 'number' ? s.verifiedScore : 0
-                initialScores[s.name.toLowerCase()] = realScore
+                const sKey = s.name.toLowerCase()
+                if (s.isVerified && typeof s.verifiedScore === 'number') {
+                  mergedScores[sKey] = s.verifiedScore
+                }
               }
             })
           }
-          setSkillScores(initialScores)
+          setSkillScores(mergedScores)
+          localStorage.setItem('skillforge_scores', JSON.stringify(mergedScores))
         }
       }
     } catch (e) {
@@ -308,8 +497,24 @@ export default function StudentDashboard({ onExitDashboard }) {
     ? Math.min(100, Math.round((matchPoints / targetRequiredSkills.length) * 100))
     : 0
 
-  // Start Diagnostic Quiz via Express Backend /api/assessment/questions Endpoint
+  // Quiz Runner States
+  const [activeQuiz, setActiveQuiz] = useState(null)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [userAnswers, setUserAnswers] = useState([])
+  const [selectedOption, setSelectedOption] = useState(null)
+  const [slideDirection, setSlideDirection] = useState(1)
+  const [quizSummary, setQuizSummary] = useState(null)
+  const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
+
+  // Start Diagnostic 5-Question Assessment Quiz via Express Backend
   const handleStartSkillQuiz = async (skillName) => {
+    setQuizSummary(null)
+    setCurrentQuestionIndex(0)
+    setUserAnswers([])
+    setSelectedOption(null)
+    setSlideDirection(1)
+    setIsSubmittingQuiz(false)
+
     try {
       const res = await fetch(`http://localhost:3001/api/assessment/questions`)
       if (res.ok) {
@@ -330,96 +535,135 @@ export default function StudentDashboard({ onExitDashboard }) {
           }
 
           const qList = data.questions[catKey] || data.questions.python
-          const selectedQ = qList[Math.floor(Math.random() * qList.length)]
-
           setActiveQuiz({
             skillName,
             category: catKey,
-            ...selectedQ
+            questions: qList,
           })
-          setSelectedOption(null)
-          setQuizFeedback(null)
           return
         }
       }
     } catch (e) {
-      console.warn('Using fallback quiz bank:', e)
+      console.warn('Using fallback question set:', e)
     }
 
-    const quizData = getQuizForSkill(skillName)
+    const fallbackQ = getQuizForSkill(skillName)
     setActiveQuiz({
       skillName,
       category: 'python',
-      ...quizData
+      questions: [
+        { ...fallbackQ, difficulty: 'easy' },
+        { ...fallbackQ, id: 'q2', difficulty: 'intermediate' },
+        { ...fallbackQ, id: 'q3', difficulty: 'intermediate' },
+        { ...fallbackQ, id: 'q4', difficulty: 'hard' },
+        { ...fallbackQ, id: 'q5', difficulty: 'hard' },
+      ],
     })
-    setSelectedOption(null)
-    setQuizFeedback(null)
   }
 
-  // Answer Quiz & Submit to Express Backend /api/assessment/submit & MongoDB Atlas
-  const handleAnswerQuiz = async () => {
-    if (selectedOption === null || !activeQuiz) return
-    const isCorrect = selectedOption === activeQuiz.correctIndex
-    setQuizFeedback(isCorrect ? 'correct' : 'incorrect')
+  // Handle Next Question or Final Submission
+  const handleNextOrSubmitQuestion = async () => {
+    if (selectedOption === null || !activeQuiz || !activeQuiz.questions || isSubmittingQuiz) return
 
-    if (isCorrect) {
-      const sName = activeQuiz.skillName
-      const sKey = sName.toLowerCase()
-      const newScore = 100 // Tested and verified!
-      setSkillScores((prev) => ({ ...prev, [sKey]: newScore }))
+    const updatedAnswers = [...userAnswers, selectedOption]
+    setUserAnswers(updatedAnswers)
 
-      // Update skill in state and set verifiedScore & level
-      let updatedSkills = studentProfile.skills.map((s) => {
-        if (s && s.name && s.name.toLowerCase() === sKey) {
-          return {
-            ...s,
-            verifiedScore: newScore,
-            isVerified: true,
-            level: 'advanced',
-          }
-        }
-        return s
-      })
-
-      if (!updatedSkills.some((s) => s && s.name && s.name.toLowerCase() === sKey)) {
-        updatedSkills.push({
-          name: sName,
-          level: 'advanced',
-          isVerified: true,
-          verifiedScore: newScore,
-        })
-      }
-
-      setStudentProfile((prev) => ({ ...prev, skills: updatedSkills }))
-
-      // Save live score update directly to Express Assessment API & MongoDB Atlas
-      try {
-        await fetch(`http://localhost:3001/api/assessment/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: studentProfile.email,
-            category: activeQuiz.category || 'python',
-            answers: [{ questionId: activeQuiz.id || 'py_1', selectedIndex: selectedOption }],
-          }),
-        })
-
-        await fetch(`http://localhost:3001/api/profile`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: studentProfile.email,
-            skills: updatedSkills,
-          }),
-        })
-      } catch (e) {}
+    // Check if more questions exist
+    if (currentQuestionIndex < activeQuiz.questions.length - 1) {
+      setSlideDirection(1)
+      setSelectedOption(null)
+      setCurrentQuestionIndex((prev) => prev + 1)
+      return
     }
 
-    setTimeout(() => {
-      setActiveQuiz(null)
-      setSelectedOption(null)
-      setQuizFeedback(null)
-    }, 1400)
+    // Final question answered -> Activate loader state while saving to backend
+    setIsSubmittingQuiz(true)
+
+    let correctCount = 0
+    activeQuiz.questions.forEach((q, idx) => {
+      if (updatedAnswers[idx] === q.correctIndex) {
+        correctCount++
+      }
+    })
+
+    const finalScore = Math.round((correctCount / activeQuiz.questions.length) * 100)
+    const sName = activeQuiz.skillName
+    const sKey = sName.toLowerCase()
+
+    setSkillScores((prev) => {
+      const updated = { ...prev, [sKey]: finalScore }
+      localStorage.setItem('skillforge_scores', JSON.stringify(updated))
+      return updated
+    })
+
+    let updatedSkills = studentProfile.skills.map((s) => {
+      if (s && s.name && s.name.toLowerCase() === sKey) {
+        return {
+          ...s,
+          verifiedScore: finalScore,
+          isVerified: true,
+          level: finalScore >= 80 ? 'advanced' : 'intermediate',
+        }
+      }
+      return s
+    })
+
+    if (!updatedSkills.some((s) => s && s.name && s.name.toLowerCase() === sKey)) {
+      updatedSkills.push({
+        name: sName,
+        level: finalScore >= 80 ? 'advanced' : 'intermediate',
+        isVerified: true,
+        verifiedScore: finalScore,
+      })
+    }
+
+    setStudentProfile((prev) => {
+      const newProf = { ...prev, skills: updatedSkills }
+      const stored = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+      localStorage.setItem('skillforge_user', JSON.stringify({ ...stored, skills: updatedSkills }))
+      return newProf
+    })
+
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+      const answersPayload = activeQuiz.questions.map((q, idx) => ({
+        questionId: q.id,
+        selectedIndex: updatedAnswers[idx],
+      }))
+
+      await fetch(`http://localhost:3001/api/assessment/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: storedUser._id,
+          email: studentProfile.email,
+          category: sName,
+          answers: answersPayload,
+        }),
+      })
+
+      await fetch(`http://localhost:3001/api/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: storedUser._id,
+          email: studentProfile.email,
+          skills: updatedSkills,
+          careerGoal: studentProfile.careerGoal,
+        }),
+      })
+    } catch (e) {
+      console.warn('Submission error:', e)
+    } finally {
+      setIsSubmittingQuiz(false)
+    }
+
+    setQuizSummary({
+      score: finalScore,
+      correctCount,
+      total: activeQuiz.questions.length,
+      skillName: activeQuiz.skillName,
+    })
   }
 
   const handleProfileUpdated = (updated) => {
@@ -1002,110 +1246,70 @@ export default function StudentDashboard({ onExitDashboard }) {
               <div className="roadmap-zigzag-laser-line" />
 
               <div className="roadmap-zigzag-deck">
-                {/* STEP 01: UP Placement */}
-                <div
-                  className={`zigzag-card-wrapper position-up ${activeMilestone === 1 ? 'active' : ''} completed`}
-                  onClick={() => setActiveMilestone(1)}
-                >
-                  <div className="zigzag-connector-stem" />
-                  <div className="zigzag-laser-node-dot">01</div>
+                {(() => {
+                  const roadmapSteps = TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer']
+                  let activeFocusFound = false
 
-                  <div className="zigzag-3d-card">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span className="step-card-num-badge">STEP 01</span>
-                      <span style={{ color: '#27C93F', fontSize: '0.68rem', fontWeight: 800 }}>✓ VERIFIED</span>
-                    </div>
-                    <h3 className="step-card-title">
-                      {strongSkills[0]?.name ? `${strongSkills[0].name.toUpperCase()} PATTERNS` : 'FOUNDATIONS'}
-                    </h3>
-                    <p className="step-card-desc">
-                      Master core software architecture, vector algorithms &amp; design patterns.
-                    </p>
-                    <div className="step-capstone-pill">
-                      ✦ Capstone 1: Base Engine
-                    </div>
-                  </div>
-                </div>
+                  return roadmapSteps.map((stepItem, sIdx) => {
+                    const stepNum = sIdx + 1
+                    const positionClass = sIdx % 2 === 0 ? 'position-up' : 'position-down'
+                    const sTechKey = stepItem.tech.toLowerCase()
+                    
+                    const userSkill = studentProfile.skills.find(s => s && s.name && s.name.toLowerCase().includes(sTechKey))
+                    const isVerified = Boolean((userSkill && userSkill.isVerified) || (skillScores[sTechKey] && skillScores[sTechKey] >= 80))
 
-                {/* STEP 02: DOWN Placement */}
-                <div
-                  className={`zigzag-card-wrapper position-down ${activeMilestone === 2 ? 'active' : ''} active`}
-                  onClick={() => setActiveMilestone(2)}
-                >
-                  <div className="zigzag-connector-stem" />
-                  <div className="zigzag-laser-node-dot">02</div>
+                    let statusText = '🔒 LOCKED'
+                    let statusColor = '#64748b'
+                    let cardStateClass = ''
 
-                  <div className="zigzag-3d-card">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span className="step-card-num-badge">STEP 02</span>
-                      <span style={{ color: '#FFD166', fontSize: '0.68rem', fontWeight: 800 }}>⚡ ACTIVE FOCUS</span>
-                    </div>
-                    <h3 className="step-card-title">
-                      {missingSkills[0]?.name ? `BRIDGE ${missingSkills[0].name.toUpperCase()}` : 'MICROSERVICES'}
-                    </h3>
-                    <p className="step-card-desc">
-                      Acquire target stack required for enterprise {studentProfile.careerGoal} engineering.
-                    </p>
-                    <div className="step-capstone-pill">
-                      ✦ Capstone 2: {missingSkills[0]?.name || 'Target Stack'} Service
-                    </div>
-                  </div>
-                </div>
+                    if (isVerified) {
+                      statusText = '✓ VERIFIED'
+                      statusColor = '#27C93F'
+                      cardStateClass = 'completed'
+                    } else if (!activeFocusFound) {
+                      statusText = '⚡ ACTIVE FOCUS'
+                      statusColor = '#FFD166'
+                      cardStateClass = 'active'
+                      activeFocusFound = true
+                    } else if (sIdx === 3) {
+                      statusText = '🔒 GRADUATION'
+                      statusColor = '#64748b'
+                    }
 
-                {/* STEP 03: UP Placement */}
-                <div
-                  className={`zigzag-card-wrapper position-up ${activeMilestone === 3 ? 'active' : ''}`}
-                  onClick={() => setActiveMilestone(3)}
-                >
-                  <div className="zigzag-connector-stem" />
-                  <div className="zigzag-laser-node-dot">03</div>
+                    return (
+                      <div
+                        key={sIdx}
+                        className={`zigzag-card-wrapper ${positionClass} ${activeMilestone === stepNum ? 'active' : ''} ${cardStateClass}`}
+                        onClick={() => setActiveMilestone(stepNum)}
+                      >
+                        <div className="zigzag-connector-stem" />
+                        <div className="zigzag-laser-node-dot">0{stepNum}</div>
 
-                  <div className="zigzag-3d-card">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span className="step-card-num-badge">STEP 03</span>
-                      <span style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 800 }}>🔒 LOCKED</span>
-                    </div>
-                    <h3 className="step-card-title">
-                      {missingSkills[1]?.name ? `${missingSkills[1].name.toUpperCase()} DEPLOY` : 'INFRASTRUCTURE'}
-                    </h3>
-                    <p className="step-card-desc">
-                      Containerize microservices with Docker multi-stage builds &amp; CI/CD pipelines.
-                    </p>
-                    <div className="step-capstone-pill" style={{ color: '#B8B3C7' }}>
-                      ✦ Capstone 3: Pipeline
-                    </div>
-                  </div>
-                </div>
-
-                {/* STEP 04: DOWN Placement */}
-                <div
-                  className={`zigzag-card-wrapper position-down ${activeMilestone === 4 ? 'active' : ''}`}
-                  onClick={() => setActiveMilestone(4)}
-                >
-                  <div className="zigzag-connector-stem" />
-                  <div className="zigzag-laser-node-dot">04</div>
-
-                  <div className="zigzag-3d-card">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span className="step-card-num-badge">STEP 04</span>
-                      <span style={{ color: '#64748b', fontSize: '0.68rem', fontWeight: 800 }}>🔒 GRADUATION</span>
-                    </div>
-                    <h3 className="step-card-title">ENTERPRISE AGENT</h3>
-                    <p className="step-card-desc">
-                      Deploy autonomous multi-agent systems with real-time SLA monitoring.
-                    </p>
-                    <div className="step-capstone-pill" style={{ color: '#B8B3C7' }}>
-                      ✦ Capstone 4: AI Agent
-                    </div>
-                  </div>
-                </div>
+                        <div className="zigzag-3d-card">
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span className="step-card-num-badge">STEP 0{stepNum}</span>
+                            <span style={{ color: statusColor, fontSize: '0.68rem', fontWeight: 800 }}>{statusText}</span>
+                          </div>
+                          <h3 className="step-card-title">{stepItem.title}</h3>
+                          <p className="step-card-desc">{stepItem.desc}</p>
+                          <div
+                            className="step-capstone-pill"
+                            style={{ color: isVerified ? '#27C93F' : cardStateClass === 'active' ? '#FFD166' : '#B8B3C7' }}
+                          >
+                            ✦ {stepItem.capstone}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                })()}
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* INTERACTIVE QUIZ RUNNER MODAL */}
+      {/* INTERACTIVE 5-QUESTION SLIDING QUIZ COCKPIT MODAL */}
       <AnimatePresence>
         {activeQuiz && (
           <motion.div
@@ -1114,107 +1318,260 @@ export default function StudentDashboard({ onExitDashboard }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div
-              className="quiz-runner-card"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-            >
-              <div className="quiz-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <Award size={18} color="#FFD166" />
-                  <h3 className="bungee-regular" style={{ fontSize: '1.1rem', color: '#FFF7E8' }}>
-                    {activeQuiz.skillName.toUpperCase()} DIAGNOSTIC QUIZ
-                  </h3>
+            {quizSummary ? (
+              /* FINAL QUIZ SUMMARY COCKPIT VIEW */
+              <motion.div
+                className="quiz-runner-card"
+                initial={{ scale: 0.88, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.88, opacity: 0 }}
+                style={{ textAlign: 'center', alignItems: 'center' }}
+              >
+                <div className="quiz-header" style={{ width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <Award size={20} color="#FFD166" />
+                    <h3 className="bungee-regular" style={{ fontSize: '1.2rem', color: '#FFF7E8' }}>
+                      {quizSummary.skillName.toUpperCase()} DIAGNOSIS COMPLETED!
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveQuiz(null)
+                      setQuizSummary(null)
+                    }}
+                    style={{ background: 'transparent', border: 'none', color: '#FFF7E8', cursor: 'pointer' }}
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
+
+                <div style={{ margin: '1.2rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
+                  <div
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      borderRadius: '50%',
+                      background: quizSummary.score >= 70 ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 209, 102, 0.2)',
+                      border: quizSummary.score >= 70 ? '3px solid #27C93F' : '3px solid #FFD166',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.8rem',
+                      fontWeight: 800,
+                      color: quizSummary.score >= 70 ? '#27C93F' : '#FFD166',
+                      boxShadow: '0 0 30px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    {quizSummary.score}%
+                  </div>
+
+                  <h2 style={{ fontSize: '1.1rem', color: '#FFF7E8', fontWeight: 800 }}>
+                    {quizSummary.score >= 80 ? '🔥 EXPERT VERIFIED SCHOLAR!' : '⚡ DEVELOPING SKILL FOUNDATION'}
+                  </h2>
+
+                  <p style={{ fontSize: '0.85rem', color: '#B8B3C7', maxWidth: '420px', lineHeight: 1.4 }}>
+                    You correctly answered <strong style={{ color: '#FFD166' }}>{quizSummary.correctCount} of {quizSummary.total}</strong> authentic PRD technical questions. Score persisted to MongoDB Atlas!
+                  </p>
+                </div>
+
                 <button
+                  className="auth-submit-btn bungee-regular"
                   onClick={() => {
                     setActiveQuiz(null)
-                    setSelectedOption(null)
+                    setQuizSummary(null)
                   }}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#FFF7E8',
-                    cursor: 'pointer',
-                  }}
+                  style={{ width: '100%' }}
                 >
-                  <X size={20} />
+                  <span>RETURN TO SKILL HUB</span>
+                  <ArrowRight size={16} />
                 </button>
-              </div>
+              </motion.div>
+            ) : (
+              /* ACTIVE QUESTION SLIDING COCKPIT VIEW */
+              (() => {
+                const qList = activeQuiz.questions || []
+                const currentQ = qList[currentQuestionIndex] || qList[0]
+                const difficulty = (
+                  currentQ?.difficulty ||
+                  (currentQuestionIndex === 0 ? 'easy' : currentQuestionIndex < 3 ? 'intermediate' : 'hard')
+                ).toLowerCase()
 
-              <p style={{ fontSize: '0.88rem', color: '#FFF7E8', fontWeight: 600 }}>
-                {activeQuiz.question}
-              </p>
+                const isEasyOrHard = difficulty === 'easy' || difficulty === 'hard'
+                const isIntermediate = difficulty === 'intermediate'
 
-              {activeQuiz.code && (
-                <div className="quiz-code-block">{activeQuiz.code}</div>
-              )}
-
-              <div className="quiz-options-list">
-                {activeQuiz.options.map((opt, oIdx) => (
-                  <button
-                    key={oIdx}
-                    className={`quiz-option-btn ${selectedOption === oIdx ? 'selected' : ''}`}
-                    onClick={() => setSelectedOption(oIdx)}
+                return (
+                  <div
+                    className={`quiz-cockpit-stage ${!isEasyOrHard ? 'no-left' : ''} ${!isIntermediate ? 'no-right' : ''}`}
                   >
-                    <span
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '6px',
-                        background: '#1c2030',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        color: '#FFD166',
-                      }}
-                    >
-                      {String.fromCharCode(65 + oIdx)}
-                    </span>
-                    <span>{opt}</span>
-                  </button>
-                ))}
-              </div>
+                    {/* LEFT CHARACTER (Shown for EASY or HARD difficulty) */}
+                    {isEasyOrHard && (
+                      <div className="quiz-char-side-col">
+                        <img
+                          src={difficulty === 'easy' ? '/easy.png' : '/hard.png'}
+                          alt="Diagnostic Mentor"
+                          className="quiz-char-side-img"
+                        />
+                        <div className="quiz-char-side-badge press-start-2p-regular">
+                          <span>{difficulty === 'easy' ? '✦ EASY DIAGNOSIS' : '✦ HARD DIAGNOSIS'}</span>
+                        </div>
+                      </div>
+                    )}
 
-              {quizFeedback && (
-                <div
-                  style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    backgroundColor:
-                      quizFeedback === 'correct'
-                        ? 'rgba(39, 201, 63, 0.15)'
-                        : 'rgba(229, 36, 59, 0.15)',
-                    border:
-                      quizFeedback === 'correct' ? '1px solid #27C93F' : '1px solid #E5243B',
-                    color: quizFeedback === 'correct' ? '#27C93F' : '#FF6B81',
-                    fontSize: '0.82rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <CheckCircle2 size={16} />
-                  <span>
-                    {quizFeedback === 'correct'
-                      ? `✓ CORRECT! ${activeQuiz.skillName} verified & score saved to MongoDB Atlas!`
-                      : '✕ Incorrect choice. Review code logic and try again!'}
-                  </span>
-                </div>
-              )}
+                    {/* CENTER SLIDING QUESTION FORM */}
+                    <AnimatePresence mode="wait" custom={slideDirection}>
+                      <motion.div
+                        key={currentQuestionIndex}
+                        custom={slideDirection}
+                        initial={{ opacity: 0, x: slideDirection > 0 ? 70 : -70 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: slideDirection > 0 ? -70 : 70 }}
+                        transition={{ type: 'spring', stiffness: 130, damping: 18 }}
+                        className="quiz-center-form-box"
+                      >
+                        {/* Header & Question Counter */}
+                        <div className="quiz-header">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                            <Award size={18} color="#FFD166" />
+                            <h3 className="bungee-regular" style={{ fontSize: '1rem', color: '#FFF7E8' }}>
+                              {activeQuiz.skillName.toUpperCase()} ASSESSMENT
+                            </h3>
+                          </div>
 
-              <button
-                className="auth-submit-btn bungee-regular"
-                onClick={handleAnswerQuiz}
-                disabled={selectedOption === null || quizFeedback !== null}
-              >
-                <span>SUBMIT DIAGNOSIS</span>
-                <ArrowRight size={15} />
-              </button>
-            </motion.div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                            <span className={`quiz-difficulty-pill ${difficulty}`}>
+                              {difficulty.toUpperCase()}
+                            </span>
+
+                            <span
+                              className="press-start-2p-regular"
+                              style={{
+                                fontSize: '0.68rem',
+                                color: '#FFD166',
+                                backgroundColor: 'rgba(255, 209, 102, 0.12)',
+                                border: '1px solid rgba(255, 209, 102, 0.4)',
+                                borderRadius: '12px',
+                                padding: '0.3rem 0.65rem',
+                              }}
+                            >
+                              {currentQuestionIndex + 1} / {qList.length}
+                            </span>
+
+                            <button
+                              onClick={() => {
+                                setActiveQuiz(null)
+                                setSelectedOption(null)
+                              }}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#FFF7E8',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <X size={18} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Top Progress Track */}
+                        <div className="quiz-progress-bar-container">
+                          <div
+                            className="quiz-progress-bar-fill"
+                            style={{
+                              width: `${((currentQuestionIndex + 1) / qList.length) * 100}%`,
+                            }}
+                          />
+                        </div>
+
+                        {/* Question Text */}
+                        <p style={{ fontSize: '0.88rem', color: '#FFF7E8', fontWeight: 600, lineHeight: 1.4 }}>
+                          {currentQ?.question}
+                        </p>
+
+                        {/* Code Snippet if present */}
+                        {currentQ?.code && (
+                          <div className="quiz-code-block">{currentQ.code}</div>
+                        )}
+
+                        {/* Options List */}
+                        <div className="quiz-options-list">
+                          {currentQ?.options?.map((opt, oIdx) => (
+                            <button
+                              key={oIdx}
+                              className={`quiz-option-btn ${selectedOption === oIdx ? 'selected' : ''}`}
+                              onClick={() => setSelectedOption(oIdx)}
+                            >
+                              <span
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  borderRadius: '6px',
+                                  background: selectedOption === oIdx ? '#FFD166' : '#1c2030',
+                                  color: selectedOption === oIdx ? '#05060A' : '#FFD166',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {String.fromCharCode(65 + oIdx)}
+                              </span>
+                              <span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Next / Finish Button */}
+                        <button
+                          className="auth-submit-btn bungee-regular"
+                          onClick={handleNextOrSubmitQuestion}
+                          disabled={selectedOption === null || isSubmittingQuiz}
+                          style={{
+                            opacity: (selectedOption === null || isSubmittingQuiz) ? 0.55 : 1,
+                            cursor: (selectedOption === null || isSubmittingQuiz) ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.6rem'
+                          }}
+                        >
+                          {isSubmittingQuiz ? (
+                            <>
+                              <RotateCcw size={16} className="scroll-arrow-bouncing" style={{ animation: 'spin 1s linear infinite' }} />
+                              <span>SAVING DIAGNOSIS TO MONGODB ATLAS...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>
+                                {currentQuestionIndex < qList.length - 1
+                                  ? `NEXT QUESTION (${currentQuestionIndex + 1}/${qList.length})`
+                                  : `FINISH & SUBMIT DIAGNOSIS (${qList.length}/${qList.length})`}
+                              </span>
+                              <ArrowRight size={16} />
+                            </>
+                          )}
+                        </button>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* RIGHT CHARACTER (Shown for INTERMEDIATE difficulty) */}
+                    {isIntermediate && (
+                      <div className="quiz-char-side-col">
+                        <img
+                          src="/man.png"
+                          alt="Intermediate Mentor"
+                          className="quiz-char-side-img"
+                        />
+                        <div className="quiz-char-side-badge press-start-2p-regular">
+                          <span>✦ INTERMEDIATE DIAGNOSIS</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()
+            )}
           </motion.div>
         )}
       </AnimatePresence>

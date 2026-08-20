@@ -8,11 +8,16 @@ import Profile from '../models/Profile.js'
 import Assessment from '../models/Assessment.js'
 import Roadmap from '../models/Roadmap.js'
 import Question from '../models/Question.js'
+import MentorChat from '../models/MentorChat.js'
+import { protect, requireAdmin } from '../middleware/authMiddleware.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const router = express.Router()
+
+// Secure all admin routes with JWT Auth + Admin Role Check
+router.use(protect, requireAdmin)
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -59,29 +64,23 @@ router.get('/stats', async (req, res) => {
       roleDistribution[g] = (roleDistribution[g] || 0) + 1
     })
 
-    // Microservices Health Checks
-    let pythonHealth = { status: 'offline', details: null }
+    // Microservices Health Check
+    let pythonHealth = { status: 'healthy', port: '8000' }
     try {
-      const pyRes = await fetch('http://localhost:8000/health', { method: 'GET', signal: AbortSignal.timeout(2500) })
-      if (pyRes.ok) {
-        const pyData = await pyRes.json()
-        pythonHealth = { status: 'healthy', details: pyData }
-      }
-    } catch (e) {
-      pythonHealth = { status: 'offline', error: e.message }
+      const pyCheck = await fetch('http://localhost:8000/docs', { signal: AbortSignal.timeout(1500) })
+      if (!pyCheck.ok) pythonHealth = { status: 'unhealthy', port: '8000' }
+    } catch {
+      pythonHealth = { status: 'offline', port: '8000' }
     }
 
-    // Recent Users
-    const recentUsers = await User.find()
-      .select('-password')
-      .sort({ createdAt: -1 })
-      .limit(6)
-
-    // Recent Assessments
-    const recentAssessments = await Assessment.find()
-      .populate('userId', 'name email role')
-      .sort({ createdAt: -1 })
-      .limit(5)
+    // Platform-wide AI Invocations & Token Telemetry
+    const allChats = await MentorChat.find().lean()
+    let totalChatMessages = 0
+    allChats.forEach((c) => {
+      if (Array.isArray(c.messages)) totalChatMessages += c.messages.length
+    })
+    const totalAiCalls = totalRoadmaps + Math.ceil(totalChatMessages / 2) + totalAssessments
+    const totalPlatformTokens = (totalRoadmaps * 2200) + (Math.ceil(totalChatMessages / 2) * 650) + (totalAssessments * 450)
 
     res.json({
       success: true,
@@ -101,6 +100,15 @@ router.get('/stats', async (req, res) => {
         roadmaps: {
           total: totalRoadmaps,
         },
+        chats: {
+          total: totalChats,
+        },
+        aiTelemetry: {
+          totalCalls: totalAiCalls,
+          totalTokens: totalPlatformTokens,
+          tokensFormatted: totalPlatformTokens >= 1000 ? `${(totalPlatformTokens / 1000).toFixed(1)}k` : `${totalPlatformTokens}`,
+          costFormatted: `$${((totalPlatformTokens / 1000000) * 0.15).toFixed(4)}`,
+        },
         roleDistribution,
         services: {
           expressGateway: { status: 'healthy', port: process.env.PORT || 3001 },
@@ -108,8 +116,6 @@ router.get('/stats', async (req, res) => {
           groqEngine: { status: 'active', model: 'openai/gpt-oss-120b & llama-3.3-70b-versatile' },
           database: { status: 'connected', host: 'MongoDB Atlas' },
         },
-        recentUsers,
-        recentAssessments,
       },
     })
   } catch (err) {
@@ -119,7 +125,7 @@ router.get('/stats', async (req, res) => {
 })
 
 // =========================================================================
-// 2. GET /api/admin/users — Searchable User Directory with Profiles
+// 2. GET /api/admin/users — Searchable User Directory with Profiles & AI Telemetry
 // =========================================================================
 router.get('/users', async (req, res) => {
   try {
@@ -143,17 +149,35 @@ router.get('/users', async (req, res) => {
       .limit(parseInt(limit))
       .lean()
 
-    // Attach profile and latest assessment data
+    // Attach profile, latest assessment, roadmap count, chat count, and AI telemetry
     const enhancedUsers = await Promise.all(
       users.map(async (u) => {
         const profile = await Profile.findOne({ userId: u._id }).lean()
         const latestAssessment = await Assessment.findOne({ userId: u._id }).sort({ createdAt: -1 }).lean()
         const roadmapCount = await Roadmap.countDocuments({ $or: [{ userId: u._id }, { email: u.email }] })
+        const userChats = await MentorChat.find({ $or: [{ userId: u._id }, { email: u.email }] }).lean()
+        const chatCount = userChats.length
+        let chatMessagesCount = 0
+        userChats.forEach((c) => {
+          if (Array.isArray(c.messages)) chatMessagesCount += c.messages.length
+        })
+        const assessmentCount = await Assessment.countDocuments({ userId: u._id })
+
+        const aiCallsCount = roadmapCount + Math.ceil(chatMessagesCount / 2) + assessmentCount
+        const estimatedTokens = (roadmapCount * 2200) + (Math.ceil(chatMessagesCount / 2) * 650) + (assessmentCount * 450)
+
         return {
           ...u,
           profile: profile || null,
           latestAssessment: latestAssessment || null,
           roadmapCount,
+          chatCount,
+          aiTelemetry: {
+            calls: aiCallsCount,
+            tokens: estimatedTokens,
+            tokensFormatted: estimatedTokens >= 1000 ? `${(estimatedTokens / 1000).toFixed(1)}k` : `${estimatedTokens}`,
+            costFormatted: `$${((estimatedTokens / 1000000) * 0.15).toFixed(4)}`,
+          },
         }
       })
     )
@@ -165,6 +189,58 @@ router.get('/users', async (req, res) => {
     })
   } catch (err) {
     console.error('[Admin Users Error]:', err)
+    res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+// =========================================================================
+// 2B. GET /api/admin/users/:id/details — Full Scholar Drilldown (Chats + Roadmaps)
+// =========================================================================
+router.get('/users/:id/details', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password').lean()
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+
+    const profile = await Profile.findOne({ userId: user._id }).lean()
+    const assessments = await Assessment.find({ userId: user._id }).sort({ createdAt: -1 }).lean()
+    const roadmaps = await Roadmap.find({ $or: [{ userId: user._id }, { email: user.email }] }).sort({ createdAt: -1 }).lean()
+    const chats = await MentorChat.find({ $or: [{ userId: user._id }, { email: user.email }] }).sort({ updatedAt: -1 }).lean()
+
+    res.json({
+      success: true,
+      user,
+      profile,
+      assessments,
+      roadmaps,
+      chats,
+    })
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+// =========================================================================
+// 2C. GET /api/admin/chats — All AI Mentor Conversations Across Cohort
+// =========================================================================
+router.get('/chats', async (req, res) => {
+  try {
+    const chats = await MentorChat.find().sort({ updatedAt: -1 }).limit(100).lean()
+    res.json({ success: true, chats })
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+// =========================================================================
+// 2D. GET /api/admin/roadmaps — All AI Generated Roadmaps Across Cohort
+// =========================================================================
+router.get('/roadmaps', async (req, res) => {
+  try {
+    const roadmaps = await Roadmap.find().sort({ createdAt: -1 }).limit(100).lean()
+    res.json({ success: true, roadmaps })
+  } catch (err) {
     res.status(500).json({ success: false, message: err.message })
   }
 })

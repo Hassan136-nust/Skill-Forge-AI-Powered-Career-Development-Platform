@@ -59,14 +59,47 @@ export default function App() {
     const isRoadmapRoute = path.endsWith('/roadmap') || path.includes('/roadmap')
     const isDashboardRoute = path.endsWith('/dashboard') || path.includes('/dashboard')
 
+    const token = localStorage.getItem('skillforge_token')
+    let user = null
+    try {
+      user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    } catch {
+      user = null
+    }
+
     if (isAdminRoute) {
-      setCurrentView('admin')
+      if (token && user && user.role === 'admin') {
+        setCurrentView('admin')
+      } else {
+        // Unauthorized admin attempt: force redirect to landing and prompt login
+        window.history.replaceState({}, '', '/')
+        setCurrentView('landing')
+        setIsAuthOpen(true)
+      }
     } else if (isMentorRoute) {
-      setCurrentView('mentor')
+      if (token && user) {
+        setCurrentView('mentor')
+      } else {
+        window.history.replaceState({}, '', '/')
+        setCurrentView('landing')
+        setIsAuthOpen(true)
+      }
     } else if (isRoadmapRoute) {
-      setCurrentView('roadmap')
+      if (token && user) {
+        setCurrentView('roadmap')
+      } else {
+        window.history.replaceState({}, '', '/')
+        setCurrentView('landing')
+        setIsAuthOpen(true)
+      }
     } else if (isDashboardRoute) {
-      setCurrentView('dashboard')
+      if (token && user) {
+        setCurrentView('dashboard')
+      } else {
+        window.history.replaceState({}, '', '/')
+        setCurrentView('landing')
+        setIsAuthOpen(true)
+      }
     } else {
       setCurrentView('landing')
     }
@@ -90,8 +123,12 @@ export default function App() {
       const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
       if (token && user) {
         setCurrentUser(user)
+      } else {
+        setCurrentUser(null)
       }
-    } catch (e) { }
+    } catch (e) {
+      setCurrentUser(null)
+    }
 
     syncViewFromUrl()
 
@@ -292,10 +329,10 @@ export default function App() {
 
   const handleOpenDashboard = () => {
     const token = localStorage.getItem('skillforge_token')
-    const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
 
-    if (token || user) {
-      const targetUrl = getDashboardPathForUser(user || currentUser)
+    if (token && user) {
+      const targetUrl = getDashboardPathForUser(user)
       window.history.pushState({}, '', targetUrl)
       setCurrentView('dashboard')
     } else {
@@ -304,10 +341,15 @@ export default function App() {
   }
 
   const handleOpenAdmin = () => {
+    const token = localStorage.getItem('skillforge_token')
     const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-    const targetUrl = getAdminPathForUser(user)
-    window.history.pushState({}, '', targetUrl)
-    setCurrentView('admin')
+    if (token && user && user.role === 'admin') {
+      const targetUrl = getAdminPathForUser(user)
+      window.history.pushState({}, '', targetUrl)
+      setCurrentView('admin')
+    } else {
+      setIsAuthOpen(true)
+    }
   }
 
   const handleAuthSuccess = (user) => {
@@ -324,8 +366,17 @@ export default function App() {
     }
   }
 
-  // If in Admin Dashboard View, render the Admin Command Center
+  // If in Admin Dashboard View, render the Admin Command Center (Protected)
   if (currentView === 'admin') {
+    const token = localStorage.getItem('skillforge_token')
+    const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    if (!token || !user || user.role !== 'admin') {
+      window.history.replaceState({}, '', '/')
+      setCurrentView('landing')
+      setIsAuthOpen(true)
+      return null
+    }
+
     return (
       <AdminDashboard
         onExitAdmin={() => {
@@ -333,13 +384,13 @@ export default function App() {
           window.scrollTo(0, 0)
           setScrollProgress(0)
           setCurrentView('landing')
-          const token = localStorage.getItem('skillforge_token')
-          const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-          setCurrentUser(token ? user : null)
+          const t = localStorage.getItem('skillforge_token')
+          const u = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          setCurrentUser(t ? u : null)
         }}
         onOpenStudentDashboard={() => {
-          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-          const targetUrl = getDashboardPathForUser(user)
+          const u = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getDashboardPathForUser(u)
           window.history.pushState({}, '', targetUrl)
           setCurrentView('dashboard')
         }}
@@ -347,13 +398,22 @@ export default function App() {
     )
   }
 
-  // If in Dedicated Full Roadmap View, render the interactive galaxy map with login.webm
+  // If in Dedicated Full Roadmap View, render the interactive galaxy map with login.webm (Protected)
   if (currentView === 'roadmap') {
+    const token = localStorage.getItem('skillforge_token')
+    const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    if (!token || !user) {
+      window.history.replaceState({}, '', '/')
+      setCurrentView('landing')
+      setIsAuthOpen(true)
+      return null
+    }
+
     return (
       <FullRoadmapPage
         onBackToDashboard={() => {
-          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-          const targetUrl = getDashboardPathForUser(user)
+          const u = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getDashboardPathForUser(u)
           window.history.pushState({}, '', targetUrl)
           setCurrentView('dashboard')
         }}
@@ -361,14 +421,23 @@ export default function App() {
     )
   }
 
-  // If in Dedicated AI Mentor View, render the full-context chat cockpit with login.webm
+  // If in Dedicated AI Mentor View, render the full-context chat cockpit with login.webm (Protected)
   if (currentView === 'mentor') {
+    const token = localStorage.getItem('skillforge_token')
+    const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    if (!token || !user) {
+      window.history.replaceState({}, '', '/')
+      setCurrentView('landing')
+      setIsAuthOpen(true)
+      return null
+    }
+
     return (
       <AiMentorPage
         currentUser={currentUser}
         onBackToDashboard={() => {
-          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-          const targetUrl = getDashboardPathForUser(user)
+          const u = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getDashboardPathForUser(u)
           window.history.pushState({}, '', targetUrl)
           setCurrentView('dashboard')
         }}
@@ -376,8 +445,17 @@ export default function App() {
     )
   }
 
-  // If in Dashboard View, render the Student Dashboard
+  // If in Dashboard View, render the Student Dashboard (Protected)
   if (currentView === 'dashboard') {
+    const token = localStorage.getItem('skillforge_token')
+    const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+    if (!token || !user) {
+      window.history.replaceState({}, '', '/')
+      setCurrentView('landing')
+      setIsAuthOpen(true)
+      return null
+    }
+
     return (
       <StudentDashboard
         onExitDashboard={() => {
@@ -385,22 +463,22 @@ export default function App() {
           window.scrollTo(0, 0)
           setScrollProgress(0)
           setCurrentView('landing')
-          const token = localStorage.getItem('skillforge_token')
-          const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-          setCurrentUser(token ? user : null)
+          const t = localStorage.getItem('skillforge_token')
+          const u = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          setCurrentUser(t ? u : null)
         }}
         onOpenFullRoadmap={(milestones) => {
-          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const u = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
           if (milestones && milestones.length > 0) {
             localStorage.setItem('skillforge_current_milestones', JSON.stringify(milestones))
           }
-          const targetUrl = getRoadmapPathForUser(user)
+          const targetUrl = getRoadmapPathForUser(u)
           window.history.pushState({}, '', targetUrl)
           setCurrentView('roadmap')
         }}
         onOpenAiMentor={() => {
-          const user = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
-          const targetUrl = getMentorPathForUser(user)
+          const u = currentUser || JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          const targetUrl = getMentorPathForUser(u)
           window.history.pushState({}, '', targetUrl)
           setCurrentView('mentor')
         }}

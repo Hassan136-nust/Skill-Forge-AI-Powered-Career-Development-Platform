@@ -51,12 +51,12 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, onOpenAdm
           <button
             className="navbar-item-btn"
             style={{
-              color: '#00F0FF',
+              color: '#FFD166',
               fontWeight: 800,
-              border: '1px solid rgba(0, 240, 255, 0.4)',
+              border: '1px solid rgba(255, 209, 102, 0.4)',
               borderRadius: '20px',
               padding: '0.25rem 0.75rem',
-              backgroundColor: 'rgba(0, 240, 255, 0.12)',
+              backgroundColor: 'rgba(255, 209, 102, 0.12)',
             }}
             onClick={() => onOpenAdmin && onOpenAdmin()}
           >
@@ -73,13 +73,13 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, onOpenAdm
               <button
                 className="navbar-item-btn"
                 style={{
-                  color: '#020612',
-                  backgroundColor: '#00F0FF',
-                  border: '1px solid #00F0FF',
+                  color: '#05060A',
+                  backgroundColor: '#FFD166',
+                  border: '1px solid #FFD166',
                   borderRadius: '20px',
                   padding: '0.45rem 1rem',
                   fontWeight: 800,
-                  boxShadow: '0 0 15px rgba(0, 240, 255, 0.4)',
+                  boxShadow: '0 0 15px rgba(255, 209, 102, 0.4)',
                 }}
                 onClick={() => onOpenAdmin && onOpenAdmin()}
               >

@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import html2pdf from 'html2pdf.js'
 import AuthModal from './AuthModal'
 import './StudentDashboard.css'
@@ -614,39 +615,66 @@ export default function StudentDashboard({ onExitDashboard }) {
     setIsExportingPdf(true)
     setActivePdfRoadmap(roadmap)
 
-    setTimeout(() => {
-      const element = document.getElementById('skillforge-active-pdf-template')
-      if (!element) {
+    setTimeout(async () => {
+      let captureHost = null
+      try {
+        const element = document.getElementById('skillforge-active-pdf-template')
+        if (!element) {
+          throw new Error('Template element not found in DOM')
+        }
+
+        // Clone element into an isolated, visible top-level capture container
+        const clone = element.cloneNode(true)
+        clone.style.position = 'static'
+        clone.style.opacity = '1'
+        clone.style.visibility = 'visible'
+        clone.style.width = '760px'
+        clone.style.margin = '0 auto'
+        clone.style.background = '#FFFFFF'
+        clone.style.color = '#0F172A'
+        clone.style.display = 'block'
+
+        captureHost = document.createElement('div')
+        captureHost.style.position = 'fixed'
+        captureHost.style.top = '0'
+        captureHost.style.left = '0'
+        captureHost.style.width = '100vw'
+        captureHost.style.height = '100vh'
+        captureHost.style.background = '#FFFFFF'
+        captureHost.style.zIndex = '99999999'
+        captureHost.style.overflow = 'auto'
+        captureHost.style.opacity = '1'
+        captureHost.appendChild(clone)
+        document.body.appendChild(captureHost)
+
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: `SkillForge_${(roadmap.careerGoal || studentProfile.careerGoal).replace(/\s+/g, '_')}_Roadmap.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#FFFFFF',
+            scrollY: 0,
+            scrollX: 0,
+            logging: false,
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] },
+        }
+
+        await html2pdf().set(opt).from(clone).save()
+      } catch (err) {
+        console.warn('PDF export error:', err)
+      } finally {
+        if (captureHost && document.body.contains(captureHost)) {
+          document.body.removeChild(captureHost)
+        }
         setIsExportingPdf(false)
         setPdfGeneratingId(null)
         setActivePdfRoadmap(null)
-        return
       }
-
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `SkillForge_${(roadmap.careerGoal || studentProfile.careerGoal).replace(/\s+/g, '_')}_Roadmap.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      }
-
-      html2pdf()
-        .set(opt)
-        .from(element)
-        .save()
-        .then(() => {
-          setIsExportingPdf(false)
-          setPdfGeneratingId(null)
-          setActivePdfRoadmap(null)
-        })
-        .catch((err) => {
-          console.warn('PDF export error:', err)
-          setIsExportingPdf(false)
-          setPdfGeneratingId(null)
-          setActivePdfRoadmap(null)
-        })
-    }, 250)
+    }, 450)
   }
 
   // Dynamic Skill Gap Engine
@@ -2137,7 +2165,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                   }}
                 >
                   <div className="ai-roadmap-markdown-body">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                       {aiRoadmapModalData.generatedRoadmapText}
                     </ReactMarkdown>
                   </div>
@@ -2738,22 +2766,21 @@ export default function StudentDashboard({ onExitDashboard }) {
         onProfileUpdated={handleProfileUpdated}
       />
 
-      {/* DEDICATED IN-DOM HIGH-CONTRAST PDF RENDERER (POWERED BY REACTMARKDOWN) */}
+      {/* DEDICATED IN-DOM HIGH-CONTRAST PDF RENDERER (POWERED BY REACTMARKDOWN & REHYPE-RAW) */}
       {activePdfRoadmap && (
         <div
           id="skillforge-active-pdf-template"
           className="pdf-export-template"
           style={{
-            position: 'fixed',
+            position: 'absolute',
             top: 0,
             left: 0,
-            width: '800px',
-            zIndex: 999999,
+            width: '790px',
+            zIndex: -9999,
             background: '#FFFFFF',
             color: '#0F172A',
-            opacity: 1,
+            opacity: 0.01,
             pointerEvents: 'none',
-            boxShadow: '0 0 50px rgba(0,0,0,0.5)',
           }}
         >
           {/* Header */}
@@ -2807,8 +2834,8 @@ export default function StudentDashboard({ onExitDashboard }) {
 
           {/* Markdown Body */}
           <div className="pdf-markdown-body" style={{ color: '#0F172A', fontSize: '12px', lineHeight: 1.6 }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {activePdfRoadmap.generatedRoadmapText?.replace(/<br\s*\/?>/gi, '\n')}
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+              {activePdfRoadmap.generatedRoadmapText}
             </ReactMarkdown>
           </div>
 

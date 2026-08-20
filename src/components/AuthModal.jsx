@@ -17,20 +17,12 @@ import {
   Award,
   Layers,
   Star,
-  Code2
+  Code2,
+  Briefcase
 } from 'lucide-react'
 import './AuthModal.css'
 
 const API_BASE = 'http://localhost:3001/api'
-
-const DEFAULT_SKILLS = [
-  { name: 'Python', level: 'intermediate' },
-  { name: 'PyTorch', level: 'beginner' },
-  { name: 'FastAPI', level: 'intermediate' },
-  { name: 'Docker', level: 'beginner' },
-  { name: 'Git & GitHub', level: 'advanced' },
-  { name: 'ChromaDB / RAG', level: 'intermediate' },
-]
 
 export default function AuthModal({ isOpen, onClose }) {
   const [mode, setMode] = useState('login') // 'login' | 'signup' | 'otp' | 'profile_setup'
@@ -40,19 +32,20 @@ export default function AuthModal({ isOpen, onClose }) {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
 
-  // Academic Profile
+  // Academic Profile & Experience
   const [university, setUniversity] = useState('')
   const [degree, setDegree] = useState('BS Computer Science')
   const [yearOfStudy, setYearOfStudy] = useState(3)
   const [experienceLevel, setExperienceLevel] = useState('intermediate')
   const [targetRole, setTargetRole] = useState('AI Engineer')
 
-  // GitHub & Skills
+  // GitHub & Skills (INITIAL STATE IS EMPTY AS REQUESTED)
   const [githubUsername, setGithubUsername] = useState('')
   const [isSyncingGithub, setIsSyncingGithub] = useState(false)
   const [githubRepos, setGithubRepos] = useState([])
-  const [skills, setSkills] = useState(DEFAULT_SKILLS)
+  const [skills, setSkills] = useState([]) // Starts empty!
   const [newSkillName, setNewSkillName] = useState('')
+  const [newSkillLevel, setNewSkillLevel] = useState('intermediate')
 
   // OTP
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
@@ -65,6 +58,7 @@ export default function AuthModal({ isOpen, onClose }) {
   const [successMessage, setSuccessMessage] = useState('AUTHENTICATION SUCCESSFUL!')
 
   const otpInputsRef = useRef([])
+  const centerFormRef = useRef(null)
 
   if (!isOpen) return null
 
@@ -179,7 +173,7 @@ export default function AuthModal({ isOpen, onClose }) {
     if (!newSkillName.trim()) return
     const exists = skills.some((s) => s.name.toLowerCase() === newSkillName.trim().toLowerCase())
     if (!exists) {
-      setSkills((prev) => [...prev, { name: newSkillName.trim(), level: 'intermediate' }])
+      setSkills((prev) => [...prev, { name: newSkillName.trim(), level: newSkillLevel }])
       setNewSkillName('')
     }
   }
@@ -188,16 +182,9 @@ export default function AuthModal({ isOpen, onClose }) {
     setSkills((prev) => prev.filter((s) => s.name !== skillName))
   }
 
-  const handleToggleSkillLevel = (skillName) => {
-    const levels = ['beginner', 'intermediate', 'advanced']
+  const handleUpdateSkillLevel = (skillName, newLevel) => {
     setSkills((prev) =>
-      prev.map((s) => {
-        if (s.name === skillName) {
-          const nextIdx = (levels.indexOf(s.level) + 1) % levels.length
-          return { ...s, level: levels[nextIdx] }
-        }
-        return s
-      })
+      prev.map((s) => (s.name === skillName ? { ...s, level: newLevel } : s))
     )
   }
 
@@ -365,8 +352,6 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   }
 
-  const centerFormRef = useRef(null)
-
   // Universal card wheel handler so scrolling anywhere over characters/card scrolls the center form
   const handleUniversalWheel = (e) => {
     e.stopPropagation()
@@ -433,7 +418,7 @@ export default function AuthModal({ isOpen, onClose }) {
                   </div>
                   <h2 className="auth-title">INITIALIZE PROFILE</h2>
                   <p className="auth-subtitle">
-                    Configure your academics, target role, and sync GitHub repositories.
+                    Configure your academics, experience level, and sync GitHub repositories.
                   </p>
                 </div>
 
@@ -450,32 +435,46 @@ export default function AuthModal({ isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* Card 1: Academic Details */}
+                {/* Card 1: Academic Foundation & Experience */}
                 <div className="cyber-section-card">
                   <div className="cyber-card-header">
                     <span className="cyber-card-title press-start-2p-regular">
                       <GraduationCap size={14} />
-                      <span>ACADEMIC FOUNDATION</span>
+                      <span>ACADEMIC FOUNDATION &amp; EXPERIENCE</span>
                     </span>
                   </div>
 
                   <div className="auth-inputs-stack">
-                    <div className="auth-field-wrapper">
-                      <label className="auth-label press-start-2p-regular">UNIVERSITY / INSTITUTION</label>
-                      <div className="auth-input-container">
-                        <input
-                          type="text"
-                          placeholder="e.g. NUST / FAST / Oxford"
-                          className="auth-input"
-                          value={university}
-                          onChange={(e) => setUniversity(e.target.value)}
-                        />
+                    <div className="auth-inputs-grid-2col">
+                      <div className="auth-field-wrapper">
+                        <label className="auth-label press-start-2p-regular">UNIVERSITY / INSTITUTION</label>
+                        <div className="auth-input-container">
+                          <input
+                            type="text"
+                            placeholder="e.g. NUST / FAST / Oxford"
+                            className="auth-input"
+                            value={university}
+                            onChange={(e) => setUniversity(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="auth-field-wrapper">
+                        <label className="auth-label press-start-2p-regular">DEGREE</label>
+                        <div className="auth-input-container">
+                          <input
+                            type="text"
+                            className="auth-input"
+                            value={degree}
+                            onChange={(e) => setDegree(e.target.value)}
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="auth-inputs-grid-2col">
+                    <div className="auth-inputs-grid-3col">
                       <div className="auth-field-wrapper">
-                        <label className="auth-label press-start-2p-regular">YEAR OF STUDY</label>
+                        <label className="auth-label press-start-2p-regular">YEAR</label>
                         <div className="auth-input-container">
                           <select
                             className="auth-select"
@@ -487,6 +486,21 @@ export default function AuthModal({ isOpen, onClose }) {
                             <option value={3}>3rd Year (Junior)</option>
                             <option value={4}>4th Year (Senior)</option>
                             <option value={5}>Postgrad</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="auth-field-wrapper">
+                        <label className="auth-label press-start-2p-regular">EXPERIENCE LEVEL</label>
+                        <div className="auth-input-container">
+                          <select
+                            className="auth-select"
+                            value={experienceLevel}
+                            onChange={(e) => setExperienceLevel(e.target.value)}
+                          >
+                            <option value="beginner">Beginner (0-1 yrs)</option>
+                            <option value="intermediate">Intermediate (1-3 yrs)</option>
+                            <option value="advanced">Advanced (3+ yrs)</option>
                           </select>
                         </div>
                       </div>
@@ -575,46 +589,58 @@ export default function AuthModal({ isOpen, onClose }) {
                   )}
                 </div>
 
-                {/* Card 3: Skills Matrix */}
+                {/* Card 3: Luxury Skills Matrix */}
                 <div className="cyber-section-card">
                   <div className="cyber-card-header">
                     <span className="cyber-card-title press-start-2p-regular">
                       <Layers size={14} />
                       <span>GUARDIANS SKILLS MATRIX</span>
                     </span>
-                    <span style={{ fontSize: '0.62rem', color: '#B8B3C7' }}>
-                      [B] Beg · [I] Inter · [A] Adv
+                    <span style={{ fontSize: '0.65rem', color: '#B8B3C7' }}>
+                      {skills.length} Technologies Configured
                     </span>
                   </div>
 
-                  <div className="skills-tag-cloud">
-                    {skills.map((skill, idx) => (
-                      <div
-                        key={idx}
-                        className={`skill-chip level-${skill.level}`}
-                        onClick={() => handleToggleSkillLevel(skill.name)}
-                        title="Click to toggle level (Beginner → Intermediate → Advanced)"
-                      >
-                        <span style={{ fontWeight: 600 }}>{skill.name}</span>
-                        <span className="skill-chip-level-badge press-start-2p-regular">[{skill.level[0]}]</span>
-                        <span
-                          className="skill-chip-remove"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRemoveSkill(skill.name)
-                          }}
-                        >
-                          <X size={11} />
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  {skills.length === 0 ? (
+                    <div className="skills-empty-state">
+                      <span>✦ No skills added yet. Auto-sync from GitHub above or add your technologies below!</span>
+                    </div>
+                  ) : (
+                    <div className="skills-tag-cloud">
+                      {skills.map((skill, idx) => (
+                        <div key={idx} className={`skill-chip-luxury level-${skill.level}`}>
+                          <span className="skill-chip-name">{skill.name}</span>
+                          
+                          {/* Direct Level Selector Dropdown on Chip */}
+                          <select
+                            className="skill-level-select-pill"
+                            value={skill.level}
+                            onChange={(e) => handleUpdateSkillLevel(skill.name, e.target.value)}
+                            title="Change proficiency level"
+                          >
+                            <option value="beginner">⭐ Beg</option>
+                            <option value="intermediate">⚡ Inter</option>
+                            <option value="advanced">🔥 Adv</option>
+                          </select>
 
-                  <div className="add-skill-inline-row">
+                          <span
+                            className="skill-chip-remove-btn"
+                            onClick={() => handleRemoveSkill(skill.name)}
+                            title="Remove skill"
+                          >
+                            <X size={12} />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add Skill Bar with Level Selector */}
+                  <div className="add-skill-cockpit-bar">
                     <div className="auth-input-container" style={{ flex: 1 }}>
                       <input
                         type="text"
-                        placeholder="Add custom technology (e.g. LangChain, Go, PyTorch)"
+                        placeholder="Add technology (e.g. PyTorch, Docker, LangChain)"
                         className="auth-input"
                         value={newSkillName}
                         onChange={(e) => setNewSkillName(e.target.value)}
@@ -626,6 +652,17 @@ export default function AuthModal({ isOpen, onClose }) {
                         }}
                       />
                     </div>
+
+                    <select
+                      className="add-skill-level-select"
+                      value={newSkillLevel}
+                      onChange={(e) => setNewSkillLevel(e.target.value)}
+                    >
+                      <option value="beginner">⭐ Beginner</option>
+                      <option value="intermediate">⚡ Intermediate</option>
+                      <option value="advanced">🔥 Advanced</option>
+                    </select>
+
                     <button
                       type="button"
                       className="github-sync-btn"
@@ -633,7 +670,7 @@ export default function AuthModal({ isOpen, onClose }) {
                       onClick={handleAddSkill}
                     >
                       <Plus size={14} />
-                      <span>ADD</span>
+                      <span>ADD SKILL</span>
                     </button>
                   </div>
                 </div>

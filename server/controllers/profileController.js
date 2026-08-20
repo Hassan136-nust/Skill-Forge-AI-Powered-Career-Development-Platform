@@ -1,12 +1,22 @@
 import Profile from '../models/Profile.js'
 import User from '../models/User.js'
 
-// @desc    Get profile by user ID
+// @desc    Get profile by user ID or email
 // @route   GET /api/profile/:userId
-// @access  Public / Private
+// @access  Public
 export const getProfileByUserId = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ userId: req.params.userId }).populate('userId', 'name email role avatar')
+    let profile = null
+    const param = req.params.userId
+
+    if (param.includes('@')) {
+      const user = await User.findOne({ email: param.toLowerCase().trim() })
+      if (user) {
+        profile = await Profile.findOne({ userId: user._id }).populate('userId', 'name email role avatar')
+      }
+    } else {
+      profile = await Profile.findOne({ userId: param }).populate('userId', 'name email role avatar')
+    }
 
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Profile not found' })
@@ -21,11 +31,12 @@ export const getProfileByUserId = async (req, res) => {
 
 // @desc    Create or update full student profile (including GitHub projects & skills)
 // @route   POST /api/profile
-// @access  Private / Authenticated
+// @access  Public / Authenticated
 export const saveProfile = async (req, res) => {
   try {
     const {
       userId,
+      email,
       university,
       degree,
       yearOfStudy,
@@ -36,29 +47,49 @@ export const saveProfile = async (req, res) => {
       careerGoal,
     } = req.body
 
-    const targetUserId = req.user?._id || userId
+    let targetUserId = req.user?._id || userId
+
+    // Resolve by email if userId not explicitly provided
+    if (!targetUserId && email) {
+      const user = await User.findOne({ email: email.toLowerCase().trim() })
+      if (user) {
+        targetUserId = user._id
+      }
+    }
 
     if (!targetUserId) {
-      return res.status(400).json({ success: false, message: 'User ID is required' })
+      // Create a student user record if one doesn't exist yet
+      const fallbackEmail = email || `student_${Date.now()}@skillforge.io`
+      let user = await User.findOne({ email: fallbackEmail })
+      if (!user) {
+        user = await User.create({
+          name: 'Scholar Student',
+          email: fallbackEmail,
+          password: 'temp_password_' + Date.now(),
+          role: 'student',
+          isVerified: true,
+        })
+      }
+      targetUserId = user._id
     }
 
     let profile = await Profile.findOne({ userId: targetUserId })
 
     if (profile) {
-      profile.university = university ?? profile.university
-      profile.degree = degree ?? profile.degree
-      profile.yearOfStudy = yearOfStudy ?? profile.yearOfStudy
-      profile.experienceLevel = experienceLevel ?? profile.experienceLevel
-      if (skills) profile.skills = skills
-      if (projects) profile.projects = projects
-      if (certifications) profile.certifications = certifications
-      if (careerGoal) profile.careerGoal = careerGoal
+      if (university !== undefined) profile.university = university
+      if (degree !== undefined) profile.degree = degree
+      if (yearOfStudy !== undefined) profile.yearOfStudy = yearOfStudy
+      if (experienceLevel !== undefined) profile.experienceLevel = experienceLevel
+      if (skills !== undefined) profile.skills = skills
+      if (projects !== undefined) profile.projects = projects
+      if (certifications !== undefined) profile.certifications = certifications
+      if (careerGoal !== undefined) profile.careerGoal = careerGoal
 
       await profile.save()
     } else {
       profile = await Profile.create({
         userId: targetUserId,
-        university: university || '',
+        university: university || 'NUST',
         degree: degree || 'BS Computer Science',
         yearOfStudy: yearOfStudy || 3,
         experienceLevel: experienceLevel || 'intermediate',
@@ -69,9 +100,15 @@ export const saveProfile = async (req, res) => {
       })
     }
 
+    // Update user profile status if available
+    await User.findByIdAndUpdate(targetUserId, {
+      profileCompleted: true,
+      targetRole: careerGoal || 'AI Engineer',
+    }).catch(() => {})
+
     res.status(200).json({
       success: true,
-      message: 'Student profile updated successfully in MongoDB Atlas',
+      message: 'Student registration & profile saved successfully in MongoDB Atlas!',
       profile,
     })
   } catch (error) {
@@ -82,13 +119,18 @@ export const saveProfile = async (req, res) => {
 
 // @desc    Add custom skill
 // @route   POST /api/profile/skills
-// @access  Private
+// @access  Public / Authenticated
 export const addSkill = async (req, res) => {
   try {
-    const { skillName, level } = req.body
-    const userId = req.user?.id || req.body.userId
+    const { skillName, level, userId, email } = req.body
+    let targetUserId = req.user?.id || userId
 
-    const profile = await Profile.findOne({ userId })
+    if (!targetUserId && email) {
+      const user = await User.findOne({ email: email.toLowerCase().trim() })
+      if (user) targetUserId = user._id
+    }
+
+    const profile = await Profile.findOne({ userId: targetUserId })
     if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' })
 
     const exists = profile.skills.some((s) => s.name.toLowerCase() === skillName.toLowerCase())

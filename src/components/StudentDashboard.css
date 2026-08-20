@@ -1,0 +1,655 @@
+/* =========================================================================
+   SKILLFORGE STUDENT DASHBOARD — LUXURY CYBER COMMAND CENTER
+   ========================================================================= */
+
+.dashboard-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  color: #FFF7E8;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  background-color: #05060a;
+}
+
+/* Looping Video Background — Bright & Crisp */
+.dashboard-bg-video-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dashboard-bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.88) contrast(1.08);
+}
+
+.dashboard-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(7, 9, 16, 0.4) 0%, rgba(2, 3, 8, 0.85) 100%);
+}
+
+/* Top Navbar */
+.dashboard-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 2.5rem;
+  background: rgba(7, 9, 16, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1.5px solid rgba(255, 209, 102, 0.2);
+}
+
+.dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.3rem;
+  color: #FFF7E8;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.dashboard-brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FFD166 0%, #E5A824 100%);
+  color: #05060A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 0 0 15px rgba(255, 209, 102, 0.4);
+}
+
+.dashboard-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(13, 16, 26, 0.8);
+  border: 1px solid #222638;
+  border-radius: 12px;
+  padding: 0.3rem;
+}
+
+.dashboard-tab-btn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #B8B3C7;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.dashboard-tab-btn:hover {
+  color: #FFF7E8;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-tab-btn.active {
+  background: #FFD166;
+  color: #05060A;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 209, 102, 0.3);
+}
+
+.dashboard-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard-nav-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: #1c2030;
+  border: 1px solid #33394f;
+  color: #FFF7E8;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.dashboard-nav-btn:hover {
+  background: #252b42;
+  border-color: #FFD166;
+  color: #FFD166;
+}
+
+/* Main Container */
+.dashboard-main-container {
+  position: relative;
+  z-index: 10;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 6rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* =========================================================================
+   1. STUDENT PROFILE & READINESS HEADER CARD
+   ========================================================================= */
+.profile-hero-card {
+  background: rgba(7, 9, 16, 0.82);
+  border: 1.5px solid rgba(255, 209, 102, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  padding: 1.8rem 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 209, 102, 0.08);
+}
+
+.profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.2) 0%, rgba(13, 16, 26, 0.8) 100%);
+  border: 2px solid #FFD166;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(255, 209, 102, 0.25);
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.profile-student-name {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.45rem;
+  color: #FFF7E8;
+  letter-spacing: 1px;
+}
+
+.profile-uni-pill {
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(255, 209, 102, 0.15);
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  color: #FFD166;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.profile-details-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.82rem;
+  color: #B8B3C7;
+}
+
+.profile-role-selector-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(13, 16, 26, 0.9);
+  border: 1px solid #33394f;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.role-select-input {
+  background: transparent;
+  border: none;
+  color: #FFD166;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+}
+
+.role-select-input option {
+  background-color: #070910;
+  color: #FFF7E8;
+}
+
+.profile-hero-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.readiness-gauge-box {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: rgba(13, 16, 26, 0.8);
+  border: 1px solid #222638;
+  border-radius: 14px;
+  padding: 0.8rem 1.4rem;
+}
+
+.gauge-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: conic-gradient(#FFD166 var(--progress, 74%), #1c2030 0deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 0 20px rgba(255, 209, 102, 0.3);
+}
+
+.gauge-inner {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #070910;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.88rem;
+  color: #FFD166;
+}
+
+.readiness-text-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.readiness-label {
+  font-size: 0.65rem;
+  color: #B8B3C7;
+  letter-spacing: 0.8px;
+}
+
+.readiness-status {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #FFF7E8;
+}
+
+/* =========================================================================
+   2. SKILL ASSESSMENT HUB (6 PRD CATEGORIES)
+   ========================================================================= */
+.dashboard-grid-2col {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.8rem;
+}
+
+.dashboard-glass-panel {
+  background: rgba(7, 9, 16, 0.82);
+  border: 1px solid rgba(255, 209, 102, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  padding: 1.6rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1c2030;
+  padding-bottom: 0.8rem;
+}
+
+.panel-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.15rem;
+  color: #FFF7E8;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.assessment-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.assessment-item-card {
+  background: rgba(13, 16, 26, 0.85);
+  border: 1px solid #222638;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 0.25s ease;
+}
+
+.assessment-item-card:hover {
+  border-color: rgba(255, 209, 102, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+}
+
+.assessment-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.assessment-cat-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #FFF7E8;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.assessment-score-badge {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.8rem;
+  color: #FFD166;
+}
+
+.assessment-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #1c2030;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.assessment-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD166 0%, #27C93F 100%);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.assessment-quiz-btn {
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 7px;
+  background: #1c2030;
+  border: 1px solid #33394f;
+  color: #FFF7E8;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.assessment-quiz-btn:hover {
+  background: #FFD166;
+  color: #05060A;
+  border-color: #FFD166;
+}
+
+/* =========================================================================
+   3. SKILL GAP ANALYSIS MATRIX
+   ========================================================================= */
+.gap-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.gap-col-box {
+  background: rgba(5, 6, 10, 0.7);
+  border: 1px solid #1c2030;
+  border-radius: 10px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.gap-col-header {
+  font-size: 0.64rem;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #1c2030;
+}
+
+.gap-col-header.strong { color: #27C93F; }
+.gap-col-header.weak { color: #FFD166; }
+.gap-col-header.missing { color: #FF6B81; }
+
+.gap-skill-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(13, 16, 26, 0.8);
+  font-size: 0.72rem;
+  color: #FFF7E8;
+}
+
+/* =========================================================================
+   4. AI CAREER ROADMAP TIMELINE
+   ========================================================================= */
+.roadmap-timeline-deck {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+}
+
+.roadmap-milestone-card {
+  background: rgba(13, 16, 26, 0.85);
+  border: 1px solid #222638;
+  border-radius: 14px;
+  padding: 1.2rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.roadmap-milestone-card:hover {
+  border-color: #FFD166;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.roadmap-milestone-card.active {
+  border-color: #FFD166;
+  background: linear-gradient(180deg, rgba(255, 209, 102, 0.08) 0%, rgba(13, 16, 26, 0.9) 100%);
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.15);
+}
+
+.milestone-badge {
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  color: #FFD166;
+}
+
+.milestone-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.92rem;
+  color: #FFF7E8;
+  line-height: 1.2;
+}
+
+.milestone-project-box {
+  background: rgba(7, 9, 16, 0.9);
+  border: 1px solid #222638;
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.72rem;
+}
+
+.milestone-project-title {
+  font-weight: 700;
+  color: #FFD166;
+  margin-bottom: 0.2rem;
+}
+
+/* =========================================================================
+   5. QUIZ RUNNER MODAL
+   ========================================================================= */
+.quiz-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(2, 3, 8, 0.85);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.quiz-runner-card {
+  width: 95%;
+  max-width: 720px;
+  background: rgba(7, 9, 16, 0.92);
+  border: 1.5px solid #FFD166;
+  border-radius: 20px;
+  padding: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 209, 102, 0.2);
+}
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1c2030;
+  padding-bottom: 0.8rem;
+}
+
+.quiz-code-block {
+  background: #030408;
+  border: 1px solid #222638;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: #A3E635;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.quiz-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.quiz-option-btn {
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  background: #0d101a;
+  border: 1.5px solid #222638;
+  color: #FFF7E8;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.quiz-option-btn:hover {
+  border-color: #FFD166;
+  background: #161b2c;
+}
+
+.quiz-option-btn.selected {
+  border-color: #FFD166;
+  background: rgba(255, 209, 102, 0.15);
+  color: #FFD166;
+  font-weight: 700;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-grid-2col {
+    grid-template-columns: 1fr;
+  }
+  .roadmap-timeline-deck {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .dashboard-navbar {
+    padding: 0.8rem 1.2rem;
+  }
+  .dashboard-main-container {
+    padding: 1.2rem;
+  }
+  .profile-hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .assessment-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .gap-columns-grid {
+    grid-template-columns: 1fr;
+  }
+  .roadmap-timeline-deck {
+    grid-template-columns: 1fr;
+  }
+}

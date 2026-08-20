@@ -1,7 +1,7 @@
 import { Sun } from 'lucide-react'
 import './Navbar.css'
 
-export default function Navbar({ onNavigate, onStart }) {
+export default function Navbar({ onNavigate, onStart, onOpenDashboard, currentUser }) {
   const scrollToSection = (id) => {
     const el = document.getElementById(id)
     if (el) {
@@ -47,13 +47,45 @@ export default function Navbar({ onNavigate, onStart }) {
         </button>
       </nav>
 
-      {/* Right Actions: theme circle button + Get Started pill button */}
+      {/* Right Actions: Dashboard shortcut + theme button + Get Started pill button */}
       <div className="navbar-right-actions">
+        {currentUser ? (
+          <button
+            className="navbar-item-btn"
+            style={{
+              color: '#05060A',
+              backgroundColor: '#FFD166',
+              border: '1px solid #FFD166',
+              borderRadius: '20px',
+              padding: '0.45rem 1.1rem',
+              fontWeight: 700,
+              boxShadow: '0 0 15px rgba(255, 209, 102, 0.4)',
+            }}
+            onClick={() => onOpenDashboard && onOpenDashboard()}
+          >
+            ✦ {currentUser.name?.split(' ')[0] || 'Scholar'}'s Dashboard
+          </button>
+        ) : (
+          <>
+            <button
+              className="navbar-item-btn"
+              style={{
+                color: '#FFD166',
+                border: '1px solid rgba(255, 209, 102, 0.4)',
+                borderRadius: '20px',
+                padding: '0.4rem 0.9rem',
+              }}
+              onClick={() => onOpenDashboard && onOpenDashboard()}
+            >
+              ✦ Student Dashboard
+            </button>
+            <button className="get-started-btn bungee-regular" onClick={onStart}>
+              Get Started
+            </button>
+          </>
+        )}
         <button className="theme-toggle-btn" title="Theme Settings">
           <Sun size={18} />
-        </button>
-        <button className="get-started-btn bungee-regular" onClick={onStart}>
-          Get Started
         </button>
       </div>
     </header>

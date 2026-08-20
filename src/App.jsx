@@ -11,6 +11,7 @@ import PricingSection from './components/PricingSection'
 import SdgArchSection from './components/SdgArchSection'
 import CosmicCatGuide from './components/CosmicCatGuide'
 import AuthModal from './components/AuthModal'
+import StudentDashboard from './components/StudentDashboard'
 import Footer from './components/Footer'
 import './App.css'
 
@@ -21,6 +22,19 @@ export default function App() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isAuthOpen, setIsAuthOpen] = useState(false)
+  const [currentView, setCurrentView] = useState('landing') // 'landing' | 'dashboard'
+  const [currentUser, setCurrentUser] = useState(null)
+
+  // Check existing session
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem('skillforge_token')
+      const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+      if (token && user) {
+        setCurrentUser(user)
+      }
+    } catch (e) {}
+  }, [])
 
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
@@ -208,6 +222,35 @@ export default function App() {
   const isHeroVisible = scrollProgress < 0.16
   const isVideoScrubbingZone = scrollProgress < 0.98
 
+  const handleOpenDashboard = () => {
+    const token = localStorage.getItem('skillforge_token')
+    if (token) {
+      setCurrentView('dashboard')
+    } else {
+      setIsAuthOpen(true)
+    }
+  }
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user)
+    setIsAuthOpen(false)
+    setCurrentView('dashboard')
+  }
+
+  // If in Dashboard View, render the Student Dashboard
+  if (currentView === 'dashboard') {
+    return (
+      <StudentDashboard
+        onExitDashboard={() => {
+          setCurrentView('landing')
+          const token = localStorage.getItem('skillforge_token')
+          const user = JSON.parse(localStorage.getItem('skillforge_user') || 'null')
+          setCurrentUser(token ? user : null)
+        }}
+      />
+    )
+  }
+
   return (
     <main ref={containerRef} className="scroll-wrapper">
       {/* Background Video Layer */}
@@ -228,12 +271,14 @@ export default function App() {
       <Navbar
         onNavigate={scrollToVideoProgress}
         onStart={() => setIsAuthOpen(true)}
+        onOpenDashboard={handleOpenDashboard}
+        currentUser={currentUser}
       />
 
       {/* Frame 1: Box-Free Hero */}
       <HeroFrame
         visible={isHeroVisible}
-        onStartJourney={() => setIsAuthOpen(true)}
+        onStartJourney={handleOpenDashboard}
         onExploreMissions={() => scrollToElement('roadmaps')}
         onScrollDown={() => scrollToVideoProgress(0.25)}
       />
@@ -258,7 +303,11 @@ export default function App() {
       </div>
 
       {/* Authentication Gateway Modal */}
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </main>
   )
 }

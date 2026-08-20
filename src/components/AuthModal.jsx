@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
@@ -24,8 +24,15 @@ import './AuthModal.css'
 
 const API_BASE = 'http://localhost:3001/api'
 
-export default function AuthModal({ isOpen, onClose }) {
-  const [mode, setMode] = useState('login') // 'login' | 'signup' | 'otp' | 'profile_setup'
+export default function AuthModal({
+  isOpen,
+  onClose,
+  initialMode = 'login',
+  initialData = null,
+  onProfileUpdated,
+  onAuthSuccess
+}) {
+  const [mode, setMode] = useState(initialMode) // 'login' | 'signup' | 'otp' | 'profile_setup'
 
   // Credentials
   const [email, setEmail] = useState('')
@@ -39,13 +46,32 @@ export default function AuthModal({ isOpen, onClose }) {
   const [experienceLevel, setExperienceLevel] = useState('intermediate')
   const [targetRole, setTargetRole] = useState('AI Engineer')
 
-  // GitHub & Skills (INITIAL STATE IS EMPTY AS REQUESTED)
+  // GitHub & Skills
   const [githubUsername, setGithubUsername] = useState('')
   const [isSyncingGithub, setIsSyncingGithub] = useState(false)
   const [githubRepos, setGithubRepos] = useState([])
-  const [skills, setSkills] = useState([]) // Starts empty!
+  const [skills, setSkills] = useState([])
   const [newSkillName, setNewSkillName] = useState('')
   const [newSkillLevel, setNewSkillLevel] = useState('intermediate')
+
+  // Sync mode and prefill data when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (initialMode) setMode(initialMode)
+      if (initialData) {
+        if (initialData.email) setEmail(initialData.email)
+        if (initialData.name) setFullName(initialData.name)
+        if (initialData.university) setUniversity(initialData.university)
+        if (initialData.degree) setDegree(initialData.degree)
+        if (initialData.yearOfStudy) setYearOfStudy(initialData.yearOfStudy)
+        if (initialData.experienceLevel) setExperienceLevel(initialData.experienceLevel)
+        if (initialData.careerGoal || initialData.targetRole) setTargetRole(initialData.careerGoal || initialData.targetRole)
+        if (initialData.githubUser || initialData.githubUsername) setGithubUsername(initialData.githubUser || initialData.githubUsername)
+        if (Array.isArray(initialData.skills)) setSkills(initialData.skills)
+        if (Array.isArray(initialData.projects)) setGithubRepos(initialData.projects)
+      }
+    }
+  }, [isOpen, initialMode, initialData])
 
   // OTP
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
@@ -280,8 +306,12 @@ export default function AuthModal({ isOpen, onClose }) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Failed to save profile')
 
+      if (data.profile && onProfileUpdated) {
+        onProfileUpdated(data.profile)
+      }
+
       const savedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
-      completeAuth(localStorage.getItem('skillforge_token'), savedUser, 'PROFILE INITIALIZED! WELCOME SCHOLAR!')
+      completeAuth(localStorage.getItem('skillforge_token'), savedUser, 'SCHOLAR PROFILE UPDATED SUCCESSFULLY!')
     } catch (err) {
       setErrorMessage(err.message)
     } finally {
@@ -610,7 +640,7 @@ export default function AuthModal({ isOpen, onClose }) {
                       {skills.map((skill, idx) => (
                         <div key={idx} className={`skill-chip-luxury level-${skill.level}`}>
                           <span className="skill-chip-name">{skill.name}</span>
-                          
+
                           {/* Direct Level Selector Dropdown on Chip */}
                           <select
                             className="skill-level-select-pill"
@@ -618,9 +648,9 @@ export default function AuthModal({ isOpen, onClose }) {
                             onChange={(e) => handleUpdateSkillLevel(skill.name, e.target.value)}
                             title="Change proficiency level"
                           >
-                            <option value="beginner">⭐ Beg</option>
-                            <option value="intermediate">⚡ Inter</option>
-                            <option value="advanced">🔥 Adv</option>
+                            <option value="beginner">BEG</option>
+                            <option value="intermediate">INTER</option>
+                            <option value="advanced">ADV</option>
                           </select>
 
                           <span
@@ -658,9 +688,9 @@ export default function AuthModal({ isOpen, onClose }) {
                       value={newSkillLevel}
                       onChange={(e) => setNewSkillLevel(e.target.value)}
                     >
-                      <option value="beginner">⭐ Beginner</option>
-                      <option value="intermediate">⚡ Intermediate</option>
-                      <option value="advanced">🔥 Advanced</option>
+                      <option value="beginner">BEGINNER</option>
+                      <option value="intermediate">INTERMEDIATE</option>
+                      <option value="advanced">ADVANCED</option>
                     </select>
 
                     <button
@@ -803,10 +833,10 @@ export default function AuthModal({ isOpen, onClose }) {
                         {/* Google Sign In Button */}
                         <button type="button" className="auth-google-btn" onClick={handleGoogleAuth} disabled={isLoading}>
                           <svg className="google-icon-svg" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z"/>
-                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.93 6.72-4.93z"/>
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z" />
+                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.93 6.72-4.93z" />
                           </svg>
                           <span>Sign in with Google</span>
                         </button>
@@ -910,10 +940,10 @@ export default function AuthModal({ isOpen, onClose }) {
                         {/* Google Sign Up Button */}
                         <button type="button" className="auth-google-btn" onClick={handleGoogleAuth} disabled={isLoading}>
                           <svg className="google-icon-svg" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z"/>
-                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.93 6.72-4.93z"/>
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z" />
+                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.93 6.72-4.93z" />
                           </svg>
                           <span>Sign up with Google</span>
                         </button>

@@ -693,12 +693,14 @@ export default function StudentDashboard({ onExitDashboard }) {
           }))
           setAiGeneratedMilestones(ms)
         }
+        loadRoadmapHistory() // Sync into Previous History list immediately!
       } else {
         setAgentFinalReport({
           success: true,
           careerGoal: studentProfile.careerGoal,
           agentAnalysis: `## Autonomous Career Strategy for ${studentProfile.careerGoal}\n\nAll 4 LangGraph StateGraph nodes executed successfully across SkillProfiler, KnowledgeRetriever, AgentPlanner, and RoadmapSynthesizer.`,
         })
+        loadRoadmapHistory()
       }
       setIsAgentExecuting(false)
       setAgentCurrentNodeIndex(4) // Reveal Final Verified Report!
@@ -795,6 +797,8 @@ export default function StudentDashboard({ onExitDashboard }) {
 
   const handleGenerateAiRoadmap = async () => {
     setIsGeneratingAiRoadmap(true)
+    const startTime = Date.now()
+
     try {
       const res = await fetch('http://localhost:3001/api/ai/roadmap/generate', {
         method: 'POST',
@@ -807,20 +811,28 @@ export default function StudentDashboard({ onExitDashboard }) {
           missingSkills: missingSkills,
         }),
       })
+      
+      const elapsed = Date.now() - startTime
+      const remainingDelay = Math.max(0, 1800 - elapsed)
+      
       if (res.ok) {
         const data = await res.json()
-        setAiRoadmapModalData(data)
-        const ms = (data.milestones && data.milestones.length > 0)
-          ? data.milestones
-          : parseMilestonesFromRoadmapText(data.generatedRoadmapText)
-        if (ms && ms.length > 0) {
-          setAiGeneratedMilestones(ms)
-        }
-        loadRoadmapHistory()
+        setTimeout(() => {
+          setAiRoadmapModalData(data)
+          const ms = (data.milestones && data.milestones.length > 0)
+            ? data.milestones
+            : parseMilestonesFromRoadmapText(data.generatedRoadmapText)
+          if (ms && ms.length > 0) {
+            setAiGeneratedMilestones(ms)
+          }
+          loadRoadmapHistory()
+          setIsGeneratingAiRoadmap(false)
+        }, remainingDelay)
+      } else {
+        setIsGeneratingAiRoadmap(false)
       }
     } catch (e) {
       console.warn('AI Roadmap generation error:', e)
-    } finally {
       setIsGeneratingAiRoadmap(false)
     }
   }
@@ -1827,17 +1839,18 @@ export default function StudentDashboard({ onExitDashboard }) {
               <button
                 className="dashboard-nav-btn"
                 style={{
-                  padding: '0.45rem 0.95rem',
-                  fontSize: '0.72rem',
-                  borderColor: 'rgba(0, 210, 255, 0.6)',
+                  padding: '0.45rem 1rem',
+                  fontSize: '0.74rem',
+                  borderColor: 'rgba(0, 210, 255, 0.5)',
                   color: '#00D2FF',
-                  backgroundColor: 'rgba(0, 210, 255, 0.1)',
+                  backgroundColor: 'rgba(0, 210, 255, 0.08)',
                   cursor: isGeneratingAiRoadmap ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem',
-                  fontWeight: 800,
+                  gap: '0.45rem',
+                  fontWeight: 700,
                   borderRadius: '10px',
+                  transition: 'all 0.2s ease',
                 }}
                 onClick={handleGenerateAiRoadmap}
                 disabled={isGeneratingAiRoadmap}
@@ -1850,33 +1863,35 @@ export default function StudentDashboard({ onExitDashboard }) {
                   </>
                 ) : (
                   <>
-                    <Zap size={13} color="#00D2FF" />
-                    <span>⚡ FAST GENAI</span>
+                    <Zap size={14} color="#00D2FF" />
+                    <span>FAST GENAI</span>
                   </>
                 )}
               </button>
 
               {/* Button 2: AUTONOMOUS AGENT (LANGGRAPH) */}
               <button
-                className="get-started-btn bungee-regular"
+                className="bungee-regular"
                 style={{
                   padding: '0.45rem 1.15rem',
                   fontSize: '0.76rem',
-                  background: 'linear-gradient(135deg, #FFD166 0%, #FF6B81 100%)',
+                  background: '#FFD166',
+                  border: '1.5px solid #FFD166',
                   color: '#05060A',
                   cursor: isAgentExecuting ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.45rem',
-                  boxShadow: '0 4px 20px rgba(255, 209, 102, 0.35)',
                   borderRadius: '10px',
+                  boxShadow: '0 4px 15px rgba(255, 209, 102, 0.25)',
+                  transition: 'all 0.2s ease',
                 }}
                 onClick={handleStartAgentVisualization}
                 disabled={isAgentExecuting}
                 title="Run full 4-node LangGraph ReAct Autonomous Agent"
               >
-                <Bot size={15} color="#05060A" />
-                <span>🤖 AUTONOMOUS AGENT</span>
+                <Bot size={15} color="#05060A" strokeWidth={2.5} />
+                <span>AUTONOMOUS AGENT</span>
               </button>
             </div>
           </div>
@@ -2314,6 +2329,186 @@ export default function StudentDashboard({ onExitDashboard }) {
                 )
               })()
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+          6.9 FAST GENAI LIVE TERMINAL EXECUTION MODAL (WITH CAT.PNG)
+          ========================================================================= */}
+      <AnimatePresence>
+        {isGeneratingAiRoadmap && (
+          <motion.div
+            className="quiz-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ zIndex: 10005 }}
+          >
+            <motion.div
+              className="ai-roadmap-modal-card agent-cockpit-modal"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              style={{
+                width: '1040px',
+                maxWidth: '94vw',
+                height: '560px',
+                maxHeight: '85vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                padding: '1.8rem 2.4rem',
+                backgroundColor: '#090C15',
+                border: '1.5px solid #00D2FF',
+                boxShadow: '0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(0, 210, 255, 0.25)',
+              }}
+            >
+              {/* Header */}
+              <div className="ai-roadmap-header-row" style={{ marginBottom: '1.2rem', paddingBottom: '0.8rem', borderBottom: '1px solid #1c2030' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: 'rgba(0, 210, 255, 0.12)',
+                      border: '1.5px solid #00D2FF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Zap size={22} color="#00D2FF" />
+                  </div>
+                  <div>
+                    <h2 className="bungee-regular" style={{ fontSize: '1.25rem', color: '#FFF7E8', margin: 0 }}>
+                      GROQ CLOUD FAST GENAI GENERATOR
+                    </h2>
+                    <span style={{ fontSize: '0.74rem', color: '#B8B3C7' }}>
+                      Target Track: <strong style={{ color: '#00D2FF' }}>{studentProfile.careerGoal}</strong> • LLaMA 3.3 (120B / 70B Instant Engine)
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00D2FF', fontSize: '0.76rem', fontWeight: 800 }}>
+                  <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>GENERATING ROADMAP...</span>
+                </div>
+              </div>
+
+              {/* Grid with Cat on left and Terminal on right */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '320px 1fr',
+                  gap: '2.5rem',
+                  alignItems: 'center',
+                  flex: 1,
+                  minHeight: 0,
+                }}
+              >
+                {/* Free standing Cosmic Cat (No Box background!) */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '1rem',
+                  }}
+                >
+                  <img
+                    src="/cat.png"
+                    alt="Cosmic Cat Fast GenAI Guide"
+                    style={{
+                      width: '280px',
+                      height: '300px',
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 20px 35px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 30px rgba(0, 210, 255, 0.35))',
+                    }}
+                  />
+                  <div
+                    className="press-start-2p-regular"
+                    style={{
+                      background: '#070912',
+                      border: '1.5px solid #00D2FF',
+                      borderRadius: '10px',
+                      padding: '0.45rem 0.9rem',
+                      fontSize: '0.62rem',
+                      color: '#00D2FF',
+                      textAlign: 'center',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    ✦ COSMIC CAT GENAI NAVIGATOR
+                  </div>
+                </div>
+
+                {/* Cyberpunk Live Terminal Console */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', height: '100%' }}>
+                  <div>
+                    <h3 className="bungee-regular" style={{ fontSize: '1.15rem', color: '#FFF7E8', margin: '0 0 0.3rem 0' }}>
+                      SYNTHESIZING FAST CAREER BLUEPRINT
+                    </h3>
+                    <p style={{ fontSize: '0.82rem', color: '#B8B3C7', margin: 0, lineHeight: 1.4 }}>
+                      Compiling 4-stage milestones, project capstones, verified resources, and semester alignment.
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      flex: 1,
+                      background: '#020307',
+                      border: '1.5px solid #222638',
+                      borderRadius: '14px',
+                      padding: '1.1rem 1.3rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem',
+                      fontFamily: 'monospace',
+                      boxShadow: 'inset 0 3px 20px rgba(0, 0, 0, 0.95)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.45rem' }}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FF5F56' }} />
+                        <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FFBD2E' }} />
+                        <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#27C93F' }} />
+                      </div>
+                      <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                        GROQ_LLAMA3_TURBO_STREAM.LOG
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', overflowY: 'auto' }}>
+                      {[
+                        `⚡ [INIT] Connecting to Groq Cloud LLaMA 3.3 Turbo Engine...`,
+                        `📊 [DIAGNOSIS] Ingesting student profile: ${studentProfile.name} • ${studentProfile.careerGoal}...`,
+                        `🔍 [BENCHMARKS] Cross-referencing verified skill matrix & capstone deliverables...`,
+                        `✨ [SYNTHESIS] Synthesizing personalized 4-milestone roadmap & resources...`,
+                        `✓ [COMPLETE] Fast GenAI Roadmap Ready! Displaying Full Syllabus...`,
+                      ].map((logLine, lIdx) => (
+                        <motion.div
+                          key={lIdx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: lIdx * 0.28, duration: 0.25 }}
+                          style={{
+                            fontSize: '0.8rem',
+                            color: logLine.includes('✓') ? '#27C93F' : logLine.includes('⚡') ? '#00D2FF' : '#E2E8F0',
+                            lineHeight: 1.45,
+                          }}
+                        >
+                          <span style={{ color: '#00D2FF', marginRight: '0.45rem' }}>&gt;</span>
+                          <span>{logLine}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -3231,6 +3426,45 @@ export default function StudentDashboard({ onExitDashboard }) {
                       </span>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        {/* Download PDF for LangGraph Agent */}
+                        <button
+                          onClick={() => {
+                            const customRoadmap = {
+                              _id: agentFinalReport.roadmapId || 'agent_plan',
+                              careerGoal: `${studentProfile.careerGoal} (Autonomous Agent)`,
+                              generatedRoadmapText: agentFinalReport.agentAnalysis,
+                              createdAt: agentFinalReport.createdAt || new Date(),
+                            }
+                            handleDownloadRoadmapPdf(customRoadmap)
+                          }}
+                          disabled={isExportingPdf}
+                          style={{
+                            background: 'rgba(39, 201, 63, 0.15)',
+                            border: '1.5px solid #27C93F',
+                            borderRadius: '10px',
+                            padding: '0.6rem 1.3rem',
+                            color: '#27C93F',
+                            fontFamily: '"Bungee", cursive, sans-serif',
+                            fontSize: '0.82rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.45rem',
+                            cursor: isExportingPdf ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          {isExportingPdf ? (
+                            <>
+                              <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                              <span>DOWNLOADING...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Download size={14} />
+                              <span>DOWNLOAD PDF</span>
+                            </>
+                          )}
+                        </button>
+
                         {/* Apply to 3D Deck (Solid Green, No Gradient) */}
                         <button
                           className="bungee-regular"

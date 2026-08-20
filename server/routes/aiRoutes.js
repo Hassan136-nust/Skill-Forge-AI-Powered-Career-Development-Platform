@@ -294,6 +294,8 @@ router.get('/roadmap/history/:email', async (req, res) => {
 router.post('/agent/analyze', async (req, res) => {
   try {
     const { profile, prompt } = req.body
+    const cleanEmail = (profile?.email || 'student@nust.edu.pk').toLowerCase()
+    const targetGoal = profile?.careerGoal || 'AI Engineer'
 
     // Forward to Python LangGraph Agent service
     const pyRes = await fetch('http://localhost:8000/agent/plan', {
@@ -307,13 +309,44 @@ router.post('/agent/analyze', async (req, res) => {
 
     if (pyRes.ok) {
       const data = await pyRes.json()
-      return res.json(data)
+
+      // Automatically persist LangGraph Agent plan into MongoDB Atlas History
+      try {
+        const milestones = data.roadmap?.steps?.map((s, idx) => ({
+          step: String(idx + 1).padStart(2, '0'),
+          title: s.title || `Milestone ${idx + 1}`,
+          desc: s.topic || s.title || '',
+          topics: s.topic || '',
+          resources: (s.resources || []).join(', '),
+          capstone: s.project || `Capstone ${idx + 1}`,
+          tech: (s.tech || 'python').toLowerCase(),
+        })) || []
+
+        const saved = await Roadmap.create({
+          email: cleanEmail,
+          careerGoal: `${targetGoal} (Autonomous Agent)`,
+          gaps: data.gaps || [],
+          generatedRoadmapText: data.agentAnalysis || '',
+          milestones: milestones,
+          model: 'LangGraph 4-Node StateGraph + Groq LLaMA 3.3',
+          generatedAt: new Date(),
+        })
+
+        return res.json({
+          ...data,
+          roadmapId: saved._id,
+          createdAt: saved.createdAt,
+        })
+      } catch (dbErr) {
+        console.warn('[Agent Roadmap Save Warning]:', dbErr.message)
+        return res.json(data)
+      }
     }
 
     // Direct fallback if Python service unavailable
     res.json({
       success: true,
-      careerGoal: profile?.careerGoal || 'AI Engineer',
+      careerGoal: targetGoal,
       message: 'Agent executed ReAct loop across skills, gaps, and RAG knowledge base.',
     })
   } catch (error) {

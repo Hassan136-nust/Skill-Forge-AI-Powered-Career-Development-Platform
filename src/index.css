@@ -55,11 +55,11 @@ html, body {
   background: rgba(5, 6, 12, 0.9);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #4facfe, #a855f7);
+  background: linear-gradient(180deg, #FFD166, #FFB703);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #00f2fe, #ff0080);
+  background: linear-gradient(180deg, #FFDF85, #FFC933);
 }
 
 /* Keyframe Animations */

@@ -588,7 +588,7 @@ export default function FullRoadmapPage({
                 <button onClick={() => setActiveDetailMilestone(null)} style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
               </div>
 
-              <div style={{ maxHeight: '60vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingRight: '0.5rem' }}>
+              <div data-lenis-prevent="true" style={{ maxHeight: '60vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingRight: '0.5rem' }}>
                 <div style={{ background: '#050712', border: '1px solid #1c2030', borderRadius: '12px', padding: '1rem' }}>
                   <span className="press-start-2p-regular" style={{ fontSize: '0.6rem', color: '#FFD166' }}>✦ OVERVIEW & PEDAGOGICAL GOAL</span>
                   <p style={{ color: '#CBD5E1', fontSize: '0.86rem', lineHeight: 1.5, margin: '0.5rem 0 0 0' }}>

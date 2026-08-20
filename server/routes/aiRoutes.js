@@ -115,7 +115,7 @@ function parseMilestonesFromText(text, fallbackRole) {
   for (const line of lines) {
     if (line.startsWith('|') && (line.includes('1') || line.includes('2') || line.includes('3') || line.includes('4') || line.includes('5') || line.includes('6') || line.includes('Milestone') || line.includes('Step'))) {
       const parts = line.split('|').map((p) => p.trim()).filter(Boolean)
-      if (parts.length >= 3 && !parts[0].includes('---') && !parts[0].toLowerCase().includes('milestone')) {
+      if (parts.length >= 3 && !parts[0].includes('---') && parts[0].toLowerCase().trim() !== 'milestone') {
         const stepNum = String(milestones.length + 1).padStart(2, '0')
         const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
         const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' • ').trim() || ''
@@ -215,19 +215,28 @@ router.post('/roadmap/generate', async (req, res) => {
       console.warn('Python service call fallback:', err.message)
     }
 
-    const prompt = `Generate a comprehensive, fully written 4-step AI Career Learning Roadmap for a CS student targeting the role of "${targetGoal}".
-Student Identified Skill Gaps: ${missingSkills ? JSON.stringify(missingSkills) : 'Target Stack Foundations'}.
+    const prompt = `You are the Lead Principal AI & Career Architect at SkillForge (NUST Career Launchpad).
+Generate an authoritative, rigorous, and inspiring 4-step Career Roadmap for a Computer Science student targeting the role of "${targetGoal}".
 
-${chromaContext ? `[VERIFIED KNOWLEDGE BASE CONTEXT — RETRIEVED FROM CHROMADB]\n${chromaContext}\n` : ''}
+Student Current Skill Gaps to Bridge: ${missingSkills && missingSkills.length > 0 ? JSON.stringify(missingSkills) : 'Core Advanced Track Competencies'}.
 
-Requirements:
-1. Motivational Kick-Off introduction.
-2. Formatted Table / Structured breakdown covering ALL 4 Milestones:
-   - Milestone 1: Core Foundations & Algorithms
-   - Milestone 2: Frameworks & Deep Practice
-   - Milestone 3: Production APIs & Databases/Caching
-   - Milestone 4: Autonomous Capstone & Cloud Deployment
-3. Provide complete descriptions, specific capstone projects, and recommended resources for every milestone. Do NOT stop or truncate mid-sentence.`
+${chromaContext ? `[OFFICIAL CURRICULUM CONTEXT — CHROMADB VECTOR STORE]\n${chromaContext}\n` : ''}
+
+CRITICAL FORMATTING INSTRUCTIONS:
+1. Start with an inspiring executive summary for the student's journey into ${targetGoal}.
+2. Provide a clean, strictly formatted Markdown Table with EXACTLY these columns:
+| Milestone | Core Learning Objectives | Key Topics & Tools | Recommended Resources | Capstone Project |
+| Milestone 1: Core Foundations & Algorithms | Master deep fundamentals and algorithmic mastery | Python OOP, AsyncIO, Vector Math, NumPy | Official Docs, Fast.ai | Capstone 1: Neural Base Vector Math Library |
+| Milestone 2: Frameworks & Deep Practice | Build production pipelines with industry frameworks | PyTorch, Model Architectures, Loss Functions | PyTorch Official Tutorials | Capstone 2: End-to-End Deep Learning Training Pipeline |
+| Milestone 3: Production APIs & Vector RAG | Scalable inference serving, caching, and vector retrieval | FastAPI, ChromaDB, Redis, Docker | FastAPI Documentation, ChromaDB Cookbooks | Capstone 3: Enterprise Semantic RAG Retrieval Service |
+| Milestone 4: Autonomous Capstone & Cloud SLA | Autonomous multi-agent orchestration and cloud deployment | LangGraph StateGraph, Docker Multi-Stage, CI/CD | LangGraph Docs, Kubernetes Ingress Guide | Capstone 4: Autonomous Production Multi-Agent Platform |
+
+3. Following the table, provide a detailed deep-dive for EACH of the 4 Milestones:
+   - Specific hands-on coding deliverables
+   - Industry job readiness benchmarks
+   - Recommended GitHub repositories / showcase tips
+4. Provide a Complete Suggested Timeline Table (Month 1-2, Month 3-4, Month 5-6, Month 7-8).
+5. DO NOT stop mid-sentence or truncate. Output the full roadmap through to graduation.`
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [

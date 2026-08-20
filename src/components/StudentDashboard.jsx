@@ -385,19 +385,40 @@ const getQuizForSkill = (skillName) => {
 export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap }) {
   const DEFAULT_AVATAR = 'https://imgs.search.brave.com/en8GueUwEke4A7ecDjpRnIpFR8Y-WWOEbjzD2xCNTu0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn'
 
-  const [studentProfile, setStudentProfile] = useState({
-    name: 'Scholar Student',
-    email: 'student@nust.edu.pk',
-    university: 'NUST',
-    degree: 'BS Computer Science',
-    yearOfStudy: 3,
-    experienceLevel: 'intermediate',
-    careerGoal: 'AI Engineer',
-    avatar: DEFAULT_AVATAR,
-    githubUser: '',
-    reposCount: 0,
-    skills: [],
-    projects: [],
+  const [studentProfile, setStudentProfile] = useState(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+      const savedGoal = localStorage.getItem('skillforge_career_goal') || storedUser.careerGoal || 'AI Engineer'
+      return {
+        name: storedUser.name || 'Scholar Student',
+        email: storedUser.email || 'student@nust.edu.pk',
+        university: storedUser.university || 'NUST',
+        degree: storedUser.degree || 'BS Computer Science',
+        yearOfStudy: storedUser.yearOfStudy || 3,
+        experienceLevel: storedUser.experienceLevel || 'intermediate',
+        careerGoal: savedGoal,
+        avatar: storedUser.avatar || DEFAULT_AVATAR,
+        githubUser: storedUser.githubUser || '',
+        reposCount: 0,
+        skills: [],
+        projects: [],
+      }
+    } catch {
+      return {
+        name: 'Scholar Student',
+        email: 'student@nust.edu.pk',
+        university: 'NUST',
+        degree: 'BS Computer Science',
+        yearOfStudy: 3,
+        experienceLevel: 'intermediate',
+        careerGoal: 'AI Engineer',
+        avatar: DEFAULT_AVATAR,
+        githubUser: '',
+        reposCount: 0,
+        skills: [],
+        projects: [],
+      }
+    }
   })
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -427,6 +448,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
 
       const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
       const userEmail = storedUser.email || 'student@nust.edu.pk'
+      const savedGoal = localStorage.getItem('skillforge_career_goal') || storedUser.careerGoal
 
       if (storedUser.name) {
         setStudentProfile((prev) => ({
@@ -434,6 +456,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
           name: storedUser.name,
           email: storedUser.email || prev.email,
           avatar: storedUser.avatar || prev.avatar || DEFAULT_AVATAR,
+          careerGoal: savedGoal || prev.careerGoal,
         }))
       }
 
@@ -442,13 +465,15 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
         const data = await res.json()
         if (data.profile) {
           const p = data.profile
+          const resolvedGoal = savedGoal || p.careerGoal || 'AI Engineer'
+          
           setStudentProfile((prev) => ({
             ...prev,
             university: p.university || prev.university,
             degree: p.degree || prev.degree,
             yearOfStudy: p.yearOfStudy || prev.yearOfStudy,
             experienceLevel: p.experienceLevel || prev.experienceLevel,
-            careerGoal: p.careerGoal || prev.careerGoal,
+            careerGoal: resolvedGoal,
             avatar: p.userId?.avatar || p.avatar || prev.avatar || DEFAULT_AVATAR,
             skills: p.skills || [],
             projects: p.projects || [],
@@ -474,6 +499,9 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
           }
           setSkillScores(mergedScores)
           localStorage.setItem('skillforge_scores', JSON.stringify(mergedScores))
+          if (resolvedGoal) {
+            loadRoadmapHistory(resolvedGoal)
+          }
         }
       }
     } catch (e) {
@@ -562,7 +590,38 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [pdfGeneratingId, setPdfGeneratingId] = useState(null)
   const [activePdfRoadmap, setActivePdfRoadmap] = useState(null)
-  const [aiGeneratedMilestones, setAiGeneratedMilestones] = useState(null)
+  
+  // Persistent AI-generated milestones initialized from localStorage so refresh never resets it
+  const [aiGeneratedMilestones, setAiGeneratedMilestones] = useState(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+      const targetRole = (storedUser.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
+      const cachedRoleRoadmap = JSON.parse(localStorage.getItem(`skillforge_roadmap_${targetRole}`) || 'null')
+      if (Array.isArray(cachedRoleRoadmap) && cachedRoleRoadmap.length > 0) {
+        return cachedRoleRoadmap
+      }
+      const genericCached = JSON.parse(localStorage.getItem('skillforge_current_milestones') || 'null')
+      if (Array.isArray(genericCached) && genericCached.length > 0) {
+        return genericCached
+      }
+    } catch {}
+    return null
+  })
+
+  // Helper to keep state and localStorage strictly synchronized per career track
+  const saveAndSetMilestones = (ms, role = null) => {
+    if (!ms || ms.length === 0) {
+      setAiGeneratedMilestones(null)
+      localStorage.removeItem('skillforge_current_milestones')
+      const currentRole = (role || studentProfile.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
+      localStorage.removeItem(`skillforge_roadmap_${currentRole}`)
+      return
+    }
+    setAiGeneratedMilestones(ms)
+    localStorage.setItem('skillforge_current_milestones', JSON.stringify(ms))
+    const currentRole = (role || studentProfile.careerGoal || 'AI Engineer').toLowerCase().replace(/\s+/g, '_')
+    localStorage.setItem(`skillforge_roadmap_${currentRole}`, JSON.stringify(ms))
+  }
 
   // =========================================================================
   // LANGGRAPH STATEGRAPH VISUALIZER STATES & PIPELINE DEFINITION
@@ -681,8 +740,10 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
       const data = await agentPromise
       if (data && data.agentAnalysis) {
         setAgentFinalReport(data)
-        if (data.roadmap && data.roadmap.steps) {
-          const ms = data.roadmap.steps.map((st, sIdx) => ({
+        const parsed = parseMilestonesFromRoadmapText(data.agentAnalysis)
+        let ms = parsed && parsed.length > 0 ? parsed : null
+        if (!ms && data.roadmap && data.roadmap.steps) {
+          ms = data.roadmap.steps.map((st, sIdx) => ({
             step: String(sIdx + 1).padStart(2, '0'),
             title: st.title.toUpperCase(),
             desc: st.topic || st.title,
@@ -691,7 +752,9 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
             capstone: st.project || `Capstone ${sIdx + 1}`,
             tech: (st.tech || 'python').toLowerCase(),
           }))
-          setAiGeneratedMilestones(ms)
+        }
+        if (ms && ms.length > 0) {
+          saveAndSetMilestones(ms, studentProfile.careerGoal)
         }
         loadRoadmapHistory() // Sync into Previous History list immediately!
       } else {
@@ -716,7 +779,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
     for (const line of lines) {
       if (line.startsWith('|') && (line.includes('1') || line.includes('2') || line.includes('3') || line.includes('4') || line.includes('5') || line.includes('6') || line.includes('Milestone') || line.includes('Step'))) {
         const parts = line.split('|').map((p) => p.trim()).filter(Boolean)
-        if (parts.length >= 3 && !parts[0].includes('---') && !parts[0].toLowerCase().includes('milestone')) {
+        if (parts.length >= 3 && !parts[0].includes('---') && parts[0].toLowerCase().trim() !== 'milestone') {
           const stepNum = String(milestones.length + 1).padStart(2, '0')
           const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
           const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' • ').trim() || ''
@@ -771,21 +834,30 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
     return milestones
   }
 
-  // Fetch Previous Roadmaps History from MongoDB Atlas
-  const loadRoadmapHistory = async () => {
+  // Fetch Previous Roadmaps History from MongoDB Atlas and auto-apply recent roadmap for target career track
+  const loadRoadmapHistory = async (roleOverride = null) => {
     try {
       const email = studentProfile.email || 'student@nust.edu.pk'
+      const activeRole = (roleOverride || studentProfile.careerGoal || 'AI Engineer').toLowerCase().trim()
       const res = await fetch(`http://localhost:3001/api/ai/roadmap/history/${encodeURIComponent(email)}`)
       if (res.ok) {
         const data = await res.json()
         if (data.history && data.history.length > 0) {
           setRoadmapHistoryList(data.history)
-          if (!aiGeneratedMilestones && data.history[0]?.generatedRoadmapText) {
-            const ms = (data.history[0].milestones && data.history[0].milestones.length > 0)
-              ? data.history[0].milestones
-              : parseMilestonesFromRoadmapText(data.history[0].generatedRoadmapText)
+          
+          // Match the most recent roadmap for this specific career goal
+          const matched = data.history.find((h) => {
+            const hGoal = (h.careerGoal || '').toLowerCase()
+            return hGoal.includes(activeRole) || activeRole.includes(hGoal.replace(/\(.*?\)/g, '').trim())
+          }) || data.history[0]
+
+          if (matched && (matched.milestones?.length > 0 || matched.generatedRoadmapText)) {
+            let ms = parseMilestonesFromRoadmapText(matched.generatedRoadmapText)
+            if (!ms || ms.length === 0) {
+              ms = matched.milestones || []
+            }
             if (ms && ms.length > 0) {
-              setAiGeneratedMilestones(ms)
+              saveAndSetMilestones(ms, activeRole)
             }
           }
         }
@@ -819,11 +891,17 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
         const data = await res.json()
         setTimeout(() => {
           setAiRoadmapModalData(data)
-          const ms = (data.milestones && data.milestones.length > 0)
+          let ms = (data.milestones && data.milestones.length > 0)
             ? data.milestones
             : parseMilestonesFromRoadmapText(data.generatedRoadmapText)
+          if (!ms || ms.length < 5) {
+            const parsedAll = parseMilestonesFromRoadmapText(data.generatedRoadmapText)
+            if (parsedAll && parsedAll.length > ms.length) {
+              ms = parsedAll
+            }
+          }
           if (ms && ms.length > 0) {
-            setAiGeneratedMilestones(ms)
+            saveAndSetMilestones(ms, studentProfile.careerGoal)
           }
           loadRoadmapHistory()
           setIsGeneratingAiRoadmap(false)
@@ -839,11 +917,12 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
 
   const handleSelectPastRoadmap = (hist) => {
     setAiRoadmapModalData(hist)
-    const ms = (hist.milestones && hist.milestones.length > 0)
-      ? hist.milestones
-      : parseMilestonesFromRoadmapText(hist.generatedRoadmapText)
+    let ms = parseMilestonesFromRoadmapText(hist.generatedRoadmapText)
+    if (!ms || ms.length === 0) {
+      ms = hist.milestones || []
+    }
     if (ms && ms.length > 0) {
-      setAiGeneratedMilestones(ms)
+      saveAndSetMilestones(ms, hist.careerGoal || studentProfile.careerGoal)
     }
     setIsHistoryModalOpen(false)
     setShowHistoryDrawer(false)
@@ -1391,9 +1470,27 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
                 <select
                   className="role-select-input"
                   value={studentProfile.careerGoal}
-                  onChange={(e) =>
-                    setStudentProfile({ ...studentProfile, careerGoal: e.target.value })
-                  }
+                  onChange={async (e) => {
+                    const newRole = e.target.value
+                    setStudentProfile((prev) => ({ ...prev, careerGoal: newRole }))
+                    localStorage.setItem('skillforge_career_goal', newRole)
+                    try {
+                      const storedUser = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+                      localStorage.setItem('skillforge_user', JSON.stringify({ ...storedUser, careerGoal: newRole }))
+                      await fetch('http://localhost:3001/api/profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          userId: storedUser._id,
+                          email: studentProfile.email,
+                          careerGoal: newRole,
+                        }),
+                      })
+                    } catch (err) {
+                      console.warn('Could not persist career goal to DB:', err)
+                    }
+                    loadRoadmapHistory(newRole)
+                  }}
                 >
                   <option value="AI Engineer">AI Engineer</option>
                   <option value="Backend Developer">Backend Developer</option>
@@ -1797,7 +1894,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               {aiGeneratedMilestones && (
                 <button
-                  onClick={() => setAiGeneratedMilestones(null)}
+                  onClick={() => saveAndSetMilestones(null)}
                   style={{
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid #33394f',
@@ -2040,22 +2137,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
                             )
                           })()}
 
-                          {/* Quick Link to View Detailed AI Syllabus */}
-                          <div
-                            className="step-card-footer-action"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              if (roadmapHistoryList && roadmapHistoryList.length > 0) {
-                                setAiRoadmapModalData(roadmapHistoryList[0])
-                              } else {
-                                handleGenerateAiRoadmap()
-                              }
-                            }}
-                            title="Open detailed AI syllabus & resources"
-                          >
-                            <span>📖 Full Syllabus &amp; Resources</span>
-                            <ArrowRight size={11} color="#FFD166" />
-                          </div>
+
                         </div>
                       </div>
                     )
@@ -2527,7 +2609,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', overflowY: 'auto' }}>
+                    <div data-lenis-prevent="true" style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', overflowY: 'auto' }}>
                       {[
                         `⚡ [INIT] Connecting to Groq Cloud LLaMA 3.3 Turbo Engine...`,
                         `📊 [DIAGNOSIS] Ingesting student profile: ${studentProfile.name} • ${studentProfile.careerGoal}...`,
@@ -2689,6 +2771,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
                 {/* Previous Roadmaps History Drawer */}
                 {showHistoryDrawer && (
                   <motion.div
+                    data-lenis-prevent="true"
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: '280px', opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
@@ -3346,7 +3429,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
                                 </span>
                               </div>
 
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', overflowY: 'auto' }}>
+                              <div data-lenis-prevent="true" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', overflowY: 'auto' }}>
                                 {currentNode.logs.map((logLine, lIdx) => (
                                   <motion.div
                                     key={lIdx}
@@ -3736,6 +3819,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap })
             <div
               className="ai-chat-messages-viewport"
               tabIndex={0}
+              data-lenis-prevent="true"
               style={{
                 flex: '1 1 auto',
                 minHeight: 0,

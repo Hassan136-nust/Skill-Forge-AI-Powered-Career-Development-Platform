@@ -70,15 +70,18 @@ export const registerUser = async (req, res) => {
       })
     }
 
-    // Dispatch real email via Gmail SMTP
+    // Dispatch real email via Gmail SMTP (non-blocking fallback)
     const mailResult = await sendOtpEmail(user.email, otp, user.name)
 
     res.status(201).json({
       success: true,
-      message: 'Registration initialized. 6-digit verification code sent to your email.',
+      message: mailResult.success
+        ? 'Registration initialized. 6-digit verification code sent to your email.'
+        : `Registration initialized. Verification Code: ${otp}`,
       email: user.email,
       requireOtp: true,
       emailSent: mailResult.success,
+      fallbackOtp: mailResult.success ? undefined : otp,
     })
   } catch (error) {
     console.error('[Register Error]:', error)

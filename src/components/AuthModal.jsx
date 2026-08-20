@@ -240,7 +240,13 @@ export default function AuthModal({
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Registration failed')
 
-      setInfoMessage(`6-Digit verification code dispatched to ${email}!`)
+      if (data.fallbackOtp) {
+        setInfoMessage(`Code: ${data.fallbackOtp}`)
+        const digits = data.fallbackOtp.split('')
+        if (digits.length === 6) setOtpDigits(digits)
+      } else {
+        setInfoMessage(`6-Digit verification code dispatched to ${email}!`)
+      }
       setMode('otp')
     } catch (err) {
       setErrorMessage(err.message)

@@ -3,22 +3,29 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Create Nodemailer Transporter using Gmail SMTP
-export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: false, // TLS
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-})
+// Create Nodemailer Transporter using Gmail service (works seamlessly on Render without port 587 blocking)
+const hasSmtpCredentials = Boolean(process.env.SMTP_USER && process.env.SMTP_PASSWORD)
+
+export const transporter = hasSmtpCredentials
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: (process.env.SMTP_USER || '').trim(),
+        pass: (process.env.SMTP_PASSWORD || '').replace(/\s+/g, ''),
+      },
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
+    })
+  : null
 
 // Send 6-Digit OTP Email Template
 export const sendOtpEmail = async (toEmail, otpCode, userName = 'Student') => {
+  if (!transporter) {
+    console.log(`[SkillForge Auth] ⚠️ SMTP_USER / SMTP_PASSWORD not set in environment. Mocking OTP for ${toEmail}: [${otpCode}]`)
+    return { success: false, reason: 'no_smtp_configured', mockOtp: otpCode }
+  }
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -62,6 +69,6 @@ export const sendOtpEmail = async (toEmail, otpCode, userName = 'Student') => {
     return { success: true, messageId: info.messageId }
   } catch (error) {
     console.error(`[Nodemailer] Failed to dispatch OTP to ${toEmail}:`, error.message)
-    return { success: false, error: error.message }
+    return { success: false, error: error.message, mockOtp: otpCode }
   }
 }

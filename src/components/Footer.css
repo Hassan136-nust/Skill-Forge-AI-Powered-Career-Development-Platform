@@ -1,0 +1,104 @@
+/* Footer Section — Solid Cyber Styling */
+
+.footer-section {
+  width: 100%;
+  background-color: #020308;
+  background-image: linear-gradient(180deg, rgba(2, 3, 8, 0.90) 0%, rgba(2, 3, 8, 0.72) 50%, rgba(2, 3, 8, 0.95) 100%), url('/footer.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid #1e293b;
+  padding: 5.5rem 3rem 2.5rem 3rem;
+  position: relative;
+  z-index: 20;
+}
+
+.footer-grid-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3.5rem;
+}
+
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-brand-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.3rem;
+  color: #FFF7E8;
+  letter-spacing: 2px;
+}
+
+.footer-brand-desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #F4F1EA;
+  max-width: 320px;
+  text-align: left;
+}
+
+.footer-links-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  text-align: left;
+}
+
+.footer-col-heading {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.95rem;
+  color: #FFD166;
+  letter-spacing: 1px;
+}
+
+.footer-link-item {
+  color: #B8B3C7;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
+.footer-link-item:hover {
+  color: #FFF7E8;
+}
+
+.footer-bottom-bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  border-top: 1px solid #1c2030;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.72rem;
+  color: #B8B3C7;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 860px) {
+  .footer-grid-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}

@@ -1,0 +1,445 @@
+/* Live Interactive Winding Roadmap — SVGs, Traveling Energy Particle, Radar Ripples */
+
+.winding-roadmap-section {
+  width: 100%;
+  padding: 6rem 2rem 7rem 2rem;
+  background-color: #000000;
+  border-top: 1px solid #1c1f2e;
+  position: relative;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.winding-roadmap-container {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+/* Role Selector Buttons for Dynamic Roadmap */
+.roadmap-role-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.roadmap-role-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.3rem;
+  border-radius: 8px;
+  background-color: #070910;
+  border: 1px solid #222638;
+  color: #B8B3C7;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.roadmap-role-pill:hover {
+  border-color: #FFD166;
+  color: #FFF7E8;
+}
+
+.roadmap-role-pill.active {
+  background-color: #FFD166;
+  border-color: #FFD166;
+  color: #05060A;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(255, 209, 102, 0.35);
+}
+
+/* Winding Journey Stage */
+.journey-canvas-stage {
+  position: relative;
+  width: 100%;
+  margin-top: 2rem;
+  min-height: 520px;
+}
+
+/* SVG Background Curve */
+.journey-svg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.journey-path-track {
+  fill: none;
+  stroke: #161a29;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.journey-path-active {
+  fill: none;
+  stroke: #FFD166;
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 12px rgba(255, 209, 102, 0.45));
+}
+
+.journey-path-dash {
+  fill: none;
+  stroke: rgba(255, 247, 232, 0.3);
+  stroke-width: 2;
+  stroke-dasharray: 6 12;
+  animation: moveDash 30s linear infinite;
+}
+
+@keyframes moveDash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+/* Continuous Traveling Pulse Energy Ball */
+.comet-pulse-head {
+  fill: #FFF7E8;
+  filter: drop-shadow(0 0 8px #FFD166);
+}
+
+.comet-pulse-glow {
+  fill: rgba(255, 209, 102, 0.3);
+  animation: cometGlowPulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes cometGlowPulse {
+  0% { r: 12px; opacity: 0.3; }
+  100% { r: 20px; opacity: 0.7; }
+}
+
+/* Milestone Pin Nodes Grid */
+.journey-milestones-row {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  z-index: 5;
+}
+
+.journey-pin-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.journey-pin-node:hover {
+  transform: translateY(-6px);
+}
+
+.journey-pin-node.selected .pin-badge-circle {
+  box-shadow: 0 0 35px rgba(255, 209, 102, 0.8), 0 0 0 6px rgba(255, 209, 102, 0.25);
+}
+
+.journey-pin-node.selected .pin-info-card {
+  border-color: #FFD166;
+  background-color: #0e1222;
+}
+
+/* Top vs Bottom alternating placement */
+.journey-pin-node.pos-top {
+  justify-content: flex-start;
+}
+
+.journey-pin-node.pos-bottom {
+  justify-content: flex-end;
+}
+
+/* Circular Map-Pin Badge with SVG Icons */
+.pin-badge-circle {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background-color: #070910;
+  border: 3.5px solid #FFD166;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 209, 102, 0.25);
+  position: relative;
+  transition: all 0.3s ease;
+  z-index: 6;
+  color: #FFF7E8;
+}
+
+.journey-pin-node:hover .pin-badge-circle {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 209, 102, 0.55);
+  transform: scale(1.08);
+}
+
+/* Live Animated Radar Ring */
+.pin-radar-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1.5px solid #FFD166;
+  opacity: 0;
+  animation: radarRipple 2.5s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes radarRipple {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.pin-step-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background-color: #FFD166;
+  color: #05060A;
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.72rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #070910;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Dotted Connector Line */
+.pin-dotted-line {
+  width: 2px;
+  height: 48px;
+  border-left: 2.5px dotted #FFD166;
+  opacity: 0.8;
+  margin: 0.4rem 0;
+}
+
+/* Anchor Point on SVG Line */
+.pin-anchor-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #FFD166;
+  border: 3px solid #070910;
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.7);
+}
+
+/* Info Box */
+.pin-info-card {
+  background-color: #070910;
+  border: 1px solid #1c2030;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  width: 100%;
+  max-width: 225px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease;
+}
+
+.pin-phase-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.85rem;
+  color: #FFF7E8;
+  line-height: 1.25;
+}
+
+.pin-eta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  color: #FFD166;
+  letter-spacing: 1px;
+}
+
+.pin-capstone-deliverable {
+  font-size: 0.72rem;
+  color: #B8B3C7;
+  line-height: 1.4;
+  margin-top: 0.2rem;
+  border-top: 1px solid #1c2030;
+  padding-top: 0.4rem;
+  width: 100%;
+}
+
+.pin-capstone-deliverable span.gold {
+  color: #F4F1EA;
+  font-weight: 600;
+}
+
+/* Detailed Module Inspector Card */
+.milestone-inspector-panel {
+  margin-top: 3rem;
+  background-color: #070910;
+  border: 1.5px solid #222638;
+  border-radius: 18px;
+  padding: 2rem 2.4rem;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 209, 102, 0.1);
+  text-align: left;
+}
+
+.inspector-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #FFD166;
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.6rem;
+}
+
+.inspector-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.4rem;
+  color: #FFF7E8;
+  margin-bottom: 0.8rem;
+}
+
+.inspector-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #F4F1EA;
+  margin-bottom: 1.2rem;
+}
+
+.inspector-topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inspector-topic-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #B8B3C7;
+}
+
+.inspector-right-box {
+  background-color: #0d101a;
+  border: 1px solid #1c2030;
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inspector-capstone-header {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.95rem;
+  color: #FFD166;
+}
+
+.inspector-repo-snippet {
+  background-color: #05060A;
+  border: 1px solid #222638;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #27C93F;
+}
+
+.inspector-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  background-color: #FFD166;
+  color: #05060A;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FFD166;
+}
+
+.inspector-action-btn:hover {
+  background-color: #FFF7E8;
+  border-color: #FFF7E8;
+  box-shadow: 0 0 20px rgba(255, 247, 232, 0.5);
+}
+
+/* Color Accent Variations for Node Badges */
+.node-accent-gold .pin-badge-circle { border-color: #FFD166; color: #FFD166; }
+.node-accent-gold .pin-dotted-line { border-left-color: #FFD166; }
+.node-accent-gold .pin-anchor-dot { background-color: #FFD166; }
+.node-accent-gold .pin-radar-ring { border-color: #FFD166; }
+
+.node-accent-cream .pin-badge-circle { border-color: #FFF7E8; color: #FFF7E8; }
+.node-accent-cream .pin-dotted-line { border-left-color: #FFF7E8; }
+.node-accent-cream .pin-anchor-dot { background-color: #FFF7E8; }
+.node-accent-cream .pin-radar-ring { border-color: #FFF7E8; }
+
+.node-accent-green .pin-badge-circle { border-color: #27C93F; color: #27C93F; }
+.node-accent-green .pin-dotted-line { border-left-color: #27C93F; }
+.node-accent-green .pin-anchor-dot { background-color: #27C93F; }
+.node-accent-green .pin-radar-ring { border-color: #27C93F; }
+
+.node-accent-blue .pin-badge-circle { border-color: #38BDF8; color: #38BDF8; }
+.node-accent-blue .pin-dotted-line { border-left-color: #38BDF8; }
+.node-accent-blue .pin-anchor-dot { background-color: #38BDF8; }
+.node-accent-blue .pin-radar-ring { border-color: #38BDF8; }
+
+.node-accent-lavender .pin-badge-circle { border-color: #C084FC; color: #C084FC; }
+.node-accent-lavender .pin-dotted-line { border-left-color: #C084FC; }
+.node-accent-lavender .pin-anchor-dot { background-color: #C084FC; }
+.node-accent-lavender .pin-radar-ring { border-color: #C084FC; }
+
+/* Responsive Mobile Layout */
+@media (max-width: 980px) {
+  .journey-svg-canvas {
+    display: none;
+  }
+  .journey-milestones-row {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    min-height: auto;
+  }
+  .journey-pin-node {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.2rem;
+  }
+  .journey-pin-node.pos-top,
+  .journey-pin-node.pos-bottom {
+    justify-content: flex-start;
+  }
+  .pin-dotted-line, .pin-anchor-dot, .pin-radar-ring {
+    display: none;
+  }
+  .pin-info-card {
+    max-width: 100%;
+    text-align: left;
+    align-items: flex-start;
+  }
+  .milestone-inspector-panel {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
+}

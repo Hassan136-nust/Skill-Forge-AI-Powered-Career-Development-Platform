@@ -1,0 +1,317 @@
+/* Live Interactive LangGraph StateGraph Section — Framer Motion & SVG Visual Graph */
+
+.agent-section-wrapper {
+  width: 100%;
+  padding: 6rem 2rem 7rem 2rem;
+  background-color: #000000;
+  border-top: 1px solid #1c1f2e;
+  position: relative;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.agent-section-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Header & Trigger Controls */
+.agent-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.agent-header-text {
+  max-width: 750px;
+}
+
+.graph-sim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 8px;
+  background-color: #FFD166;
+  color: #05060A;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FFD166;
+}
+
+.graph-sim-btn:hover {
+  background-color: #FFF7E8;
+  border-color: #FFF7E8;
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.4);
+}
+
+/* Main Interactive Layout: Visual Graph Canvas (Left) + Live State Inspector (Right) */
+.langgraph-main-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Visual Graph Studio Card */
+.stategraph-canvas-card {
+  background-color: #070910;
+  border: 1.5px solid #222638;
+  border-radius: 18px;
+  padding: 2.2rem 1.8rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 209, 102, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.stategraph-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 209, 102, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.stategraph-studio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 5;
+  border-bottom: 1px solid #1c2030;
+  padding-bottom: 1rem;
+}
+
+.studio-title-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #FFF7E8;
+}
+
+.studio-cycle-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: #FFD166;
+  letter-spacing: 1px;
+}
+
+.studio-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #27C93F;
+  box-shadow: 0 0 10px #27C93F;
+}
+
+/* Visual Graph Flow Diagram Nodes */
+.graph-nodes-flow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 5;
+}
+
+.graph-flow-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Individual LangGraph Node Box */
+.graph-node-box {
+  flex: 1;
+  background-color: #0d101a;
+  border: 1.5px solid #222638;
+  border-radius: 12px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  text-align: left;
+}
+
+.graph-node-box:hover {
+  border-color: #FFD166;
+  transform: translateY(-3px);
+}
+
+.graph-node-box.active-executing {
+  border-color: #FFD166;
+  background-color: #121728;
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.4), 0 0 0 3px rgba(255, 209, 102, 0.15);
+}
+
+.graph-node-box.completed-node {
+  border-color: #27C93F;
+}
+
+.node-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.node-label-title {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #FFF7E8;
+}
+
+.node-type-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.5px;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background-color: #05060A;
+  border: 1px solid #222638;
+  color: #FFD166;
+}
+
+.node-desc-small {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #B8B3C7;
+}
+
+/* Directed Connector Arrows & Loops */
+.graph-edge-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.graph-edge-connector.active {
+  color: #FFD166;
+  animation: bounceSubtle 1.5s infinite;
+}
+
+.graph-cycle-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  background-color: #0d101a;
+  border: 1px solid #FFD166;
+  color: #FFD166;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+}
+
+/* Right Side: Live State Inspector & ChromaDB Vectors */
+.state-inspector-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.state-payload-card {
+  background-color: #070910;
+  border: 1.5px solid #222638;
+  border-radius: 18px;
+  padding: 1.8rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+  text-align: left;
+}
+
+.inspector-card-header {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1rem;
+  color: #FFF7E8;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.inspector-card-subtitle {
+  font-size: 0.82rem;
+  color: #B8B3C7;
+  margin-bottom: 1.2rem;
+}
+
+.json-state-terminal {
+  background-color: #05060A;
+  border: 1px solid #1c2030;
+  border-radius: 10px;
+  padding: 1.2rem;
+  font-family: 'JetBrains Mono', var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: #F4F1EA;
+  overflow-x: auto;
+  max-height: 240px;
+}
+
+.json-key { color: #FFD166; font-weight: 600; }
+.json-val-str { color: #27C93F; }
+.json-val-num { color: #38BDF8; }
+.json-val-bool { color: #C084FC; }
+
+/* ChromaDB Knowledge Collections Card */
+.chromadb-store-card {
+  background-color: #070910;
+  border: 1.5px solid #222638;
+  border-radius: 18px;
+  padding: 1.8rem;
+  text-align: left;
+}
+
+.chroma-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  background-color: #0d101a;
+  border: 1px solid #1c2030;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #F4F1EA;
+  margin-bottom: 0.5rem;
+}
+
+.chroma-file-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chroma-chunks-badge {
+  font-size: 0.65rem;
+  color: #FFD166;
+  background-color: #05060A;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+@media (max-width: 980px) {
+  .langgraph-main-layout {
+    grid-template-columns: 1fr;
+  }
+  .graph-flow-row {
+    flex-direction: column;
+  }
+  .graph-node-box {
+    width: 100%;
+  }
+}

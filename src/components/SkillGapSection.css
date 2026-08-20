@@ -1,0 +1,213 @@
+/* macOS Terminal Engine Inspector — Warm Cream, Soft Ivory, Lavender Gray, Cosmic Gold */
+
+.terminal-section-wrapper {
+  width: 100%;
+  padding: 6rem 3rem;
+  background-color: #000000;
+  border-top: 1px solid #1c1f2e;
+  position: relative;
+  z-index: 20;
+}
+
+.terminal-inner-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.terminal-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  color: #FFD166;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.terminal-tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #FFD166;
+  box-shadow: 0 0 10px rgba(255, 209, 102, 0.6);
+}
+
+.terminal-heading-main {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 400;
+  color: #FFF7E8;
+  letter-spacing: 2px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.terminal-heading-gold {
+  color: #FFD166;
+}
+
+.terminal-desc-lead {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #F4F1EA;
+  max-width: 780px;
+  margin-bottom: 2rem;
+}
+
+/* Command Presets Bar */
+.terminal-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.term-cmd-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  background-color: #0d0f18;
+  border: 1px solid #222638;
+  color: #B8B3C7;
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.term-cmd-btn:hover {
+  border-color: #FFD166;
+  color: #FFF7E8;
+}
+
+.term-cmd-btn.active {
+  background-color: #FFD166;
+  border-color: #FFD166;
+  color: #05060A;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(255, 209, 102, 0.35);
+}
+
+/* macOS Terminal Window */
+.macos-window-card {
+  width: 100%;
+  background-color: #070910;
+  border: 1.5px solid #222638;
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 209, 102, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.macos-window-header {
+  height: 44px;
+  background-color: #0d101a;
+  border-bottom: 1px solid #1c2030;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.2rem;
+}
+
+.macos-traffic-lights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.traffic-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.traffic-light.red { background-color: #FF5F56; }
+.traffic-light.yellow { background-color: #FFBD2E; }
+.traffic-light.green { background-color: #27C93F; }
+
+.macos-window-title {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #B8B3C7;
+  letter-spacing: 0.5px;
+}
+
+.macos-window-status {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #FFD166;
+}
+
+/* Terminal Console Body */
+.macos-terminal-body {
+  padding: 1.8rem;
+  font-family: 'JetBrains Mono', var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: #F4F1EA;
+  height: 360px;
+  min-height: 360px;
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+  scroll-behavior: smooth;
+}
+
+.term-line-prompt {
+  color: #FFD166;
+  font-weight: 700;
+}
+
+.term-line-cmd {
+  color: #FFF7E8;
+  font-weight: 600;
+}
+
+.term-line-info {
+  color: #F4F1EA;
+}
+
+.term-line-dim {
+  color: #B8B3C7;
+}
+
+.term-line-highlight {
+  color: #FFD166;
+  font-weight: 600;
+}
+
+.term-line-success {
+  color: #27C93F;
+  font-weight: 600;
+}
+
+.term-line-alert {
+  color: #FF5F56;
+  font-weight: 600;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background-color: #FFD166;
+  margin-left: 4px;
+  animation: bounceSubtle 1s infinite;
+  vertical-align: middle;
+}
+
+@media (max-width: 860px) {
+  .terminal-section-wrapper {
+    padding: 4rem 1.5rem;
+  }
+  .macos-terminal-body {
+    padding: 1.2rem;
+    font-size: 0.78rem;
+  }
+}

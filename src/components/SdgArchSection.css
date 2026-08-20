@@ -1,0 +1,239 @@
+/* High-Craft UN SDG Sustainability Matrix & Microservices Architecture */
+
+.sdg-section-wrapper {
+  width: 100%;
+  padding: 7rem 2.5rem 8rem 2.5rem;
+  background-color: #000000;
+  border-top: 1px solid #141724;
+  position: relative;
+  z-index: 20;
+}
+
+.sdg-inner-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.sdg-header-block {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 4.5rem auto;
+}
+
+/* 4 Executive SDG Impact Tiles */
+.sdg-four-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.8rem;
+  margin-bottom: 5.5rem;
+}
+
+.sdg-glass-tile {
+  background: #080a12;
+  border: 1px solid #1a1e2e;
+  border-radius: 20px;
+  padding: 2.2rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+}
+
+.sdg-glass-tile:hover {
+  transform: translateY(-8px);
+  border-color: #FFD166;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 209, 102, 0.1);
+}
+
+/* Watermark Number in Background */
+.sdg-watermark-num {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 3.8rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.04);
+  line-height: 1;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.sdg-glass-tile:hover .sdg-watermark-num {
+  color: rgba(255, 209, 102, 0.12);
+}
+
+/* Top Icon & Tag */
+.sdg-tile-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.sdg-tile-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background-color: #0d101c;
+  border: 1.5px solid #222638;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFD166;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.sdg-glass-tile:hover .sdg-tile-icon-box {
+  border-color: #FFD166;
+  background-color: #FFD166;
+  color: #05060A;
+  box-shadow: 0 0 20px rgba(255, 209, 102, 0.4);
+}
+
+.sdg-badge-label {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.82rem;
+  color: #FFD166;
+  letter-spacing: 1px;
+}
+
+.sdg-tile-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.05rem;
+  color: #FFF7E8;
+  letter-spacing: 1px;
+  line-height: 1.35;
+  margin-bottom: 0.8rem;
+  position: relative;
+  z-index: 2;
+}
+
+.sdg-tile-desc {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #B8B3C7;
+  margin-bottom: 1.4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.sdg-impact-points-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-top: 1px solid #161a29;
+  padding-top: 1.2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.sdg-impact-point-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #F4F1EA;
+  font-weight: 500;
+}
+
+/* Architecture Blueprint Card */
+.arch-blueprint-card {
+  background: #070910;
+  border: 1.5px solid #222638;
+  border-radius: 20px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  text-align: left;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.arch-header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.arch-header-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 1.25rem;
+  color: #FFF7E8;
+  letter-spacing: 1px;
+}
+
+.arch-devops-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: #FFD166;
+  background-color: #0e1222;
+  border: 1px solid #222638;
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+}
+
+.arch-desc {
+  color: #B8B3C7;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 900px;
+}
+
+/* Microservice Nodes Flow Diagram */
+.arch-flow-diagram {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  background-color: #05060A;
+  border: 1px solid #1c2030;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.arch-flow-node {
+  background-color: #0d101a;
+  border: 1px solid #222638;
+  padding: 0.75rem 1.1rem;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #F4F1EA;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.arch-flow-node:hover {
+  border-color: #FFD166;
+  color: #FFF7E8;
+}
+
+.arch-flow-node.highlight-gold {
+  border-color: #FFD166;
+  color: #FFD166;
+}
+
+.arch-arrow {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 980px) {
+  .sdg-four-grid {
+    grid-template-columns: 1fr;
+  }
+}

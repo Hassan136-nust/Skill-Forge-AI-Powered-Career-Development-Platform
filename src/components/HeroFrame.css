@@ -1,0 +1,226 @@
+/* ==========================================================================
+   BOX-FREE CINEMATIC HERO SECTION (SKILLFORGE PRD)
+   ========================================================================== */
+
+.hero-screen-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem 2rem 2rem;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+.hero-screen-layer.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.hero-screen-layer.hidden {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.96);
+  pointer-events: none;
+}
+
+.hero-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Floating Box-Free Content Container */
+.hero-floating-content {
+  position: relative;
+  max-width: 820px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 20;
+}
+
+/* Top Pixel Badge */
+.hero-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: #FFD166;
+  text-shadow: 0 0 12px rgba(255, 209, 102, 0.5);
+  margin-bottom: 1.2rem;
+  text-transform: uppercase;
+}
+
+.hero-tag-badge span.sparkle {
+  color: #FFD166;
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+/* Giant Bungee Main Title with Warm Cream */
+.hero-forge-title {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+  font-weight: 400;
+  letter-spacing: 4px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #FFF7E8;
+  margin-bottom: 0.9rem;
+  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 247, 232, 0.3);
+}
+
+/* Subtitle in Cosmic Gold */
+.hero-forge-subtitle {
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 400;
+  color: #FFD166;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.8rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.95), 0 0 15px rgba(255, 209, 102, 0.35);
+  max-width: 700px;
+}
+
+/* Description in Soft Ivory */
+.hero-forge-desc {
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.4vw, 1.12rem);
+  line-height: 1.65;
+  color: #F4F1EA;
+  max-width: 620px;
+  margin: 0 auto 2rem auto;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.95);
+}
+
+/* Action Buttons with Solid Palette (No Gradients) */
+.hero-forge-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.btn-forge-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.95rem 2.2rem;
+  border-radius: 9999px;
+  background-color: #FFD166;
+  color: #05060A;
+  font-size: 0.95rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.4), 0 8px 20px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  border: 1px solid #FFD166;
+}
+
+.btn-forge-primary:hover {
+  background-color: #FFF7E8;
+  border-color: #FFF7E8;
+  color: #05060A;
+  transform: translateY(-2px);
+  box-shadow: 0 0 35px rgba(255, 247, 232, 0.7), 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+.btn-forge-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 2rem;
+  border-radius: 9999px;
+  background-color: rgba(13, 16, 26, 0.7);
+  backdrop-filter: blur(14px);
+  border: 1.5px solid #222638;
+  color: #F4F1EA;
+  font-size: 0.92rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.btn-forge-secondary:hover {
+  border-color: #FFD166;
+  color: #FFF7E8;
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Badges */
+.hero-forge-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.forge-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+  color: #B8B3C7;
+}
+
+.forge-badge.green span:first-child { color: #FFD166; }
+.forge-badge.cyan span:first-child { color: #FFF7E8; }
+.forge-badge.amber span:first-child { color: #FFD166; }
+
+/* Bottom Scroll Prompt */
+.clean-scroll-prompt {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: #B8B3C7;
+  cursor: pointer;
+  z-index: 25;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.scroll-arrow-bouncing {
+  font-size: 1.1rem;
+  animation: bounceSubtle 1.8s infinite ease-in-out;
+  color: #FFD166;
+}
+
+@media (max-width: 860px) {
+  .hero-forge-actions {
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+  }
+  .btn-forge-primary, .btn-forge-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-forge-badges {
+    gap: 0.8rem;
+  }
+}
+

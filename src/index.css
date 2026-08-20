@@ -1,0 +1,120 @@
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #08090f;
+  --bg-card: #0d0f18;
+  --bg-card-hover: #131622;
+
+  --color-warm-cream: #FFF7E8;
+  --color-soft-ivory: #F4F1EA;
+  --color-lavender-gray: #B8B3C7;
+  --color-cosmic-gold: #FFD166;
+  --color-dark-surface: #0e101a;
+  --color-border: #222638;
+  --color-border-glow: rgba(255, 209, 102, 0.35);
+
+  --text-primary: #FFF7E8;
+  --text-body: #F4F1EA;
+  --text-secondary: #B8B3C7;
+  --accent-gold: #FFD166;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Bungee', cursive, sans-serif;
+  --font-bungee: 'Bungee', cursive, sans-serif;
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  font: 16px/1.5 var(--font-sans);
+  color-scheme: dark;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(5, 6, 12, 0.9);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4facfe, #a855f7);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00f2fe, #ff0080);
+}
+
+/* Keyframe Animations */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes floatReverse {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.6)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 30px rgba(255, 0, 128, 0.8)); }
+}
+
+@keyframes shineSweep {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(200%) rotate(45deg); }
+}
+
+@keyframes borderRotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes bounceSubtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.bungee-regular {
+  font-family: "Bungee", cursive, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.press-start-2p-regular {
+  font-family: "Press Start 2P", monospace, system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+

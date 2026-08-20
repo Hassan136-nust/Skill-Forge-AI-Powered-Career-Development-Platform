@@ -1,0 +1,93 @@
+/* ==========================================================================
+   COSMIC SCROLL EXPERIENCE — MAIN STYLES
+   ========================================================================== */
+
+.scroll-wrapper {
+  position: relative;
+  width: 100%;
+  background-color: #030408;
+  min-height: 100vh;
+  min-height: 100dvh;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fixed Fullscreen Video Layer */
+.video-viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  height: 100svh;
+  z-index: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #0e122b 0%, #030408 100%);
+  pointer-events: none;
+}
+
+.video-overlay-tint {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 30%, rgba(3, 4, 8, 0.4) 100%),
+              linear-gradient(180deg, rgba(5, 7, 18, 0.5) 0%, transparent 20%, transparent 80%, rgba(5, 7, 18, 0.7) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scrub-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transition: opacity 0.5s ease;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.scrub-video.loading {
+  opacity: 0;
+}
+
+.scrub-video.loaded {
+  opacity: 1;
+}
+
+/* Extended Scroll Track */
+.scroll-track {
+  height: 400vh;
+  width: 100%;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Homepage Continuation Layer */
+.homepage-content-layer {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  background-color: #000000;
+  min-height: 100vh;
+  box-shadow: 0 -30px 60px rgba(0, 0, 0, 0.95);
+}
+
+/* Ensure smooth section anchor scroll with navbar breathing room */
+#skill-gaps,
+#roadmaps,
+#multi-agent,
+#pricing,
+#sdg-impact,
+#architecture {
+  scroll-margin-top: 90px;
+}
+
+@media (max-width: 860px) {
+  .scroll-track {
+    height: 350vh;
+  }
+}

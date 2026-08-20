@@ -1,0 +1,303 @@
+import jwt from 'jsonwebtoken'
+import { OAuth2Client } from 'google-auth-library'
+import User from '../models/User.js'
+import Profile from '../models/Profile.js'
+import { sendOtpEmail } from '../config/mailer.js'
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+// Helper: Generate JWT Token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  })
+}
+
+// Helper: Generate 6-Digit Random Numeric OTP
+const generateOtpCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+// @desc    Register a new user and dispatch real 6-digit email OTP
+// @route   POST /api/auth/register
+// @access  Public
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password, role, targetRole } = req.body
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide full name, email, and password' })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' })
+    }
+
+    // Check if verified user already exists
+    let user = await User.findOne({ email: email.toLowerCase() })
+
+    if (user && user.isVerified) {
+      return res.status(400).json({ success: false, message: 'An account with this email already exists. Please sign in.' })
+    }
+
+    const otp = generateOtpCode()
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 mins
+
+    if (user && !user.isVerified) {
+      // Update unverified user with new credentials and fresh OTP
+      user.name = name
+      user.password = password
+      user.role = role || 'student'
+      user.otpCode = otp
+      user.otpExpires = otpExpires
+      await user.save()
+    } else {
+      // Create new unverified user
+      user = await User.create({
+        name,
+        email: email.toLowerCase(),
+        password,
+        role: role || 'student',
+        otpCode: otp,
+        otpExpires,
+        isVerified: false,
+      })
+
+      // Create linked Profile
+      await Profile.create({
+        userId: user._id,
+        careerGoal: targetRole || 'AI Engineer',
+      })
+    }
+
+    // Dispatch real email via Gmail SMTP
+    const mailResult = await sendOtpEmail(user.email, otp, user.name)
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration initialized. 6-digit verification code sent to your email.',
+      email: user.email,
+      requireOtp: true,
+      emailSent: mailResult.success,
+    })
+  } catch (error) {
+    console.error('[Register Error]:', error)
+    res.status(500).json({ success: false, message: error.message || 'Server registration error' })
+  }
+}
+
+// @desc    Direct Login for existing users (No OTP required)
+// @route   POST /api/auth/login
+// @access  Public
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide email and password' })
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password')
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' })
+    }
+
+    const isMatch = await user.matchPassword(password)
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' })
+    }
+
+    // Find profile
+    let profile = await Profile.findOne({ userId: user._id })
+    if (!profile) {
+      profile = await Profile.create({ userId: user._id })
+    }
+
+    // Direct JWT generation
+    const token = generateToken(user._id)
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+      },
+      profile,
+    })
+  } catch (error) {
+    console.error('[Login Error]:', error)
+    res.status(500).json({ success: false, message: error.message || 'Server login error' })
+  }
+}
+
+// @desc    Verify 6-digit OTP on Signup
+// @route   POST /api/auth/verify-otp
+// @access  Public
+export const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body
+
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'Please provide email and 6-digit OTP code' })
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+otpCode +otpExpires')
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+
+    if (!user.otpCode || user.otpCode !== otp.trim()) {
+      return res.status(400).json({ success: false, message: 'Invalid 6-digit verification code' })
+    }
+
+    if (user.otpExpires < new Date()) {
+      return res.status(400).json({ success: false, message: 'Verification code has expired. Please click resend.' })
+    }
+
+    // Mark user as verified
+    user.isVerified = true
+    user.otpCode = undefined
+    user.otpExpires = undefined
+    await user.save()
+
+    let profile = await Profile.findOne({ userId: user._id })
+    if (!profile) {
+      profile = await Profile.create({ userId: user._id })
+    }
+
+    const token = generateToken(user._id)
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified! Account created successfully.',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+      },
+      profile,
+    })
+  } catch (error) {
+    console.error('[Verify OTP Error]:', error)
+    res.status(500).json({ success: false, message: error.message || 'Verification error' })
+  }
+}
+
+// @desc    Resend 6-digit email OTP
+// @route   POST /api/auth/resend-otp
+// @access  Public
+export const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please provide email address' })
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() })
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No registered user found with this email' })
+    }
+
+    const otp = generateOtpCode()
+    user.otpCode = otp
+    user.otpExpires = new Date(Date.now() + 10 * 60 * 1000)
+    await user.save()
+
+    await sendOtpEmail(user.email, otp, user.name)
+
+    res.status(200).json({
+      success: true,
+      message: 'Fresh 6-digit OTP code sent to your email.',
+    })
+  } catch (error) {
+    console.error('[Resend OTP Error]:', error)
+    res.status(500).json({ success: false, message: error.message || 'Resend error' })
+  }
+}
+
+// @desc    Seamless Google OAuth Login / Registration (Direct, no OTP)
+// @route   POST /api/auth/google
+// @access  Public
+export const googleAuth = async (req, res) => {
+  try {
+    const { email, name, picture, googleId } = req.body
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Google authentication requires email' })
+    }
+
+    let user = await User.findOne({ email: email.toLowerCase() })
+
+    if (!user) {
+      // Direct registration via Google
+      user = await User.create({
+        name: name || 'Google Scholar',
+        email: email.toLowerCase(),
+        googleId: googleId || 'g_' + Date.now(),
+        avatar: picture || '',
+        isVerified: true,
+        role: 'student',
+      })
+
+      await Profile.create({
+        userId: user._id,
+        careerGoal: 'AI Engineer',
+      })
+    } else {
+      if (googleId) user.googleId = googleId
+      if (picture && !user.avatar) user.avatar = picture
+      user.isVerified = true
+      await user.save()
+    }
+
+    const profile = await Profile.findOne({ userId: user._id })
+    const token = generateToken(user._id)
+
+    res.status(200).json({
+      success: true,
+      message: 'Google login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+      },
+      profile,
+    })
+  } catch (error) {
+    console.error('[Google Auth Error]:', error)
+    res.status(500).json({ success: false, message: error.message || 'Google Auth error' })
+  }
+}
+
+// @desc    Get Current Logged in User & Profile
+// @route   GET /api/auth/me
+// @access  Private
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+    const profile = await Profile.findOne({ userId: req.user.id })
+
+    res.status(200).json({
+      success: true,
+      user,
+      profile,
+    })
+  } catch (error) {
+    console.error('[GetMe Error]:', error)
+    res.status(500).json({ success: false, message: error.message })
+  }
+}

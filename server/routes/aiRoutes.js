@@ -75,6 +75,67 @@ Keep code snippets modern and answers clear and concise.`,
 
 import Roadmap from '../models/Roadmap.js'
 
+// Helper: Parse structured milestones from generated markdown for dynamic 3D Cards
+function parseMilestonesFromText(text, fallbackRole) {
+  const milestones = []
+  if (!text) return milestones
+
+  // 1. Try parsing Markdown table rows (| Milestone | Focus / Objectives | Capstone | ...)
+  const lines = text.split('\n')
+  for (const line of lines) {
+    if (line.startsWith('|') && (line.includes('1') || line.includes('2') || line.includes('3') || line.includes('4') || line.includes('5') || line.includes('6') || line.includes('Milestone') || line.includes('Step'))) {
+      const parts = line.split('|').map((p) => p.trim()).filter(Boolean)
+      if (parts.length >= 3 && !parts[0].includes('---') && !parts[0].toLowerCase().includes('milestone')) {
+        const stepNum = String(milestones.length + 1).padStart(2, '0')
+        const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
+        const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || ''
+        const rawCapstone = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || `Capstone ${milestones.length + 1}`
+
+        let tech = 'python'
+        const lower = (rawTitle + ' ' + rawDesc + ' ' + rawCapstone).toLowerCase()
+        if (lower.includes('torch') || lower.includes('deep learning') || lower.includes('neural')) tech = 'pytorch'
+        else if (lower.includes('fastapi') || lower.includes('vector') || lower.includes('chroma') || lower.includes('api')) tech = 'fastapi'
+        else if (lower.includes('docker') || lower.includes('cloud') || lower.includes('deploy') || lower.includes('agent')) tech = 'docker'
+        else if (lower.includes('react') || lower.includes('frontend') || lower.includes('next')) tech = 'react'
+        else if (lower.includes('node') || lower.includes('express') || lower.includes('typescript')) tech = 'typescript'
+        else if (lower.includes('postgres') || lower.includes('sql') || lower.includes('database') || lower.includes('redis')) tech = 'postgresql'
+        else if (lower.includes('kube') || lower.includes('kubernetes') || lower.includes('linux') || lower.includes('ci/cd')) tech = 'kubernetes'
+        else if (lower.includes('pandas') || lower.includes('data') || lower.includes('numpy')) tech = 'pandas'
+
+        milestones.push({
+          step: stepNum,
+          title: rawTitle.toUpperCase(),
+          desc: rawDesc.length > 120 ? rawDesc.substring(0, 117) + '...' : rawDesc,
+          capstone: rawCapstone.length > 55 ? rawCapstone.substring(0, 52) + '...' : rawCapstone,
+          tech: tech,
+        })
+      }
+    }
+  }
+
+  // 2. If table parsing didn't find enough, try section headers (### Milestone 1 / ## Step 1)
+  if (milestones.length === 0) {
+    const milestoneBlocks = text.split(/(?=#{1,3}\s*(?:Milestone|Step|\d))/i)
+    milestoneBlocks.forEach((block, idx) => {
+      const bLines = block.trim().split('\n')
+      if (bLines.length > 0 && /(?:Milestone|Step|\d)/i.test(bLines[0])) {
+        const stepNum = String(milestones.length + 1).padStart(2, '0')
+        const title = bLines[0].replace(/[*_#`]/g, '').trim().toUpperCase()
+        const desc = bLines.slice(1, 4).join(' ').replace(/[*_#`]/g, '').trim()
+        milestones.push({
+          step: stepNum,
+          title: title,
+          desc: desc.length > 120 ? desc.substring(0, 117) + '...' : desc,
+          capstone: `Capstone ${stepNum}: Production Showcase`,
+          tech: idx === 0 ? 'python' : idx === 1 ? 'pytorch' : idx === 2 ? 'fastapi' : 'docker',
+        })
+      }
+    })
+  }
+
+  return milestones
+}
+
 // =========================================================================
 // 2. POST /api/ai/roadmap/generate — GenAI Career Roadmap Generator
 // =========================================================================
@@ -134,6 +195,7 @@ Requirements:
     })
 
     const generatedRoadmapText = chatCompletion.choices[0]?.message?.content || ''
+    const milestones = parseMilestonesFromText(generatedRoadmapText, targetGoal)
 
     // Persist to MongoDB Atlas
     let savedRoadmap = null
@@ -143,6 +205,7 @@ Requirements:
         careerGoal: targetGoal,
         gaps: Array.isArray(missingSkills) ? missingSkills : [],
         generatedRoadmapText,
+        milestones: milestones,
         model: 'openai/gpt-oss-120b (Groq Cloud)',
         generatedAt: new Date(),
       })
@@ -155,6 +218,7 @@ Requirements:
       careerGoal: targetGoal,
       analysis: pythonAnalysis,
       generatedRoadmapText,
+      milestones: milestones,
       roadmapId: savedRoadmap?._id,
       generatedAt: savedRoadmap?.createdAt || new Date(),
       model: 'openai/gpt-oss-120b (Groq Cloud)',

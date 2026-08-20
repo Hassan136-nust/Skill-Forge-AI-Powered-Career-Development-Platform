@@ -472,6 +472,66 @@ export default function StudentDashboard({ onExitDashboard }) {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [pdfGeneratingId, setPdfGeneratingId] = useState(null)
+  const [activePdfRoadmap, setActivePdfRoadmap] = useState(null)
+  const [aiGeneratedMilestones, setAiGeneratedMilestones] = useState(null)
+
+  // Helper: Client-side robust milestone extractor for any generated roadmap text
+  const parseMilestonesFromRoadmapText = (text) => {
+    const milestones = []
+    if (!text) return milestones
+
+    const lines = text.split('\n')
+    for (const line of lines) {
+      if (line.startsWith('|') && (line.includes('1') || line.includes('2') || line.includes('3') || line.includes('4') || line.includes('5') || line.includes('6') || line.includes('Milestone') || line.includes('Step'))) {
+        const parts = line.split('|').map((p) => p.trim()).filter(Boolean)
+        if (parts.length >= 3 && !parts[0].includes('---') && !parts[0].toLowerCase().includes('milestone')) {
+          const stepNum = String(milestones.length + 1).padStart(2, '0')
+          const rawTitle = parts[0].replace(/[*_#`1234567890️⃣]/g, '').trim()
+          const rawDesc = parts[1]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || ''
+          const rawCapstone = parts[2]?.replace(/[*_#`]/g, '').replace(/<br\s*\/?>/gi, ' ').trim() || `Capstone ${milestones.length + 1}`
+
+          let tech = 'python'
+          const lower = (rawTitle + ' ' + rawDesc + ' ' + rawCapstone).toLowerCase()
+          if (lower.includes('torch') || lower.includes('deep learning') || lower.includes('neural')) tech = 'pytorch'
+          else if (lower.includes('fastapi') || lower.includes('vector') || lower.includes('chroma') || lower.includes('api')) tech = 'fastapi'
+          else if (lower.includes('docker') || lower.includes('cloud') || lower.includes('deploy') || lower.includes('agent')) tech = 'docker'
+          else if (lower.includes('react') || lower.includes('frontend') || lower.includes('next')) tech = 'react'
+          else if (lower.includes('node') || lower.includes('express') || lower.includes('typescript')) tech = 'typescript'
+          else if (lower.includes('postgres') || lower.includes('sql') || lower.includes('database') || lower.includes('redis')) tech = 'postgresql'
+          else if (lower.includes('kube') || lower.includes('kubernetes') || lower.includes('linux') || lower.includes('ci/cd')) tech = 'kubernetes'
+
+          milestones.push({
+            step: stepNum,
+            title: rawTitle.toUpperCase(),
+            desc: rawDesc.length > 115 ? rawDesc.substring(0, 112) + '...' : rawDesc,
+            capstone: rawCapstone.length > 55 ? rawCapstone.substring(0, 52) + '...' : rawCapstone,
+            tech: tech,
+          })
+        }
+      }
+    }
+
+    if (milestones.length === 0) {
+      const blocks = text.split(/(?=#{1,3}\s*(?:Milestone|Step|\d))/i)
+      blocks.forEach((block, idx) => {
+        const bLines = block.trim().split('\n')
+        if (bLines.length > 0 && /(?:Milestone|Step|\d)/i.test(bLines[0])) {
+          const stepNum = String(milestones.length + 1).padStart(2, '0')
+          const title = bLines[0].replace(/[*_#`]/g, '').trim().toUpperCase()
+          const desc = bLines.slice(1, 4).join(' ').replace(/[*_#`]/g, '').trim()
+          milestones.push({
+            step: stepNum,
+            title: title,
+            desc: desc.length > 115 ? desc.substring(0, 112) + '...' : desc,
+            capstone: `Capstone ${stepNum}: Production Showcase`,
+            tech: idx === 0 ? 'python' : idx === 1 ? 'pytorch' : idx === 2 ? 'fastapi' : 'docker',
+          })
+        }
+      })
+    }
+
+    return milestones
+  }
 
   // Fetch Previous Roadmaps History from MongoDB Atlas
   const loadRoadmapHistory = async () => {
@@ -480,8 +540,16 @@ export default function StudentDashboard({ onExitDashboard }) {
       const res = await fetch(`http://localhost:3001/api/ai/roadmap/history/${encodeURIComponent(email)}`)
       if (res.ok) {
         const data = await res.json()
-        if (data.history) {
+        if (data.history && data.history.length > 0) {
           setRoadmapHistoryList(data.history)
+          if (!aiGeneratedMilestones && data.history[0]?.generatedRoadmapText) {
+            const ms = (data.history[0].milestones && data.history[0].milestones.length > 0)
+              ? data.history[0].milestones
+              : parseMilestonesFromRoadmapText(data.history[0].generatedRoadmapText)
+            if (ms && ms.length > 0) {
+              setAiGeneratedMilestones(ms)
+            }
+          }
         }
       }
     } catch (e) {
@@ -506,6 +574,12 @@ export default function StudentDashboard({ onExitDashboard }) {
       if (res.ok) {
         const data = await res.json()
         setAiRoadmapModalData(data)
+        const ms = (data.milestones && data.milestones.length > 0)
+          ? data.milestones
+          : parseMilestonesFromRoadmapText(data.generatedRoadmapText)
+        if (ms && ms.length > 0) {
+          setAiGeneratedMilestones(ms)
+        }
         loadRoadmapHistory()
       }
     } catch (e) {
@@ -515,97 +589,64 @@ export default function StudentDashboard({ onExitDashboard }) {
     }
   }
 
+  const handleSelectPastRoadmap = (hist) => {
+    setAiRoadmapModalData(hist)
+    const ms = (hist.milestones && hist.milestones.length > 0)
+      ? hist.milestones
+      : parseMilestonesFromRoadmapText(hist.generatedRoadmapText)
+    if (ms && ms.length > 0) {
+      setAiGeneratedMilestones(ms)
+    }
+    setIsHistoryModalOpen(false)
+    setShowHistoryDrawer(false)
+  }
+
   // 1-Click Crisp High-Contrast PDF Exporter for any roadmap snapshot
   const handleDownloadRoadmapPdf = (customRoadmap = null) => {
-    const roadmap = customRoadmap || aiRoadmapModalData
-    if (!roadmap || !roadmap.generatedRoadmapText) return
+    const roadmap = (customRoadmap && customRoadmap.generatedRoadmapText) ? customRoadmap : aiRoadmapModalData
+    if (!roadmap || !roadmap.generatedRoadmapText) {
+      console.warn('No roadmap content found for PDF export.')
+      return
+    }
 
     const rId = roadmap._id || 'active'
     setPdfGeneratingId(rId)
     setIsExportingPdf(true)
+    setActivePdfRoadmap(roadmap)
 
-    // Clean text by replacing raw <br> tags with clean linebreaks
-    const rawText = roadmap.generatedRoadmapText || ''
-    const cleanedText = rawText.replace(/<br\s*\/?>/gi, '\n')
-
-    // Create a temporary off-screen container with crisp, high-contrast professional styling
-    const printContainer = document.createElement('div')
-    printContainer.className = 'pdf-export-template'
-    printContainer.style.width = '780px'
-    printContainer.style.position = 'fixed'
-    printContainer.style.left = '-9999px'
-    printContainer.style.top = '0'
-    printContainer.style.zIndex = '-9999'
-
-    // Branded Header HTML
-    const formattedDate = roadmap.createdAt ? new Date(roadmap.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }) : new Date().toLocaleDateString('en-US')
-
-    printContainer.innerHTML = `
-      <div style="border-bottom: 2.5px solid #0284C7; padding-bottom: 16px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <span style="font-size: 24px;">🪐</span>
-            <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #0F172A;">SKILLFORGE AI</span>
-            <span style="background: #0284C7; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;">VERIFIED ROADMAP</span>
-          </div>
-          <p style="font-size: 12px; color: #64748B; margin: 0; font-weight: 500;">AI-Powered Student Career Pathway &amp; Diagnostic Learning Roadmap</p>
-        </div>
-        <div style="text-align: right; font-size: 11px; color: #475569; line-height: 1.45;">
-          <div style="font-weight: 800; color: #0F172A; font-size: 13px;">${studentProfile.name}</div>
-          <div>${studentProfile.university || 'NUST'} • ${studentProfile.degree || 'BS Computer Science'}</div>
-          <div>Target Track: <strong style="color: #0284C7;">${roadmap.careerGoal || studentProfile.careerGoal}</strong></div>
-          <div style="color: #94A3B8; margin-top: 2px;">Generated: ${formattedDate}</div>
-        </div>
-      </div>
-      <div id="pdf-inner-content"></div>
-      <div style="margin-top: 28px; border-top: 1px solid #E2E8F0; padding-top: 10px; font-size: 10px; color: #94A3B8; display: flex; justify-content: space-between;">
-        <span>SkillForge — LoopLearn Hackathon 2026 (PS-03)</span>
-        <span>Engine: Groq Cloud LLaMA 3.3 / GPT-OSS-120B</span>
-      </div>
-    `
-
-    // Extract rendered table and text from the existing DOM or format markdown
-    const activeMarkdownElement = document.getElementById('ai-roadmap-printable-area')
-    const innerTarget = printContainer.querySelector('#pdf-inner-content')
-
-    if (activeMarkdownElement && (!customRoadmap || customRoadmap._id === aiRoadmapModalData?._id)) {
-      innerTarget.innerHTML = activeMarkdownElement.innerHTML.replace(/<br\s*\/?>/gi, '<br>')
-    } else {
-      // Clean HTML conversion for background downloads
-      innerTarget.innerHTML = `<div style="white-space: pre-wrap; font-size: 12px; line-height: 1.55; color: #1E293B;">${cleanedText}</div>`
-    }
-
-    document.body.appendChild(printContainer)
-
-    const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `SkillForge_${(roadmap.careerGoal || studentProfile.careerGoal).replace(/\s+/g, '_')}_Roadmap.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }
-
-    html2pdf()
-      .set(opt)
-      .from(printContainer)
-      .save()
-      .then(() => {
-        document.body.removeChild(printContainer)
+    setTimeout(() => {
+      const element = document.getElementById('skillforge-active-pdf-template')
+      if (!element) {
         setIsExportingPdf(false)
         setPdfGeneratingId(null)
-      })
-      .catch((err) => {
-        console.warn('PDF export error:', err)
-        if (document.body.contains(printContainer)) {
-          document.body.removeChild(printContainer)
-        }
-        setIsExportingPdf(false)
-        setPdfGeneratingId(null)
-      })
+        setActivePdfRoadmap(null)
+        return
+      }
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `SkillForge_${(roadmap.careerGoal || studentProfile.careerGoal).replace(/\s+/g, '_')}_Roadmap.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }
+
+      html2pdf()
+        .set(opt)
+        .from(element)
+        .save()
+        .then(() => {
+          setIsExportingPdf(false)
+          setPdfGeneratingId(null)
+          setActivePdfRoadmap(null)
+        })
+        .catch((err) => {
+          console.warn('PDF export error:', err)
+          setIsExportingPdf(false)
+          setPdfGeneratingId(null)
+          setActivePdfRoadmap(null)
+        })
+    }, 250)
   }
 
   // Dynamic Skill Gap Engine
@@ -1424,7 +1465,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                 missingSkills.map((s, i) => (
                   <div key={i} className="gap-skill-item">
                     <span>{s.name}</span>
-                    <span style={{ color: '#FF6B81', fontWeight: 700 }}>0%</span>
+                  <span style={{ color: '#FF6B81', fontWeight: 700 }}>0%</span>
                   </div>
                 ))
               )}
@@ -1433,43 +1474,81 @@ export default function StudentDashboard({ onExitDashboard }) {
         </div>
 
         {/* =========================================================================
-            6. ALTERNATING (UP-DOWN-UP-DOWN) 3D STEP ROADMAP WITH SIDE COSMIC CAT
+            6. 3D INTERACTIVE AI CAREER ROADMAP PATHWAY (DYNAMICALLY GENERATED BY AI)
             ========================================================================= */}
         <div id="roadmap-section" className="dashboard-glass-panel">
           <div className="panel-header-row">
-            <h2 className="panel-title">
-              <Sparkles size={18} color="#FFD166" />
-              <span>3D AI CAREER ROADMAP PATHWAY</span>
-            </h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <span style={{ fontSize: '0.68rem', color: '#B8B3C7' }}>
-                Personalized Path for {studentProfile.careerGoal}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+              <h2 className="panel-title">
+                <Compass size={18} color="#FFD166" />
+                <span>3D AI CAREER ROADMAP PATHWAY</span>
+              </h2>
+              {aiGeneratedMilestones && aiGeneratedMilestones.length > 0 ? (
+                <span
+                  style={{
+                    background: 'rgba(255, 209, 102, 0.15)',
+                    border: '1px solid #FFD166',
+                    borderRadius: '12px',
+                    padding: '0.2rem 0.6rem',
+                    color: '#FFD166',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <Sparkles size={11} color="#FFD166" />
+                  <span>AI DYNAMIC BLUEPRINT ({aiGeneratedMilestones.length} MILESTONES)</span>
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  Standard Track: {studentProfile.careerGoal}
+                </span>
+              )}
+            </div>
 
-              {/* Previous Roadmaps Button (Outside on Dashboard) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              {aiGeneratedMilestones && (
+                <button
+                  onClick={() => setAiGeneratedMilestones(null)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid #33394f',
+                    borderRadius: '10px',
+                    padding: '0.45rem 0.75rem',
+                    color: '#B8B3C7',
+                    fontSize: '0.72rem',
+                    cursor: 'pointer',
+                  }}
+                  title="Reset to default benchmark track"
+                >
+                  Reset Default
+                </button>
+              )}
+
+              {/* Previous Roadmaps Button */}
               <button
-                className="assessment-quiz-btn"
                 style={{
-                  width: 'auto',
-                  padding: '0.4rem 0.95rem',
-                  background: 'rgba(255, 209, 102, 0.12)',
-                  borderColor: '#FFD166',
+                  background: 'rgba(255, 209, 102, 0.1)',
+                  border: '1px solid rgba(255, 209, 102, 0.4)',
+                  borderRadius: '12px',
+                  padding: '0.45rem 0.9rem',
                   color: '#FFD166',
+                  fontSize: '0.75rem',
                   fontWeight: 800,
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.45rem',
                   cursor: 'pointer',
-                  boxShadow: '0 0 15px rgba(255, 209, 102, 0.2)',
                 }}
                 onClick={() => {
                   loadRoadmapHistory()
                   setIsHistoryModalOpen(true)
                 }}
-                title="View previous AI generated roadmaps"
               >
                 <History size={14} color="#FFD166" />
-                <span>PREVIOUS ({roadmapHistoryList.length})</span>
+                <span>HISTORY</span>
               </button>
 
               <button
@@ -1485,7 +1564,6 @@ export default function StudentDashboard({ onExitDashboard }) {
                   alignItems: 'center',
                   gap: '0.45rem',
                   cursor: isGeneratingAiRoadmap ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 0 15px rgba(255, 209, 102, 0.3)',
                 }}
                 onClick={handleGenerateAiRoadmap}
                 disabled={isGeneratingAiRoadmap}
@@ -1506,16 +1584,20 @@ export default function StudentDashboard({ onExitDashboard }) {
           </div>
 
           <div className="roadmap-side-by-side-layout">
-            {/* Cosmic Cat standing FREELY on the left side (outside any inner box) */}
+            {/* Cosmic Cat standing FREELY on the left side */}
             <div className="roadmap-side-cat-companion">
               <div className="cat-free-dialog-bubble">
                 <span className="press-start-2p-regular" style={{ fontSize: '0.62rem', color: '#FFD166' }}>
                   ✦ COSMIC CAT NAVIGATOR
                 </span>
                 <p style={{ fontSize: '0.8rem', color: '#FFF7E8', margin: '0.35rem 0 0 0', lineHeight: 1.35 }}>
-                  {missingSkills.length > 0
-                    ? `"Scholar ${studentProfile.name.split(' ')[0]}! Step 02 ('${missingSkills[0].name}') is your active target!"`
-                    : `"Scholar ${studentProfile.name.split(' ')[0]}! All 4 roadmap steps verified & completed!"`}
+                  {(() => {
+                    const steps = (aiGeneratedMilestones && aiGeneratedMilestones.length > 0)
+                      ? aiGeneratedMilestones
+                      : (TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer'])
+                    const activeStep = steps[1] || steps[0]
+                    return `"Scholar ${studentProfile.name.split(' ')[0]}! Step ${activeStep?.step || '02'} ('${activeStep?.title || 'PyTorch'}') is your active target!"`
+                  })()}
                 </p>
               </div>
 
@@ -1529,13 +1611,15 @@ export default function StudentDashboard({ onExitDashboard }) {
 
               <div className="roadmap-zigzag-deck">
                 {(() => {
-                  const roadmapSteps = TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer']
+                  const roadmapSteps = (aiGeneratedMilestones && aiGeneratedMilestones.length > 0)
+                    ? aiGeneratedMilestones
+                    : (TRACK_ROADMAPS[studentProfile.careerGoal] || TRACK_ROADMAPS['AI Engineer'])
                   let activeFocusFound = false
 
                   return roadmapSteps.map((stepItem, sIdx) => {
                     const stepNum = sIdx + 1
                     const positionClass = sIdx % 2 === 0 ? 'position-up' : 'position-down'
-                    const sTechKey = stepItem.tech.toLowerCase()
+                    const sTechKey = (stepItem.tech || '').toLowerCase()
                     
                     const userSkill = studentProfile.skills.find(s => s && s.name && s.name.toLowerCase().includes(sTechKey))
                     const isVerified = Boolean((userSkill && userSkill.isVerified) || (skillScores[sTechKey] && skillScores[sTechKey] >= 80))
@@ -1553,7 +1637,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                       statusColor = '#FFD166'
                       cardStateClass = 'active'
                       activeFocusFound = true
-                    } else if (sIdx === 3) {
+                    } else if (sIdx === roadmapSteps.length - 1) {
                       statusText = '🔒 GRADUATION'
                       statusColor = '#64748b'
                     }
@@ -2042,10 +2126,12 @@ export default function StudentDashboard({ onExitDashboard }) {
                 <div
                   id="ai-roadmap-printable-area"
                   className="ai-roadmap-scroll-container"
+                  tabIndex={0}
                   style={{
                     flex: '1 1 auto',
                     minHeight: 0,
                     height: '100%',
+                    maxHeight: '100%',
                     overflowY: 'auto',
                     paddingRight: '0.8rem',
                   }}
@@ -2067,6 +2153,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  flexShrink: 0,
                 }}
               >
                 <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
@@ -2076,7 +2163,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                   {/* Download as PDF Button */}
                   <button
-                    onClick={handleDownloadRoadmapPdf}
+                    onClick={() => handleDownloadRoadmapPdf(aiRoadmapModalData)}
                     disabled={isExportingPdf}
                     style={{
                       background: 'linear-gradient(135deg, rgba(39, 201, 63, 0.2) 0%, rgba(0, 210, 255, 0.2) 100%)',
@@ -2093,7 +2180,7 @@ export default function StudentDashboard({ onExitDashboard }) {
                       boxShadow: '0 4px 20px rgba(39, 201, 63, 0.25)',
                     }}
                   >
-                    {isExportingPdf ? (
+                    {isExportingPdf && pdfGeneratingId === (aiRoadmapModalData._id || 'active') ? (
                       <>
                         <RotateCcw size={15} style={{ animation: 'spin 1s linear infinite' }} />
                         <span>EXPORTING PDF...</span>
@@ -2122,6 +2209,207 @@ export default function StudentDashboard({ onExitDashboard }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* =========================================================================
+          7.5 DEDICATED PREVIOUS ROADMAPS MODAL (WITH 1-CLICK DOWNLOAD & VIEW)
+          ========================================================================= */}
+      <AnimatePresence>
+        {isHistoryModalOpen && (
+          <motion.div
+            className="quiz-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ zIndex: 10000 }}
+          >
+            <motion.div
+              className="ai-roadmap-modal-card"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{
+                width: '780px',
+                maxWidth: '94vw',
+                height: '75vh',
+                maxHeight: '75vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Header */}
+              <div className="ai-roadmap-header-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 209, 102, 0.2)',
+                      border: '1.5px solid #FFD166',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <History size={22} color="#FFD166" />
+                  </div>
+                  <div>
+                    <h2 className="bungee-regular" style={{ fontSize: '1.2rem', color: '#FFF7E8', margin: 0 }}>
+                      PREVIOUS GENERATED ROADMAPS ({roadmapHistoryList.length})
+                    </h2>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      Stored in MongoDB Atlas • Access &amp; Download previous career blueprints anytime
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsHistoryModalOpen(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid #33394f',
+                    borderRadius: '50%',
+                    width: '36px',
+                    height: '36px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFF7E8',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* History List */}
+              <div
+                className="ai-roadmap-scroll-container"
+                style={{
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  padding: '1.2rem',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                }}
+              >
+                {roadmapHistoryList.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                    <FileText size={42} color="#33394f" />
+                    <span style={{ color: '#64748b', fontSize: '0.88rem' }}>
+                      No previous roadmaps found yet. Click "GENERATE AI ROADMAP" to generate your first roadmap!
+                    </span>
+                    <button
+                      className="assessment-quiz-btn"
+                      style={{ width: 'auto', padding: '0.5rem 1.2rem' }}
+                      onClick={() => {
+                        setIsHistoryModalOpen(false)
+                        handleGenerateAiRoadmap()
+                      }}
+                    >
+                      <Sparkles size={14} color="#FFD166" />
+                      <span>GENERATE FIRST ROADMAP</span>
+                    </button>
+                  </div>
+                ) : (
+                  roadmapHistoryList.map((hist, hIdx) => (
+                    <div
+                      key={hIdx}
+                      style={{
+                        background: 'rgba(13, 16, 26, 0.85)',
+                        border: '1px solid #222638',
+                        borderRadius: '16px',
+                        padding: '1.1rem 1.3rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '1rem',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span className="bungee-regular" style={{ fontSize: '1rem', color: '#FFF7E8' }}>
+                            {hist.careerGoal}
+                          </span>
+                          <span
+                            style={{
+                              background: 'rgba(39, 201, 63, 0.15)',
+                              border: '1px solid #27C93F',
+                              borderRadius: '8px',
+                              padding: '0.15rem 0.5rem',
+                              color: '#27C93F',
+                              fontSize: '0.65rem',
+                              fontWeight: 800,
+                            }}
+                          >
+                            ✓ COMPLETE ROADMAP
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '0.72rem', color: '#64748b' }}>
+                          <span>📅 {hist.createdAt ? new Date(hist.createdAt).toLocaleString() : 'Saved Snapshot'}</span>
+                          <span>•</span>
+                          <span style={{ color: '#FFD166' }}>⚡ Groq LLaMA 3.3 (120B)</span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        {/* Download PDF Button */}
+                        <button
+                          onClick={() => handleDownloadRoadmapPdf(hist)}
+                          disabled={isExportingPdf && pdfGeneratingId === (hist._id || 'active')}
+                          style={{
+                            background: 'rgba(39, 201, 63, 0.15)',
+                            border: '1px solid #27C93F',
+                            borderRadius: '10px',
+                            padding: '0.45rem 0.95rem',
+                            color: '#27C93F',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            cursor: 'pointer',
+                          }}
+                          title="Download high-resolution PDF for this snapshot"
+                        >
+                          {isExportingPdf && pdfGeneratingId === (hist._id || 'active') ? (
+                            <>
+                              <RotateCcw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                              <span>DOWNLOADING...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Download size={13} />
+                              <span>DOWNLOAD PDF</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* View Roadmap Button */}
+                        <button
+                          onClick={() => handleSelectPastRoadmap(hist)}
+                          className="auth-submit-btn bungee-regular"
+                          style={{ width: 'auto', padding: '0.45rem 1.1rem', fontSize: '0.78rem' }}
+                        >
+                          <span>VIEW ROADMAP</span>
+                          <ArrowRight size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 
       {/* =========================================================================
           8. FLOATING AI ASSISTANT CHAT COCKPIT (RAG + GROQ CLOUD)
@@ -2282,15 +2570,18 @@ export default function StudentDashboard({ onExitDashboard }) {
 
             {/* Messages Stream with Full Markdown & Smooth Scroll */}
             <div
-              className="ai-roadmap-scroll-container"
+              className="ai-chat-messages-viewport"
+              tabIndex={0}
               style={{
                 flex: '1 1 auto',
                 minHeight: 0,
-                padding: '1rem',
+                height: '100%',
+                maxHeight: '370px',
                 overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.85rem',
+                padding: '1rem',
               }}
             >
               {aiChatMessages.map((msg, mIdx) => (
@@ -2446,6 +2737,98 @@ export default function StudentDashboard({ onExitDashboard }) {
         initialData={studentProfile}
         onProfileUpdated={handleProfileUpdated}
       />
+
+      {/* DEDICATED IN-DOM HIGH-CONTRAST PDF RENDERER (POWERED BY REACTMARKDOWN) */}
+      {activePdfRoadmap && (
+        <div
+          id="skillforge-active-pdf-template"
+          className="pdf-export-template"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '800px',
+            zIndex: 999999,
+            background: '#FFFFFF',
+            color: '#0F172A',
+            opacity: 1,
+            pointerEvents: 'none',
+            boxShadow: '0 0 50px rgba(0,0,0,0.5)',
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              borderBottom: '2.5px solid #0284C7',
+              paddingBottom: '16px',
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '24px' }}>🪐</span>
+                <span style={{ fontSize: '22px', fontWeight: 900, color: '#0F172A' }}>SKILLFORGE AI</span>
+                <span
+                  style={{
+                    background: '#0284C7',
+                    color: '#FFFFFF',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                  }}
+                >
+                  VERIFIED ROADMAP
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#64748B', margin: 0, fontWeight: 500 }}>
+                AI-Powered Student Career Pathway &amp; Diagnostic Learning Roadmap
+              </p>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: '11px', color: '#475569', lineHeight: 1.45 }}>
+              <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>{studentProfile.name}</div>
+              <div>
+                {studentProfile.university || 'NUST'} • {studentProfile.degree || 'BS Computer Science'}
+              </div>
+              <div>
+                Target Track: <strong style={{ color: '#0284C7' }}>{activePdfRoadmap.careerGoal}</strong>
+              </div>
+              <div style={{ color: '#94A3B8', marginTop: '2px' }}>
+                Generated:{' '}
+                {activePdfRoadmap.createdAt
+                  ? new Date(activePdfRoadmap.createdAt).toLocaleDateString()
+                  : new Date().toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+
+          {/* Markdown Body */}
+          <div className="pdf-markdown-body" style={{ color: '#0F172A', fontSize: '12px', lineHeight: 1.6 }}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {activePdfRoadmap.generatedRoadmapText?.replace(/<br\s*\/?>/gi, '\n')}
+            </ReactMarkdown>
+          </div>
+
+          {/* Footer */}
+          <div
+            style={{
+              marginTop: '28px',
+              borderTop: '1px solid #CBD5E1',
+              paddingTop: '10px',
+              fontSize: '10px',
+              color: '#64748B',
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>SkillForge — LoopLearn Hackathon 2026 (PS-03)</span>
+            <span>Engine: Groq Cloud LLaMA 3.3 (120B)</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

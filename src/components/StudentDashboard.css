@@ -843,12 +843,13 @@
 .ai-roadmap-modal-card {
   width: 96%;
   max-width: 1080px;
-  max-height: 88vh;
-  background: rgba(7, 9, 16, 0.96);
+  height: 85vh;
+  max-height: 85vh;
+  background: rgba(7, 9, 16, 0.98);
   backdrop-filter: blur(35px);
   border: 1.5px solid #FFD166;
   border-radius: 24px;
-  padding: 2rem 2.4rem;
+  padding: 1.8rem 2.2rem;
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.98), 0 0 60px rgba(255, 209, 102, 0.28);
   display: flex;
   flex-direction: column;
@@ -863,6 +864,7 @@
   border-bottom: 1px solid #1c2030;
   padding-bottom: 1.2rem;
   margin-bottom: 1.2rem;
+  flex-shrink: 0;
 }
 
 .ai-roadmap-badge-pill {
@@ -879,9 +881,17 @@
 }
 
 .ai-roadmap-scroll-container {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
   padding-right: 0.8rem;
+  scrollbar-width: thin !important;
+  scrollbar-color: #FFD166 rgba(13, 16, 26, 0.8) !important;
 }
 
 /* Custom Sleek Cyan/Gold Scrollbar */
@@ -985,7 +995,8 @@
 
 /* Styled Markdown Tables */
 .ai-roadmap-markdown-body table {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   border-collapse: separate;
   border-spacing: 0;
   margin: 1.5rem 0;
@@ -994,6 +1005,8 @@
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  table-layout: fixed;
+  word-break: break-word;
 }
 
 .ai-roadmap-markdown-body th {
@@ -1024,8 +1037,35 @@
 }
 
 /* =========================================================================
-   7. AI CHAT COCKPIT MARKDOWN STYLING
+   7. AI CHAT COCKPIT MARKDOWN STYLING & SCROLL CONTAINER
    ========================================================================= */
+.ai-chat-messages-viewport {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #FFD166 rgba(13, 16, 26, 0.8) !important;
+  padding: 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.85rem !important;
+}
+
+.ai-chat-messages-viewport::-webkit-scrollbar {
+  width: 6px !important;
+}
+.ai-chat-messages-viewport::-webkit-scrollbar-thumb {
+  background: #FFD166 !important;
+  border-radius: 4px !important;
+}
+.ai-chat-messages-viewport::-webkit-scrollbar-track {
+  background: rgba(13, 16, 26, 0.8) !important;
+}
+
 .ai-chat-markdown {
   color: #FFF7E8;
   font-size: 0.82rem;

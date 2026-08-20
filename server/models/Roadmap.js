@@ -34,6 +34,7 @@ const RoadmapSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    milestones: [mongoose.Schema.Types.Mixed],
     model: {
       type: String,
       default: 'openai/gpt-oss-120b (Groq Cloud)',

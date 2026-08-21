@@ -534,7 +534,10 @@ export default function App() {
         <SkillGapSection />
         <RoadmapSection />
         <AgentSection />
-        <PricingSection />
+        <PricingSection
+          onOpenAuth={(mode) => setIsAuthOpen(true)}
+          onStartJourney={handleOpenDashboard}
+        />
         <SdgArchSection />
         <Footer onNavigate={scrollToVideoProgress} />
       </div>

@@ -182,7 +182,34 @@ Returns student chat conversations and queries for platform analytics.
 
 ---
 
-### 3.7 ⏱️ Health Check Endpoints (Uptime Monitoring)
+### 3.7 💳 Stripe Payment Gateway Routes (`/api/payment`)
+
+#### `POST /api/payment/create-checkout-session`
+Initializes a hosted Stripe Checkout session for subscription/plan upgrade.
+- **Request Body**:
+  ```json
+  {
+    "planId": "pro",
+    "userEmail": "student@nust.edu.pk",
+    "successUrl": "https://skillforge-app.vercel.app/?payment=success&plan=pro",
+    "cancelUrl": "https://skillforge-app.vercel.app/#pricing"
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "url": "https://checkout.stripe.com/c/pay/cs_test_...",
+    "sessionId": "cs_test_..."
+  }
+  ```
+
+#### `GET /api/payment/config`
+Returns the public Stripe publishable key for frontend SDK initialization.
+
+---
+
+### 3.8 ⏱️ Health Check Endpoints (Uptime Monitoring)
 
 - **`GET /health`** (Express Gateway): Returns `{ "status": "healthy", "service": "Express Gateway", "uptime": "1420s" }`
 - **`GET /health`** (Python Microservice): Returns `{ "status": "healthy", "service": "Python AI", "vector_store": { "ready": true } }`

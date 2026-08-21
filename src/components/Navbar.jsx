@@ -15,9 +15,11 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, onOpenAdm
 
   return (
     <header className="navbar-container">
-      {/* Brand: Same Planet Icon + SKILLFORGE */}
+      {/* Brand: Logo Image + SKILLFORGE */}
       <div className="navbar-brand" onClick={() => onNavigate(0)}>
-        <div className="brand-icon-planet">🪐</div>
+        <div className="brand-icon-planet">
+          <img src="/logo.png" alt="SkillForge Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+        </div>
         <div className="brand-logo-text">
           <span className="brand-text-top bungee-regular">SKILL</span>
           <span className="brand-text-bottom bungee-regular">FORGE</span>

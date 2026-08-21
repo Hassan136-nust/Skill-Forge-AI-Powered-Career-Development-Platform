@@ -8,6 +8,7 @@ import assessmentRoutes from './routes/assessmentRoutes.js'
 import aiRoutes from './routes/aiRoutes.js'
 import mentorRoutes from './routes/mentorRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import paymentRoutes from './routes/paymentRoutes.js'
 
 dotenv.config()
 
@@ -46,6 +47,7 @@ app.use('/api/assessment', assessmentRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/mentor', mentorRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/payment', paymentRoutes)
 
 // 404 Handler
 app.use((req, res) => {

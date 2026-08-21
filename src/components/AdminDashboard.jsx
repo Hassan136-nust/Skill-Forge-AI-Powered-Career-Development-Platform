@@ -1665,13 +1665,18 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
               </div>
             )}
 
-            <div className="admin-two-col-grid">
+            <div className="admin-chroma-split-layout">
               {/* Document Browser & Editor */}
               <div className="radar-card" style={{ padding: '1.8rem 2.2rem' }}>
-                <div className="radar-card-header" style={{ marginBottom: '1rem' }}>
+                <div className="radar-card-header" style={{ marginBottom: '1.2rem' }}>
                   <div className="radar-title-group">
                     <BookOpen size={20} color="#FFD166" />
-                    <h2 className="radar-title" style={{ fontSize: '1.15rem' }}>KNOWLEDGE DOCUMENTS ({kbFiles.length})</h2>
+                    <div>
+                      <h2 className="radar-title" style={{ fontSize: '1.15rem', margin: 0 }}>KNOWLEDGE DOCUMENTS ({kbFiles.length})</h2>
+                      <span style={{ fontSize: '0.72rem', color: '#B8B3C7' }}>
+                        Active: <strong style={{ color: '#FFD166' }}>{selectedKbFile?.name || 'None Selected'}</strong> &bull; {kbContent.length} chars
+                      </span>
+                    </div>
                   </div>
                   {selectedKbFile && (
                     <button
@@ -1681,19 +1686,32 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
                         backgroundColor: '#FFD166',
                         border: '1px solid #FFD166',
                         borderRadius: '20px',
-                        padding: '0.35rem 0.9rem',
-                        fontWeight: 700,
+                        padding: '0.45rem 1.1rem',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 0 15px rgba(255, 209, 102, 0.3)',
                       }}
                       onClick={handleSaveKbFile}
                       disabled={isSavingKb}
                     >
                       <Check size={14} />
-                      <span>{isSavingKb ? 'Saving...' : 'Save File'}</span>
+                      <span>{isSavingKb ? 'Saving File...' : 'Save File'}</span>
                     </button>
                   )}
                 </div>
 
-                <div className="admin-kb-chips-row" onWheel={handleWheelScroll}>
+                <div
+                  className="admin-kb-chips-row"
+                  data-lenis-prevent="true"
+                  onWheel={(e) => {
+                    e.stopPropagation()
+                    handleWheelScroll(e)
+                  }}
+                  style={{ marginBottom: '1rem' }}
+                >
                   {kbFiles.map((file) => (
                     <button
                       key={file.name}
@@ -1711,24 +1729,29 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
 
                 <textarea
                   className="admin-dark-textarea"
+                  data-lenis-prevent="true"
+                  onWheel={(e) => e.stopPropagation()}
                   value={kbContent}
                   onChange={(e) => setKbContent(e.target.value)}
-                  placeholder="Document content..."
-                  rows={15}
+                  placeholder="Select a document above to view and edit its content..."
+                  rows={20}
                 />
               </div>
 
               {/* Semantic Search Tester Sandbox */}
               <div className="radar-card" style={{ padding: '1.8rem 2.2rem' }}>
-                <div className="radar-card-header" style={{ marginBottom: '1rem' }}>
+                <div className="radar-card-header" style={{ marginBottom: '1.2rem' }}>
                   <div className="radar-title-group">
                     <Terminal size={20} color="#FFD166" />
-                    <h2 className="radar-title" style={{ fontSize: '1.15rem' }}>CHROMADB SEMANTIC SEARCH PLAYGROUND</h2>
+                    <div>
+                      <h2 className="radar-title" style={{ fontSize: '1.15rem', margin: 0 }}>VECTOR RETRIEVAL PLAYGROUND</h2>
+                      <span style={{ fontSize: '0.72rem', color: '#B8B3C7' }}>ChromaDB Cosine Distance Testbed</span>
+                    </div>
                   </div>
-                  <span className="radar-role-badge">VECTOR RETRIEVAL</span>
+                  <span className="radar-role-badge">CHROMADB</span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                   <div className="admin-search-box" style={{ width: '100%' }}>
                     <Search size={16} color="#FFD166" className="search-icon" />
                     <input
@@ -1746,12 +1769,14 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
                       backgroundColor: '#FFD166',
                       border: '1px solid #FFD166',
                       borderRadius: '20px',
-                      padding: '0.5rem 1.2rem',
+                      padding: '0.6rem 1.2rem',
                       fontWeight: 800,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '0.4rem',
+                      cursor: 'pointer',
+                      boxShadow: '0 0 15px rgba(255, 209, 102, 0.25)',
                     }}
                     onClick={handleTestRagSearch}
                     disabled={isSearchingRag}
@@ -1762,11 +1787,16 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
                 </div>
 
                 {ragSearchResults && (
-                  <div className="admin-results-display">
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#FFD166', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                  <div
+                    className="admin-results-display"
+                    data-lenis-prevent="true"
+                    onWheel={(e) => e.stopPropagation()}
+                    style={{ marginTop: '1.2rem', maxHeight: '420px', overflowY: 'auto' }}
+                  >
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#FFD166', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                       Retrieved Context &bull; Sources: {ragSearchResults.sources?.join(', ') || 'SkillForge Knowledge Base'}
                     </div>
-                    <div className="admin-markdown-render">
+                    <div className="admin-markdown-render" style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
                       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                         {ragSearchResults.context || 'No matching vector chunks found.'}
                       </ReactMarkdown>
@@ -2062,6 +2092,8 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="admin-gold-modal"
+              data-lenis-prevent="true"
+              onWheel={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="admin-modal-header">
@@ -2216,6 +2248,8 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
               exit={{ scale: 0.95, opacity: 0 }}
               className="admin-gold-modal"
               style={{ maxWidth: '720px' }}
+              data-lenis-prevent="true"
+              onWheel={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="admin-modal-header">
@@ -2406,6 +2440,8 @@ export default function AdminDashboard({ onExitAdmin, onOpenStudentDashboard }) 
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="admin-gold-modal"
+              data-lenis-prevent="true"
+              onWheel={(e) => e.stopPropagation()}
               style={{
                 maxWidth: '960px',
                 width: '92vw',

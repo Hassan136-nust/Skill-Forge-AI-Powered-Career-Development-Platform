@@ -706,43 +706,60 @@
   font-weight: 800;
 }
 
+/* ChromaDB Dedicated Split Layout */
+.admin-chroma-split-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.6rem;
+  align-items: start;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .admin-chroma-split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-dark-textarea {
   width: 100%;
-  background: rgba(2, 4, 8, 0.88);
-  border: 1.5px solid rgba(255, 209, 102, 0.3);
+  background: rgba(3, 5, 10, 0.94);
+  border: 1.5px solid rgba(255, 209, 102, 0.35);
   border-radius: 12px;
-  padding: 1rem 1.2rem;
+  padding: 1.2rem 1.4rem;
   color: #FFF7E8;
-  font-size: 0.86rem;
-  font-family: var(--font-mono, monospace);
-  line-height: 1.6;
+  font-size: 0.94rem;
+  font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono, monospace);
+  line-height: 1.7;
   resize: vertical;
   outline: none;
-  min-height: 380px;
-  max-height: 520px;
-  overflow-y: auto;
+  min-height: 480px;
+  max-height: 620px;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #FFD166 rgba(255, 255, 255, 0.05);
+  scrollbar-color: #FFD166 rgba(255, 255, 255, 0.08);
   -webkit-overflow-scrolling: touch;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 .admin-dark-textarea::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .admin-dark-textarea::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
 }
 
 .admin-dark-textarea::-webkit-scrollbar-thumb {
-  background: #FFD166;
-  border-radius: 4px;
+  background: linear-gradient(180deg, #FFD166, #FFAA00);
+  border-radius: 6px;
 }
 
 .admin-dark-textarea:focus {
   border-color: #FFD166;
-  box-shadow: 0 0 15px rgba(255, 209, 102, 0.2);
+  box-shadow: 0 0 20px rgba(255, 209, 102, 0.3), inset 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 .admin-dark-input {
@@ -924,10 +941,28 @@
   border-radius: 20px;
   width: 100%;
   max-width: 650px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 85vh;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
   padding: 2rem 2.4rem;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(255, 209, 102, 0.12);
+  scrollbar-width: thin;
+  scrollbar-color: #FFD166 rgba(255, 255, 255, 0.08);
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-gold-modal::-webkit-scrollbar {
+  width: 7px;
+}
+
+.admin-gold-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+}
+
+.admin-gold-modal::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FFD166, #FFAA00);
+  border-radius: 4px;
 }
 
 .admin-modal-header {

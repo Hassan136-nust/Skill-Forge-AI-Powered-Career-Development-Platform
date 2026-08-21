@@ -5,7 +5,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: docker/Dockerfile.frontend
     ports:
       - "5173:5173"
     environment:
@@ -17,7 +17,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: docker/Dockerfile.backend
     ports:
       - "3001:3001"
     env_file:
@@ -28,11 +28,11 @@ services:
     depends_on:
       - python-service
 
-  # 3. Python AI & SkillAnalyzer Service (Port 8000)
+  # 3. Python AI & ChromaDB Vector Store Service (Port 8000)
   python-service:
     build:
-      context: ./python_service
-      dockerfile: Dockerfile.python
+      context: .
+      dockerfile: docker/Dockerfile.python
     ports:
       - "8000:8000"
     env_file:
@@ -40,10 +40,10 @@ services:
     environment:
       - PORT=8000
     volumes:
-      # ChromaDB: Persist vector index between container restarts
+      # ChromaDB: Persist vector database index
       - chroma_data:/app/chroma_db
-      # Knowledge Base: Mount source files for indexing
-      - ./rag/knowledge-base:/app/../rag/knowledge-base:ro
+      # Knowledge Base: Mount source curricula for live indexing
+      - ./rag/knowledge-base:/app/rag/knowledge-base:ro
 
 # Named volumes
 volumes:

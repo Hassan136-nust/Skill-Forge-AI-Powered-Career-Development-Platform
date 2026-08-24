@@ -339,7 +339,6 @@ Both microservices expose production-ready health monitoring endpoints for **[Up
 
 <div align="center">
 
-**Built with ❤️ for the LoopLearn Hackathon 2026**<br />
 *Democratizing AI-Grounded Career Acceleration Across the Universe* 🪐
 
 </div>

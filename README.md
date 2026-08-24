@@ -3,8 +3,6 @@
 # 🪐 SKILLFORGE
 ### *Autonomous AI-Grounded Career Acceleration & Diagnostic Intelligence Platform*
 
-[![Hackathon](https://img.shields.io/badge/LoopLearn%20Hackathon-2026%20(PS--03)-FFD166?style=for-the-badge&logo=codeforces&logoColor=05060A)](https://github.com/Hassan136-nust/Skill-Forge-AI-Powered-Career-Development-Platform)
-[![SDG 4 & 8](https://img.shields.io/badge/UN%20SDG-4%20%26%208%20Aligned-06D6A0?style=for-the-badge&logo=unicef&logoColor=white)](https://sdgs.un.org/goals)
 [![Groq AI](https://img.shields.io/badge/LLM%20Engine-Groq%20Cloud%20GPT--OSS--120B-F77F00?style=for-the-badge&logo=openai&logoColor=white)](https://groq.com/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20DB-ChromaDB%20Semantic%20RAG-118AB2?style=for-the-badge&logo=databricks&logoColor=white)](https://www.trychroma.com/)
 [![Vercel](https://img.shields.io/badge/Frontend-Vercel%20SPA-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)

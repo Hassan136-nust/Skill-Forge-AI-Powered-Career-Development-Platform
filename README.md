@@ -337,6 +337,6 @@ Both microservices expose production-ready health monitoring endpoints for **[Up
 
 <div align="center">
 
-*Democratizing AI-Grounded Career Acceleration Across the Universe* 🪐
+*Democratizing AI-Grounded Career Acceleration Across the Universe* 
 
 </div>

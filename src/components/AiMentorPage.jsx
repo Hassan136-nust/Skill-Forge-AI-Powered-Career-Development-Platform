@@ -26,7 +26,10 @@ import {
   Zap,
   Activity,
   GraduationCap,
-  CheckCircle2
+  CheckCircle2,
+  History,
+  X,
+  Menu
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -65,6 +68,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
   const [isSending, setIsSending] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
   const [copiedIndex, setCopiedIndex] = useState(null)
+  const [showMobileHistory, setShowMobileHistory] = useState(false)
 
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
@@ -333,7 +337,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
       {/* =========================================================================
           TOP NAVBAR — EXACT SAME AS ROADMAP & DASHBOARD (NO BLUE EFFECTS)
           ========================================================================= */}
-      <header className="navbar-container" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+      <header className="navbar-container mentor-navbar-container" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
         <div className="navbar-brand" onClick={onBackToDashboard} style={{ cursor: 'pointer' }}>
           <div className="brand-icon-planet">🪐</div>
           <div className="brand-logo-text">
@@ -342,44 +346,29 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
           </div>
         </div>
 
-        <nav className="navbar-menu">
-          <button className="navbar-item-btn" onClick={onBackToDashboard}>
+        <nav className="navbar-menu mentor-navbar-center">
+          <button className="navbar-item-btn mentor-back-btn" onClick={onBackToDashboard}>
             ← Back to Dashboard
           </button>
-          <span
-            style={{
-              color: '#FFD166',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              padding: '0.45rem 0.85rem',
-              borderRadius: '8px',
-              background: 'rgba(255, 209, 102, 0.08)',
-              border: '1px solid rgba(255, 209, 102, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-            }}
-          >
+          <span className="mentor-navbar-badge">
             <Bot size={15} color="#FFD166" />
             <span>AI Career Mentor Cockpit ({studentProfile.careerGoal})</span>
           </span>
         </nav>
 
-        <div className="navbar-right-actions">
+        <div className="navbar-right-actions mentor-navbar-actions">
+          {/* Mobile History Drawer Toggle */}
           <button
-            className="navbar-item-btn"
-            style={{
-              color: '#FFD166',
-              border: '1px solid rgba(255, 209, 102, 0.4)',
-              backgroundColor: 'rgba(255, 209, 102, 0.08)',
-              borderRadius: '20px',
-              padding: '0.45rem 1rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              cursor: 'pointer',
-            }}
+            className="mentor-mobile-history-toggle"
+            onClick={() => setShowMobileHistory(!showMobileHistory)}
+            title="Open Chat History"
+          >
+            <History size={14} />
+            <span>CHATS ({sessions.length})</span>
+          </button>
+
+          <button
+            className="navbar-item-btn mentor-new-chat-nav-btn"
             onClick={handleCreateNewSession}
             title="Start a fresh chat session"
           >
@@ -388,19 +377,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
           </button>
 
           <button
-            className="get-started-btn bungee-regular"
-            style={{
-              padding: '0.5rem 1.2rem',
-              fontSize: '0.8rem',
-              backgroundColor: '#FFD166',
-              borderColor: '#FFD166',
-              color: '#05060A',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(255, 209, 102, 0.3)',
-            }}
+            className="get-started-btn bungee-regular mentor-dashboard-nav-btn"
             onClick={onBackToDashboard}
             title="Return to Student Cockpit Dashboard"
           >
@@ -410,12 +387,116 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
         </div>
       </header>
 
+      {/* Mobile Chat History Drawer Modal */}
+      <AnimatePresence>
+        {showMobileHistory && (
+          <div className="mentor-mobile-drawer-wrapper">
+            <motion.div
+              className="mentor-mobile-drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileHistory(false)}
+            />
+            <motion.div
+              className="mentor-mobile-drawer-sheet"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 280 }}
+              data-lenis-prevent="true"
+            >
+              <div className="mentor-sidebar-header-row">
+                <button
+                  className="mentor-new-chat-btn"
+                  onClick={() => {
+                    handleCreateNewSession()
+                    setShowMobileHistory(false)
+                  }}
+                >
+                  <Plus size={15} color="#05060A" strokeWidth={3} />
+                  <span>+ NEW CHAT</span>
+                </button>
+                <button
+                  className="mentor-sidebar-close-btn"
+                  onClick={() => setShowMobileHistory(false)}
+                  title="Close Drawer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mentor-search-box">
+                <Search size={13} color="#64748B" />
+                <input
+                  type="text"
+                  placeholder="Search previous chats..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="mentor-search-input"
+                />
+              </div>
+
+              <div className="mentor-sessions-list" data-lenis-prevent="true">
+                {filteredSessions.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#64748B', fontSize: '0.78rem' }}>
+                    No conversations found. Start a new chat!
+                  </div>
+                ) : (
+                  filteredSessions.map((s) => (
+                    <div
+                      key={s._id}
+                      className={`mentor-session-item ${s._id === activeSessionId ? 'active' : ''}`}
+                      onClick={() => {
+                        loadSessionMessages(s._id)
+                        setShowMobileHistory(false)
+                      }}
+                    >
+                      <div className="mentor-session-info">
+                        <span className="mentor-session-title">
+                          {s.title || 'Mentorship Discussion'}
+                        </span>
+                        <span className="mentor-session-meta">
+                          <MessageSquare size={10} color="#FFD166" />
+                          <span>{s.messageCount || 0} msgs • {new Date(s.updatedAt || s.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                        </span>
+                      </div>
+                      <button
+                        className="mentor-session-delete"
+                        onClick={(e) => handleDeleteSession(e, s._id)}
+                        title="Delete Chat Session"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Student Dossier Badge */}
+              <div className="mentor-student-dossier">
+                <div className="mentor-student-initial-badge" style={{ overflow: 'hidden', padding: 0 }}>
+                  <img src="/hard.png" alt="Student" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+                <div className="mentor-student-meta">
+                  <span className="mentor-student-name">{studentProfile.name}</span>
+                  <span className="mentor-student-tag">
+                    <Target size={11} color="#FFD166" />
+                    <span>{studentProfile.careerGoal}</span>
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* =========================================================================
           MAIN TWO-COLUMN COCKPIT (SIDEBAR + MENTORSHIP ARENA)
           ========================================================================= */}
       <main className="mentor-cockpit-layout">
-        {/* Left Sidebar: Session List & Student Dossier */}
-        <aside className="mentor-sidebar-panel">
+        {/* Left Sidebar: Desktop Only */}
+        <aside className="mentor-sidebar-panel mentor-desktop-sidebar">
           <button className="mentor-new-chat-btn" onClick={handleCreateNewSession}>
             <Plus size={15} color="#05060A" strokeWidth={3} />
             <span>+ NEW MENTOR CHAT</span>
@@ -488,7 +569,7 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
               <div className="mentor-avatar-badge">
                 <img src="/hard.png" alt="AI Mentor" className="mentor-avatar-img" />
               </div>
-              <div>
+              <div className="mentor-arena-text-block">
                 <h3 className="mentor-arena-headline">
                   {activeSession?.title || `SkillForge AI Mentor • ${studentProfile.careerGoal}`}
                 </h3>
@@ -500,6 +581,15 @@ export default function AiMentorPage({ onBackToDashboard, currentUser }) {
                 </div>
               </div>
             </div>
+
+            {/* Mobile History Pill in Header */}
+            <button
+              className="mentor-arena-history-badge"
+              onClick={() => setShowMobileHistory(!showMobileHistory)}
+            >
+              <History size={13} />
+              <span>CHATS ({sessions.length})</span>
+            </button>
           </div>
 
           {/* Messages Stream */}

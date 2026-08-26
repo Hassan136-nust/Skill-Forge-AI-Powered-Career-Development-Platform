@@ -106,7 +106,7 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, onOpenAdm
           </div>
         ) : (
           <>
-            <button
+            {/* <button
               className="navbar-item-btn"
               style={{
                 color: '#FFD166',
@@ -117,7 +117,7 @@ export default function Navbar({ onNavigate, onStart, onOpenDashboard, onOpenAdm
               onClick={() => onOpenDashboard && onOpenDashboard()}
             >
               ✦ Student Dashboard
-            </button>
+            </button> */}
             <button className="get-started-btn bungee-regular" onClick={onStart}>
               Get Started
             </button>

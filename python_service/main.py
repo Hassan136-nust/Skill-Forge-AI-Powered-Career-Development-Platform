@@ -26,13 +26,13 @@ from vectorstore import vector_store
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Build the ChromaDB vector index at startup — runs once, skipped if already indexed."""
-    print("⚡ SkillForge: Building ChromaDB knowledge base index...")
+    print("[SkillForge] Building ChromaDB knowledge base index...")
     try:
         vector_store.build_index()
         status = vector_store.status()
-        print(f"✅ ChromaDB ready | mode={status['mode']} | chunks={status['indexed_chunks']}")
+        print(f"[SkillForge] ChromaDB ready | mode={status['mode']} | chunks={status['indexed_chunks']}")
     except Exception as e:
-        print(f"⚠️  ChromaDB index build warning: {e} — BM25 fallback active.")
+        print(f"[SkillForge] ChromaDB index build warning: {e} -- BM25 fallback active.")
     yield
     # Cleanup on shutdown (nothing needed for ChromaDB persistent)
 

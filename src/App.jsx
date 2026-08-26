@@ -142,13 +142,13 @@ export default function App() {
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.6,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
       infinite: false
     })
 
@@ -167,7 +167,7 @@ export default function App() {
     }
   }, [])
 
-  // Scroll Scrubbing & Video Setup
+  // Silky Smooth (Makhno Makhni) Non-Blocking Video Scrubbing Engine
   useEffect(() => {
     if (currentView !== 'landing') return
 
@@ -181,7 +181,6 @@ export default function App() {
 
     const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches
     const smallMQ = window.matchMedia('(max-width: 860px)')
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const isMobile = () => coarse || smallMQ.matches
 
     let laidOutWidth = window.innerWidth
@@ -189,8 +188,41 @@ export default function App() {
 
     let targetProgress = 0
     let currentProgress = 0
-    const lerpFactor = isMobile() ? 0.15 : 0.08
-    const minSeekDelta = isMobile() ? 0.012 : 0.003
+    let lastRenderedProgress = -1
+
+    // Hardware Non-Blocking Seek Queue
+    let isSeeking = false
+    let pendingTargetTime = null
+
+    const applySeek = (time) => {
+      if (!video || !video.duration || isNaN(video.duration) || video.readyState < 2) return
+
+      if (isSeeking) {
+        pendingTargetTime = time
+        return
+      }
+
+      // If difference is imperceptible, skip
+      if (Math.abs(video.currentTime - time) < 0.008) return
+
+      isSeeking = true
+      try {
+        video.currentTime = time
+      } catch (e) {
+        isSeeking = false
+      }
+    }
+
+    const onSeeked = () => {
+      isSeeking = false
+      if (pendingTargetTime !== null && !isCancelled) {
+        const nextTime = pendingTargetTime
+        pendingTargetTime = null
+        applySeek(nextTime)
+      }
+    }
+
+    video.addEventListener('seeked', onSeeked)
 
     const primeVideo = () => {
       if (!video) return
@@ -240,36 +272,44 @@ export default function App() {
 
     video.addEventListener('loadedmetadata', onLoadedMetadata)
 
-    const updateScrollTarget = () => {
-      const scrollY = window.scrollY || window.pageYOffset
+    const updateScrollTarget = (scrollYValue) => {
+      const scrollY = typeof scrollYValue === 'number' ? scrollYValue : (window.scrollY || window.pageYOffset || 0)
       const videoTrackHeight = window.innerHeight * 5
       if (videoTrackHeight > 0) {
-        const progress = Math.min(1, Math.max(0, scrollY / videoTrackHeight))
-        targetProgress = progress
-        setScrollProgress(progress)
+        targetProgress = Math.min(1, Math.max(0, scrollY / videoTrackHeight))
       }
+    }
+
+    // Connect directly to Lenis scroll for zero-latency scroll tracking
+    let unbindLenis = null
+    if (lenisRef.current) {
+      unbindLenis = lenisRef.current.on('scroll', (e) => {
+        updateScrollTarget(e.scroll)
+      })
     }
 
     const renderLoop = () => {
       if (isCancelled) return
 
-      if (video.duration && !isNaN(video.duration) && video.readyState >= 2) {
-        currentProgress += (targetProgress - currentProgress) * (reduceMotion ? 1 : lerpFactor)
-        // Clamp to avoid the empty/black EOF frame of the MP4
-        const maxValidTime = Math.max(0, video.duration - 0.08)
-        const targetTime = Math.min(maxValidTime, Math.max(0, currentProgress * maxValidTime))
+      const delta = targetProgress - currentProgress
+      const lerpSpeed = isMobile() ? 0.18 : 0.12
 
-        if (!video.seeking && Math.abs(video.currentTime - targetTime) > minSeekDelta) {
-          try {
-            if (typeof video.fastSeek === 'function') {
-              video.fastSeek(targetTime)
-            } else {
-              video.currentTime = targetTime
-            }
-          } catch (e) {
-            video.currentTime = targetTime
-          }
-        }
+      if (Math.abs(delta) > 0.0001) {
+        currentProgress += delta * lerpSpeed
+      } else {
+        currentProgress = targetProgress
+      }
+
+      if (video.duration && !isNaN(video.duration) && video.readyState >= 2) {
+        const maxValidTime = Math.max(0, video.duration - 0.06)
+        const targetTime = Math.min(maxValidTime, Math.max(0, currentProgress * maxValidTime))
+        applySeek(targetTime)
+      }
+
+      // Throttled React state update: only update when progress moves meaningfully
+      if (Math.abs(currentProgress - lastRenderedProgress) > 0.006 || (currentProgress >= 0.99 && lastRenderedProgress < 0.99)) {
+        lastRenderedProgress = currentProgress
+        setScrollProgress(currentProgress)
       }
 
       animationFrameId = requestAnimationFrame(renderLoop)
@@ -290,11 +330,15 @@ export default function App() {
     return () => {
       isCancelled = true
       if (animationFrameId) cancelAnimationFrame(animationFrameId)
+      if (unbindLenis && typeof unbindLenis === 'function') unbindLenis()
       window.removeEventListener('scroll', updateScrollTarget)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('pointerdown', onFirstGesture)
       window.removeEventListener('touchstart', onFirstGesture)
-      if (video) video.removeEventListener('loadedmetadata', onLoadedMetadata)
+      if (video) {
+        video.removeEventListener('loadedmetadata', onLoadedMetadata)
+        video.removeEventListener('seeked', onSeeked)
+      }
       if (blobUrl) URL.revokeObjectURL(blobUrl)
     }
   }, [currentView])

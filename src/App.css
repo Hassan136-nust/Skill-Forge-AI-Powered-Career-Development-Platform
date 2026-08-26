@@ -45,9 +45,12 @@
   height: 100%;
   object-fit: cover;
   object-position: center center;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.4s ease;
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .scrub-video.loading {
@@ -88,7 +91,7 @@
 
 @media (max-width: 860px) {
   .scroll-track {
-    height: 500vh;
+    height: 550vh;
   }
 }
 

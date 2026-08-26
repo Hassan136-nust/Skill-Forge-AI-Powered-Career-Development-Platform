@@ -190,22 +190,25 @@ export default function App() {
     let currentProgress = 0
     let lastRenderedProgress = -1
 
-    // Hardware Non-Blocking Seek Queue
+    // Hardware Non-Blocking Seek Queue with Frame Pacing
     let isSeeking = false
     let pendingTargetTime = null
+    let lastSeekTimestamp = 0
+    const MIN_SEEK_INTERVAL = isMobile() ? 32 : 20 // Paced seeking prevents mobile decoder congestion
 
     const applySeek = (time) => {
       if (!video || !video.duration || isNaN(video.duration) || video.readyState < 2) return
 
-      if (isSeeking) {
+      const now = performance.now()
+      if (isSeeking || (now - lastSeekTimestamp < MIN_SEEK_INTERVAL)) {
         pendingTargetTime = time
         return
       }
 
-      // If difference is imperceptible, skip
-      if (Math.abs(video.currentTime - time) < 0.008) return
+      if (Math.abs(video.currentTime - time) < 0.01) return
 
       isSeeking = true
+      lastSeekTimestamp = now
       try {
         video.currentTime = time
       } catch (e) {
@@ -274,9 +277,9 @@ export default function App() {
 
     const updateScrollTarget = (scrollYValue) => {
       const scrollY = typeof scrollYValue === 'number' ? scrollYValue : (window.scrollY || window.pageYOffset || 0)
-      const videoTrackHeight = window.innerHeight * 5
-      if (videoTrackHeight > 0) {
-        targetProgress = Math.min(1, Math.max(0, scrollY / videoTrackHeight))
+      const trackHeight = window.innerHeight * 5.0
+      if (trackHeight > 0) {
+        targetProgress = Math.min(1, Math.max(0, scrollY / trackHeight))
       }
     }
 
@@ -292,7 +295,7 @@ export default function App() {
       if (isCancelled) return
 
       const delta = targetProgress - currentProgress
-      const lerpSpeed = isMobile() ? 0.18 : 0.12
+      const lerpSpeed = isMobile() ? 0.16 : 0.12
 
       if (Math.abs(delta) > 0.0001) {
         currentProgress += delta * lerpSpeed
@@ -301,12 +304,12 @@ export default function App() {
       }
 
       if (video.duration && !isNaN(video.duration) && video.readyState >= 2) {
-        const maxValidTime = Math.max(0, video.duration - 0.06)
+        const maxValidTime = Math.max(0, video.duration - 0.05)
         const targetTime = Math.min(maxValidTime, Math.max(0, currentProgress * maxValidTime))
         applySeek(targetTime)
       }
 
-      // Throttled React state update: only update when progress moves meaningfully
+      // Throttled React state update for HUD overlays
       if (Math.abs(currentProgress - lastRenderedProgress) > 0.006 || (currentProgress >= 0.99 && lastRenderedProgress < 0.99)) {
         lastRenderedProgress = currentProgress
         setScrollProgress(currentProgress)
@@ -345,9 +348,9 @@ export default function App() {
 
   // Smooth scroll helper using Lenis
   const scrollToVideoProgress = (prog) => {
-    const videoTrackHeight = window.innerHeight * 5
+    const videoTrackHeight = window.innerHeight * 5.0
     if (lenisRef.current) {
-      lenisRef.current.scrollTo(prog * videoTrackHeight, { duration: 1.4 })
+      lenisRef.current.scrollTo(prog * videoTrackHeight, { duration: 1.3 })
     } else {
       window.scrollTo({
         top: prog * videoTrackHeight,

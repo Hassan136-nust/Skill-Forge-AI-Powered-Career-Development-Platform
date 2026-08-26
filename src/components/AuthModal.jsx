@@ -38,6 +38,19 @@ export default function AuthModal({
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
 
+  // Screen size detection for responsive mobile vertical slide vs desktop horizontal slide
+  const [isMobileScreen, setIsMobileScreen] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   // Academic Profile & Experience
   const [university, setUniversity] = useState('')
   const [degree, setDegree] = useState('BS Computer Science')
@@ -468,7 +481,7 @@ export default function AuthModal({
         <X size={20} />
       </button>
 
-      <div className="guardians-squad-wrapper" data-lenis-prevent="true">
+      <div className={`guardians-squad-wrapper ${isProfileSetup ? 'setup-wide-wrapper' : ''}`} data-lenis-prevent="true">
         {/* Main Luxury Command Glass Viewport */}
         <div
           className={`auth-sliding-viewport ${isProfileSetup ? 'setup-fullwidth' : ''}`}
@@ -800,19 +813,25 @@ export default function AuthModal({
           ) : (
             <>
               {/* =========================================================================
-                  SLIDING IMAGE PANEL (Moves from Left 0% to Right 100%)
+                  SLIDING IMAGE PANEL (Moves horizontally on Desktop, vertically on Mobile)
                   ========================================================================= */}
               <motion.div
                 className="auth-half-panel auth-image-panel"
-                style={{ left: 0 }}
-                animate={{
-                  x: isSignup ? '100%' : '0%',
-                }}
+                style={
+                  isMobileScreen
+                    ? { top: '60%', left: 0, width: '100%', height: '40%' }
+                    : { top: 0, left: 0, width: '50%', height: '100%' }
+                }
+                animate={
+                  isMobileScreen
+                    ? { y: isSignup ? '-150%' : '0%', x: '0%' }
+                    : { x: isSignup ? '100%' : '0%', y: '0%' }
+                }
                 transition={{
                   type: 'spring',
-                  stiffness: 70,
-                  damping: 17,
-                  mass: 0.9,
+                  stiffness: 75,
+                  damping: 18,
+                  mass: 0.85,
                 }}
               >
                 <AnimatePresence mode="wait">
@@ -837,19 +856,25 @@ export default function AuthModal({
               </motion.div>
 
               {/* =========================================================================
-                  SLIDING FORM PANEL (Moves from Right 0% to Left -100%)
+                  SLIDING FORM PANEL (Moves horizontally on Desktop, vertically on Mobile)
                   ========================================================================= */}
               <motion.div
                 className="auth-half-panel auth-form-panel"
-                style={{ left: '50%' }}
-                animate={{
-                  x: isSignup ? '-100%' : '0%',
-                }}
+                style={
+                  isMobileScreen
+                    ? { top: 0, left: 0, width: '100%', height: '60%' }
+                    : { top: 0, left: '50%', width: '50%', height: '100%' }
+                }
+                animate={
+                  isMobileScreen
+                    ? { y: isSignup ? '66%' : '0%', x: '0%' }
+                    : { x: isSignup ? '-100%' : '0%', y: '0%' }
+                }
                 transition={{
                   type: 'spring',
-                  stiffness: 70,
-                  damping: 17,
-                  mass: 0.9,
+                  stiffness: 75,
+                  damping: 18,
+                  mass: 0.85,
                 }}
               >
                 {isSuccess ? (

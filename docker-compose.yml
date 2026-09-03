@@ -1,42 +1,75 @@
 version: '3.8'
 
 services:
-  # 1. React Frontend Service (Port 5173)
+  # 1. React Frontend Service (Port 5173 - Vite / Nginx)
   frontend:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
+    container_name: skillforge-frontend
+    restart: unless-stopped
     ports:
       - "5173:5173"
     environment:
       - VITE_API_URL=http://localhost:3001
     depends_on:
       - backend
+    networks:
+      - skillforge-network
 
   # 2. Express Backend API Service (Port 3001)
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    container_name: skillforge-backend
+    restart: unless-stopped
     ports:
       - "3001:3001"
-    env_file:
-      - .env
     environment:
       - PORT=3001
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/skillforge}
+      - JWT_SECRET=${JWT_SECRET:-skillforge_development_secret_key_2026}
+      - JWT_EXPIRES_IN=7d
+      - FRONTEND_URL=http://localhost:5173
       - PYTHON_SERVICE_URL=http://python-service:8000
     depends_on:
-      - python-service
+      mongodb:
+        condition: service_healthy
+      python-service:
+        condition: service_started
+    networks:
+      - skillforge-network
 
-  # 3. Python AI & ChromaDB Vector Store Service (Port 8000)
+  # 3. MongoDB Database Service (Port 27017 - MERN Database)
+  mongodb:
+    image: mongo:7.0
+    container_name: skillforge-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=skillforge
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - skillforge-network
+
+  # 4. Python AI & ChromaDB Vector Store Service (Port 8000)
   python-service:
     build:
       context: .
       dockerfile: docker/Dockerfile.python
+    container_name: skillforge-python-ai
+    restart: unless-stopped
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     environment:
       - PORT=8000
     volumes:
@@ -44,8 +77,17 @@ services:
       - chroma_data:/app/chroma_db
       # Knowledge Base: Mount source curricula for live indexing
       - ./rag/knowledge-base:/app/rag/knowledge-base:ro
+    networks:
+      - skillforge-network
 
-# Named volumes
+# Networks
+networks:
+  skillforge-network:
+    driver: bridge
+
+# Named volumes for persistent storage
 volumes:
+  mongo_data:
+    driver: local
   chroma_data:
     driver: local

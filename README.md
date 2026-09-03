@@ -5,6 +5,8 @@
 
 [![Groq AI](https://img.shields.io/badge/LLM%20Engine-Groq%20Cloud%20GPT--OSS--120B-F77F00?style=for-the-badge&logo=openai&logoColor=white)](https://groq.com/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20DB-ChromaDB%20Semantic%20RAG-118AB2?style=for-the-badge&logo=databricks&logoColor=white)](https://www.trychroma.com/)
+[![Docker](https://img.shields.io/badge/Containerized-Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
 [![Vercel](https://img.shields.io/badge/Frontend-Vercel%20SPA-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 [![Render](https://img.shields.io/badge/Microservices-Render%20Cloud-46E3B7?style=for-the-badge&logo=render&logoColor=05060A)](https://render.com/)
 
@@ -16,7 +18,7 @@
 
 **Democratizing personalized career pathways, technical competency verification, and AI-grounded learning roadmaps for next-generation engineers.**
 
-[🚀 Live Demo](https://skillforge-app.vercel.app) • [📖 Documentation](#-architecture--data-flow) • [🐍 Python Microservice](#-python-fastapi-ai-microservice) • [🛠️ Setup Guide](#-installation--local-setup)
+[🚀 Live Demo](https://skillforge-app.vercel.app) • [📖 Documentation](#-architecture--data-flow) • [🐳 Docker](#-docker-containerization) • [🚀 CI/CD Pipeline](#-cicd-pipeline-github-actions) • [🛠️ Setup Guide](#-installation--local-setup)
 
 </div>
 
@@ -250,6 +252,60 @@ chmod +x scripts/*.sh
 # Option B: Audit running microservice health
 ./scripts/test_services.sh
 ```
+
+---
+
+## 🐳 Docker Containerization (Full MERN Stack)
+
+SkillForge is fully containerized with **Docker & Docker Compose**, enabling one-click deployment for the complete MERN stack (MongoDB 7.0, Express API backend, React Vite SPA with Nginx, and Python AI FastAPI microservice):
+
+### Architecture in Docker:
+- **`skillforge-frontend`** (`port 5173`): React SPA built with Vite, served via optimized **Nginx** reverse proxy.
+- **`skillforge-backend`** (`port 3001`): Node.js + Express API Gateway connecting to MongoDB and Python services.
+- **`skillforge-mongodb`** (`port 27017`): MongoDB 7.0 database container with healthchecks and persistent named volume (`mongo_data`).
+- **`skillforge-python-ai`** (`port 8000`): FastAPI AI microservice with ChromaDB persistent vector storage (`chroma_data`).
+
+### Quick Start with Docker:
+```bash
+# 1. Build and run all services in detached mode
+docker compose up -d --build
+
+# 2. View logs across all services
+docker compose logs -f
+
+# 3. Stop all containers
+docker compose down
+```
+
+Or using npm shortcut scripts:
+```bash
+npm run docker:build
+npm run docker:up
+npm run docker:logs
+npm run docker:down
+```
+
+---
+
+## 🚀 CI/CD Pipeline (GitHub Actions)
+
+A comprehensive Continuous Integration & Continuous Delivery (CI/CD) workflow is configured at [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+
+### Automated Pipeline Stages:
+1. **🔍 Lint & Syntax Validation**:
+   - Sets up Node.js 20 environment with cached dependencies (`npm ci`).
+   - Validates JavaScript backend files (`node --check server/server.js`).
+   - Runs ESLint checks across the codebase.
+2. **🏗️ Build & Production Assets**:
+   - Builds the production Vite frontend bundle (`npm run build`).
+   - Uploads build artifacts (`frontend-dist`) for verification.
+3. **🐳 Docker Container Build & Compose Validation**:
+   - Validates `docker-compose.yml` configuration (`docker compose config`).
+   - Tests Docker multi-stage builds using `docker/build-push-action` for both Backend and Frontend.
+   - Tests root Dockerfile for cloud PaaS deployments.
+4. **🚀 Continuous Deployment (CD Readiness)**:
+   - Triggers on successful merge to `main` branch.
+   - Prepares validated containers for deployment to Cloud / Kubernetes / PaaS providers.
 
 ---
 

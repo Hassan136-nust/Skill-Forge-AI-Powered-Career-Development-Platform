@@ -20,6 +20,7 @@ import {
   Edit3,
   LogOut,
   X,
+  Menu,
   Star,
   Zap,
   Plus,
@@ -454,6 +455,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showRepos, setShowRepos] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   // User-Isolated Skill Scores (0/100 default for new users)
   const [skillScores, setSkillScores] = useState(() => {
@@ -1457,7 +1459,8 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
           </button>
         </nav>
 
-        <div className="navbar-right-actions">
+        {/* Desktop Right Actions */}
+        <div className="navbar-right-actions desktop-navbar-actions">
           {(() => {
             try {
               const u = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
@@ -1576,10 +1579,129 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             }}
             title="Sign Out of Session"
           >
-            <LogOut size={14} color="#F87171" strokeWidth={2.2} />
+            <LogOut size={14} />
             <span>Sign Out</span>
           </button>
         </div>
+
+        {/* Mobile Hamburger Toggle Button */}
+        <button
+          className="dashboard-mobile-hamburger-btn"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          {isMobileMenuOpen ? <X size={22} color="#FFD166" /> : <Menu size={22} color="#FFD166" />}
+        </button>
+
+        {/* Mobile Animated Dropdown Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              className="dashboard-mobile-drawer"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              {(() => {
+                try {
+                  const u = JSON.parse(localStorage.getItem('skillforge_user') || '{}')
+                  if (u.role === 'admin') {
+                    return (
+                      <button
+                        className="mobile-drawer-btn"
+                        style={{ color: '#00F0FF', borderColor: 'rgba(0, 240, 255, 0.4)' }}
+                        onClick={() => {
+                          setIsMobileMenuOpen(false)
+                          if (onOpenAdmin) onOpenAdmin()
+                        }}
+                      >
+                        <span>👑 Admin Dashboard</span>
+                      </button>
+                    )
+                  }
+                } catch {}
+                return null
+              })()}
+
+              <button
+                className="mobile-drawer-btn"
+                style={{ color: '#FFD166' }}
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  if (onOpenAiMentor) onOpenAiMentor()
+                  else setIsAiChatOpen(true)
+                }}
+              >
+                <Bot size={16} color="#FFD166" />
+                <span>AI Mentor Page</span>
+              </button>
+
+              <button
+                className="mobile-drawer-btn"
+                style={{ color: '#FFD166' }}
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  setIsEditModalOpen(true)
+                }}
+              >
+                <Edit3 size={16} />
+                <span>Edit Profile & Skills</span>
+              </button>
+
+              <button
+                className="mobile-drawer-btn"
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  if (onExitDashboard) onExitDashboard()
+                }}
+              >
+                <span>Home Page</span>
+              </button>
+
+              <button
+                className="mobile-drawer-btn"
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  const el = document.getElementById('roadmap-section')
+                  if (el) el.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span>3D Career Roadmap</span>
+              </button>
+
+              <button
+                className="mobile-drawer-btn"
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  const el = document.getElementById('skill-assessment-hub')
+                  if (el) el.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span>Skill Assessment Hub</span>
+              </button>
+
+              <button
+                className="mobile-drawer-btn signout-btn"
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  try {
+                    localStorage.removeItem('skillforge_token')
+                    localStorage.removeItem('skillforge_user')
+                    localStorage.removeItem('skillforge_scores')
+                    localStorage.removeItem('skillforge_completed_tasks')
+                    localStorage.removeItem('skillforge_current_milestones')
+                    localStorage.removeItem('skillforge_career_goal')
+                  } catch {}
+                  if (onExitDashboard) onExitDashboard()
+                }}
+              >
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* MAIN CONTAINER */}
@@ -2060,19 +2182,11 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div className="roadmap-header-actions-row">
               {aiGeneratedMilestones && (
                 <button
                   onClick={() => saveAndSetMilestones(null)}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid #33394f',
-                    borderRadius: '10px',
-                    padding: '0.45rem 0.75rem',
-                    color: '#B8B3C7',
-                    fontSize: '0.72rem',
-                    cursor: 'pointer',
-                  }}
+                  className="dashboard-nav-btn reset-default-btn"
                   title="Reset to default benchmark track"
                 >
                   Reset Default
@@ -2081,19 +2195,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
               {/* History Button */}
               <button
-                className="dashboard-nav-btn"
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  fontSize: '0.72rem',
-                  borderColor: '#FFD166',
-                  color: '#FFD166',
-                  backgroundColor: 'rgba(255, 209, 102, 0.08)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  borderRadius: '10px',
-                }}
+                className="dashboard-nav-btn history-action-btn"
                 onClick={() => setIsHistoryModalOpen(true)}
                 title="View previous roadmaps history"
               >
@@ -2103,21 +2205,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
               {/* Button 1: FAST GENAI ROADMAP */}
               <button
-                className="dashboard-nav-btn"
-                style={{
-                  padding: '0.45rem 1rem',
-                  fontSize: '0.74rem',
-                  borderColor: 'rgba(0, 210, 255, 0.5)',
-                  color: '#00D2FF',
-                  backgroundColor: 'rgba(0, 210, 255, 0.08)',
-                  cursor: isGeneratingAiRoadmap ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  fontWeight: 700,
-                  borderRadius: '10px',
-                  transition: 'all 0.2s ease',
-                }}
+                className="dashboard-nav-btn fast-genai-action-btn"
                 onClick={handleGenerateAiRoadmap}
                 disabled={isGeneratingAiRoadmap}
                 title="Fast single-shot Groq GenAI roadmap generation"
@@ -2137,21 +2225,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
               {/* Button 2: AUTONOMOUS AGENT (LANGGRAPH) */}
               <button
-                className="bungee-regular"
-                style={{
-                  padding: '0.45rem 1.15rem',
-                  fontSize: '0.76rem',
-                  background: '#FFD166',
-                  border: '1.5px solid #FFD166',
-                  color: '#05060A',
-                  cursor: isAgentExecuting ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  borderRadius: '10px',
-                  boxShadow: '0 4px 15px rgba(255, 209, 102, 0.25)',
-                  transition: 'all 0.2s ease',
-                }}
+                className="bungee-regular autonomous-agent-action-btn"
                 onClick={handleStartAgentVisualization}
                 disabled={isAgentExecuting}
                 title="Run full 4-node LangGraph ReAct Autonomous Agent"
@@ -2643,130 +2717,71 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             style={{ zIndex: 10005 }}
           >
             <motion.div
-              className="ai-roadmap-modal-card agent-cockpit-modal"
+              className="ai-roadmap-modal-card agent-cockpit-modal fast-genai-modal-card"
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              style={{
-                width: '1040px',
-                maxWidth: '94vw',
-                height: '560px',
-                maxHeight: '85vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                padding: '1.8rem 2.4rem',
-                backgroundColor: '#090C15',
-                border: '1.5px solid #00D2FF',
-                boxShadow: '0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(0, 210, 255, 0.25)',
-              }}
             >
               {/* Header */}
-              <div className="ai-roadmap-header-row" style={{ marginBottom: '1.2rem', paddingBottom: '0.8rem', borderBottom: '1px solid #1c2030' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div className="ai-roadmap-header-row fast-genai-header-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div
                     style={{
-                      width: '44px',
-                      height: '44px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '12px',
                       background: 'rgba(0, 210, 255, 0.12)',
                       border: '1.5px solid #00D2FF',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      flexShrink: 0,
                     }}
                   >
-                    <Zap size={22} color="#00D2FF" />
+                    <Zap size={20} color="#00D2FF" />
                   </div>
                   <div>
-                    <h2 className="bungee-regular" style={{ fontSize: '1.25rem', color: '#FFF7E8', margin: 0 }}>
+                    <h2 className="bungee-regular fast-genai-title">
                       GROQ CLOUD FAST GENAI GENERATOR
                     </h2>
-                    <span style={{ fontSize: '0.74rem', color: '#B8B3C7' }}>
+                    <span className="fast-genai-subtitle">
                       Target Track: <strong style={{ color: '#00D2FF' }}>{studentProfile.careerGoal}</strong> • LLaMA 3.3 (120B / 70B Instant Engine)
                     </span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00D2FF', fontSize: '0.76rem', fontWeight: 800 }}>
+                <div className="fast-genai-status-badge">
                   <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
                   <span>GENERATING ROADMAP...</span>
                 </div>
               </div>
 
               {/* Grid with Cat on left and Terminal on right */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '320px 1fr',
-                  gap: '2.5rem',
-                  alignItems: 'center',
-                  flex: 1,
-                  minHeight: 0,
-                }}
-              >
-                {/* Free standing Cosmic Cat (No Box background!) */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '1rem',
-                  }}
-                >
+              <div className="fast-genai-grid-stage">
+                {/* Free standing Cosmic Cat */}
+                <div className="fast-genai-cat-col">
                   <img
                     src="/cat.png"
                     alt="Cosmic Cat Fast GenAI Guide"
-                    style={{
-                      width: '280px',
-                      height: '300px',
-                      objectFit: 'contain',
-                      filter: 'drop-shadow(0 20px 35px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 30px rgba(0, 210, 255, 0.35))',
-                    }}
+                    className="fast-genai-cat-img"
                   />
-                  <div
-                    className="press-start-2p-regular"
-                    style={{
-                      background: '#070912',
-                      border: '1.5px solid #00D2FF',
-                      borderRadius: '10px',
-                      padding: '0.45rem 0.9rem',
-                      fontSize: '0.62rem',
-                      color: '#00D2FF',
-                      textAlign: 'center',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.8)',
-                    }}
-                  >
+                  <div className="press-start-2p-regular fast-genai-cat-badge">
                     ✦ COSMIC CAT GENAI NAVIGATOR
                   </div>
                 </div>
 
                 {/* Cyberpunk Live Terminal Console */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', height: '100%' }}>
+                <div className="fast-genai-terminal-col">
                   <div>
-                    <h3 className="bungee-regular" style={{ fontSize: '1.15rem', color: '#FFF7E8', margin: '0 0 0.3rem 0' }}>
+                    <h3 className="bungee-regular fast-genai-terminal-title">
                       SYNTHESIZING FAST CAREER BLUEPRINT
                     </h3>
-                    <p style={{ fontSize: '0.82rem', color: '#B8B3C7', margin: 0, lineHeight: 1.4 }}>
+                    <p className="fast-genai-terminal-desc">
                       Compiling 4-stage milestones, project capstones, verified resources, and semester alignment.
                     </p>
                   </div>
 
-                  <div
-                    style={{
-                      flex: 1,
-                      background: '#020307',
-                      border: '1.5px solid #222638',
-                      borderRadius: '14px',
-                      padding: '1.1rem 1.3rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.65rem',
-                      fontFamily: 'monospace',
-                      boxShadow: 'inset 0 3px 20px rgba(0, 0, 0, 0.95)',
-                    }}
-                  >
+                  <div className="fast-genai-terminal-box">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.45rem' }}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FF5F56' }} />
@@ -2823,40 +2838,34 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             style={{ zIndex: 10000 }}
           >
             <motion.div
-              className="ai-roadmap-modal-card"
+              className="ai-roadmap-modal-card genai-roadmap-modal-card"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              style={{
-                height: '88vh',
-                maxHeight: '88vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-              }}
             >
               {/* Header */}
-              <div className="ai-roadmap-header-row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div className="ai-roadmap-header-row genai-roadmap-header-row">
+                <div className="genai-header-left">
                   <div
                     style={{
-                      width: '42px',
-                      height: '42px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '12px',
                       background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.25) 100%)',
                       border: '1.5px solid #FFD166',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      flexShrink: 0,
                     }}
                   >
-                    <Sparkles size={22} color="#FFD166" />
+                    <Sparkles size={20} color="#FFD166" />
                   </div>
                   <div>
-                    <h2 className="bungee-regular" style={{ fontSize: '1.25rem', color: '#FFF7E8', margin: 0 }}>
+                    <h2 className="bungee-regular genai-roadmap-title">
                       AI PERSONALIZED ROADMAP • {aiRoadmapModalData.careerGoal?.toUpperCase()}
                     </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.35rem' }}>
+                    <div className="genai-roadmap-badges">
                       <span className="ai-roadmap-badge-pill">
                         <Cpu size={12} />
                         <span>POWERED BY GROQ CLOUD (GPT-OSS-120B)</span>
@@ -2869,30 +2878,18 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div className="genai-header-right-btns">
                   {/* Previous Roadmaps History Toggle */}
                   <button
                     onClick={() => {
                       setShowHistoryDrawer(!showHistoryDrawer)
                       if (!showHistoryDrawer) loadRoadmapHistory()
                     }}
-                    style={{
-                      background: showHistoryDrawer ? 'rgba(255, 209, 102, 0.25)' : 'rgba(255, 255, 255, 0.06)',
-                      border: '1px solid #FFD166',
-                      borderRadius: '12px',
-                      padding: '0.45rem 0.85rem',
-                      color: '#FFD166',
-                      fontSize: '0.74rem',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      cursor: 'pointer',
-                    }}
+                    className="genai-history-btn"
                     title="View previously generated roadmaps"
                   >
-                    <History size={14} />
-                    <span>PREVIOUS ({roadmapHistoryList.length})</span>
+                    <History size={13} />
+                    <span>PAST ({roadmapHistoryList.length})</span>
                   </button>
 
                   {/* Close Modal Button */}
@@ -2901,35 +2898,17 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                       setAiRoadmapModalData(null)
                       setShowHistoryDrawer(false)
                     }}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid #33394f',
-                      borderRadius: '50%',
-                      width: '36px',
-                      height: '36px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#FFF7E8',
-                      cursor: 'pointer',
-                    }}
+                    className="genai-close-btn"
+                    title="Close Roadmap"
                   >
-                    <X size={20} />
+                    <X size={18} />
                   </button>
                 </div>
               </div>
 
               {/* Main Content Area (With optional History Sidebar) */}
               <div
-                style={{
-                  display: 'flex',
-                  flex: '1 1 auto',
-                  minHeight: 0,
-                  height: 'calc(88vh - 180px)',
-                  maxHeight: 'calc(88vh - 180px)',
-                  gap: '1rem',
-                  overflow: 'hidden',
-                }}
+                className="genai-roadmap-content-area"
                 onWheel={(e) => {
                   const el = document.getElementById('ai-roadmap-printable-area')
                   if (el) {
@@ -2942,20 +2921,9 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                   <motion.div
                     data-lenis-prevent="true"
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: '280px', opacity: 1 }}
+                    animate={{ width: '260px', opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
-                    style={{
-                      background: 'rgba(13, 16, 26, 0.95)',
-                      border: '1px solid #222638',
-                      borderRadius: '16px',
-                      padding: '1rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.6rem',
-                      overflowY: 'auto',
-                      minWidth: '260px',
-                      height: '100%',
-                    }}
+                    className="genai-history-drawer"
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.5rem' }}>
                       <span className="press-start-2p-regular" style={{ fontSize: '0.62rem', color: '#FFD166' }}>
@@ -3011,19 +2979,9 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                 {/* Printable and Scrollable Rich Markdown Content */}
                 <div
                   id="ai-roadmap-printable-area"
-                  className="ai-roadmap-scroll-container"
+                  className="ai-roadmap-scroll-container genai-roadmap-scroll-box"
+                  data-lenis-prevent="true"
                   tabIndex={0}
-                  style={{
-                    flex: '1 1 auto',
-                    minHeight: 0,
-                    height: '100%',
-                    maxHeight: '100%',
-                    overflowY: 'scroll',
-                    overflowX: 'hidden',
-                    paddingRight: '0.8rem',
-                    pointerEvents: 'auto',
-                    touchAction: 'pan-y',
-                  }}
                 >
                   <div className="ai-roadmap-markdown-body">
                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
@@ -3034,45 +2992,22 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
               </div>
 
               {/* Modal Footer */}
-              <div
-                style={{
-                  marginTop: '1.2rem',
-                  paddingTop: '1rem',
-                  borderTop: '1px solid #1c2030',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              <div className="ai-roadmap-footer-row genai-roadmap-footer">
+                <span className="genai-footer-note">
                   ✦ Generated dynamically based on your verified assessment scores &amp; skill gaps.
                 </span>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div className="genai-footer-btns">
                   {/* Download as PDF Button */}
                   <button
                     onClick={() => handleDownloadRoadmapPdf(aiRoadmapModalData)}
                     disabled={isExportingPdf}
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(39, 201, 63, 0.2) 0%, rgba(0, 210, 255, 0.2) 100%)',
-                      border: '1.5px solid #27C93F',
-                      borderRadius: '12px',
-                      padding: '0.55rem 1.3rem',
-                      color: '#27C93F',
-                      fontFamily: '"Bungee", cursive, sans-serif',
-                      fontSize: '0.82rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      cursor: isExportingPdf ? 'not-allowed' : 'pointer',
-                      boxShadow: '0 4px 20px rgba(39, 201, 63, 0.25)',
-                    }}
+                    className="genai-download-pdf-btn"
                   >
                     {isExportingPdf && pdfGeneratingId === (aiRoadmapModalData._id || 'active') ? (
                       <>
                         <RotateCcw size={15} style={{ animation: 'spin 1s linear infinite' }} />
-                        <span>EXPORTING PDF...</span>
+                        <span>EXPORTING...</span>
                       </>
                     ) : (
                       <>
@@ -3083,14 +3018,13 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                   </button>
 
                   <button
-                    className="auth-submit-btn bungee-regular"
+                    className="auth-submit-btn bungee-regular genai-close-action-btn"
                     onClick={() => {
                       setAiRoadmapModalData(null)
                       setShowHistoryDrawer(false)
                     }}
-                    style={{ width: 'auto', padding: '0.55rem 1.6rem', fontSize: '0.85rem' }}
                   >
-                    <span>CLOSE ROADMAP</span>
+                    <span>CLOSE</span>
                   </button>
                 </div>
               </div>
@@ -3324,46 +3258,34 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
             style={{ zIndex: 10000 }}
           >
             <motion.div
-              className="ai-roadmap-modal-card agent-cockpit-modal"
+              className="ai-roadmap-modal-card agent-cockpit-modal agent-visualizer-modal-card"
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              style={{
-                width: '1280px',
-                maxWidth: '96vw',
-                height: '92vh',
-                maxHeight: '92vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                padding: '1.8rem 2.4rem',
-                backgroundColor: '#090C15',
-                border: '1.5px solid #FFD166',
-                boxShadow: '0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(255, 209, 102, 0.2)',
-              }}
             >
               {/* Top Flow Header Track */}
-              <div className="ai-roadmap-header-row" style={{ marginBottom: '1rem', paddingBottom: '0.9rem', borderBottom: '1px solid #1c2030' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div className="ai-roadmap-header-row agent-visualizer-header-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div
                     style={{
-                      width: '46px',
-                      height: '46px',
+                      width: '42px',
+                      height: '42px',
                       borderRadius: '12px',
                       background: 'rgba(255, 209, 102, 0.12)',
                       border: '1.5px solid #FFD166',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      flexShrink: 0,
                     }}
                   >
-                    <Bot size={24} color="#FFD166" />
+                    <Bot size={22} color="#FFD166" />
                   </div>
                   <div>
-                    <h2 className="bungee-regular" style={{ fontSize: '1.35rem', color: '#FFF7E8', margin: 0, letterSpacing: '0.5px' }}>
+                    <h2 className="bungee-regular agent-visualizer-title">
                       LANGGRAPH AUTONOMOUS AGENT STATEGRAPH
                     </h2>
-                    <span style={{ fontSize: '0.78rem', color: '#B8B3C7' }}>
+                    <span className="agent-visualizer-subtitle">
                       Target Track: <strong style={{ color: '#FFD166' }}>{studentProfile.careerGoal}</strong> • Multi-Node ReAct Reasoning Workflow
                     </span>
                   </div>
@@ -3371,19 +3293,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
 
                 <button
                   onClick={() => setIsAgentModalOpen(false)}
-                  style={{
-                    background: '#131724',
-                    border: '1px solid #33394f',
-                    borderRadius: '50%',
-                    width: '38px',
-                    height: '38px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFF7E8',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className="agent-visualizer-close-btn"
                   title="Close Agent Cockpit"
                 >
                   <X size={20} />
@@ -3391,19 +3301,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
               </div>
 
               {/* Top 5 Connected Sequential Nodes Stepper Flow (100% Responsive Grid, Zero Overflow) */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(5, 1fr)',
-                  gap: '0.65rem',
-                  background: '#04060A',
-                  border: '1px solid #1c2030',
-                  borderRadius: '12px',
-                  padding: '0.6rem 0.8rem',
-                  marginBottom: '1.2rem',
-                  overflow: 'hidden',
-                }}
-              >
+              <div className="agent-visualizer-stepper-track">
                 {[
                   { num: '01', title: 'SkillProfiler', icon: Award },
                   { num: '02', title: 'KnowledgeRAG', icon: BookOpen },
@@ -3418,32 +3316,7 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                   return (
                     <div
                       key={sIdx}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        padding: '0.45rem 0.6rem',
-                        borderRadius: '8px',
-                        background: isActive
-                          ? 'rgba(255, 209, 102, 0.15)'
-                          : isDone
-                          ? 'rgba(39, 201, 63, 0.12)'
-                          : '#090D18',
-                        border: isActive
-                          ? '1.5px solid #FFD166'
-                          : isDone
-                          ? '1.5px solid #27C93F'
-                          : '1px solid #1c2030',
-                        color: isActive ? '#FFD166' : isDone ? '#27C93F' : '#64748b',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        cursor: agentFinalReport ? 'pointer' : 'default',
-                        transition: 'all 0.2s ease',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
+                      className={`agent-visualizer-step-item ${isActive ? 'is-active' : ''} ${isDone ? 'is-done' : ''}`}
                       onClick={() => {
                         if (agentFinalReport && sIdx <= 4) {
                           setAgentCurrentNodeIndex(sIdx)
@@ -3489,64 +3362,27 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -40 }}
                           transition={{ duration: 0.4 }}
-                          style={{
-                            display: 'grid',
-                            gridTemplateColumns: '380px 1fr',
-                            gap: '2.5rem',
-                            alignItems: 'center',
-                            height: '100%',
-                            padding: '0.5rem 0',
-                          }}
+                          className="agent-visualizer-node-stage"
                         >
                           {/* Character Col Standing Freely (NO Card Background!) */}
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '1.2rem',
-                              background: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                            }}
-                          >
+                          <div className="agent-visualizer-char-col">
                             <img
                               src={currentNode.img}
                               alt={currentNode.characterName}
-                              style={{
-                                width: '340px',
-                                height: '360px',
-                                maxHeight: '52vh',
-                                objectFit: 'contain',
-                                filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 30px rgba(255, 209, 102, 0.35))',
-                                transition: 'all 0.3s ease',
-                              }}
+                              className="agent-visualizer-char-img"
                             />
-                            <div
-                              className="press-start-2p-regular"
-                              style={{
-                                background: '#070912',
-                                border: '1.5px solid #FFD166',
-                                borderRadius: '10px',
-                                padding: '0.5rem 1rem',
-                                fontSize: '0.66rem',
-                                color: '#FFD166',
-                                textAlign: 'center',
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.8)',
-                              }}
-                            >
+                            <div className="press-start-2p-regular agent-visualizer-char-badge">
                               ✦ {currentNode.characterName.toUpperCase()}
                             </div>
                           </div>
 
                           {/* Interactive Console & Node Reasoning */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', height: '100%' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div className="agent-visualizer-terminal-col">
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
                               <span
                                 className="press-start-2p-regular"
                                 style={{
-                                  fontSize: '0.68rem',
+                                  fontSize: '0.66rem',
                                   color: '#FFD166',
                                   background: 'rgba(255, 209, 102, 0.12)',
                                   border: '1.5px solid #FFD166',
@@ -3557,36 +3393,23 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                                 {currentNode.badge}
                               </span>
 
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#27C93F', fontWeight: 800 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.76rem', color: '#27C93F', fontWeight: 800 }}>
                                 <RotateCcw size={14} style={{ animation: 'spin 1s linear infinite' }} />
                                 <span>EXECUTING STATE GRAPH</span>
                               </div>
                             </div>
 
                             <div>
-                              <h3 className="bungee-regular" style={{ fontSize: '1.35rem', color: '#FFF7E8', margin: '0 0 0.35rem 0' }}>
+                              <h3 className="bungee-regular agent-visualizer-node-title">
                                 {currentNode.title}
                               </h3>
-                              <p style={{ fontSize: '0.88rem', color: '#B8B3C7', margin: 0, lineHeight: 1.45 }}>
+                              <p className="agent-visualizer-node-desc">
                                 {currentNode.desc}
                               </p>
                             </div>
 
                             {/* Live Cyberpunk Terminal Thought Stream */}
-                            <div
-                              style={{
-                                flex: 1,
-                                background: '#020307',
-                                border: '1.5px solid #222638',
-                                borderRadius: '16px',
-                                padding: '1.2rem 1.4rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.75rem',
-                                fontFamily: 'monospace',
-                                boxShadow: 'inset 0 3px 20px rgba(0, 0, 0, 0.95)',
-                              }}
-                            >
+                            <div className="agent-visualizer-terminal-box">
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c2030', paddingBottom: '0.5rem' }}>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF5F56' }} />
@@ -3644,52 +3467,24 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      height: '100%',
-                      gap: '1rem',
-                    }}
+                    className="agent-final-report-wrapper"
+                    data-lenis-prevent="true"
                   >
-                    {/* Top Executive Banner (Solid No Gradient) */}
-                    <div
-                      style={{
-                        background: '#0c101c',
-                        border: '1.5px solid #27C93F',
-                        borderRadius: '14px',
-                        padding: '0.9rem 1.4rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexShrink: 0,
-                      }}
-                    >
+                    {/* Top Executive Banner */}
+                    <div className="agent-final-banner">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                         <Award size={24} color="#27C93F" />
                         <div>
-                          <h3 className="bungee-regular" style={{ fontSize: '1.15rem', color: '#FFF7E8', margin: 0 }}>
+                          <h3 className="bungee-regular agent-final-banner-title">
                             AUTONOMOUS CAREER BLUEPRINT SYNTHESIZED
                           </h3>
-                          <span style={{ fontSize: '0.76rem', color: '#27C93F' }}>
+                          <span className="agent-final-banner-sub">
                             ✓ 4-Node LangGraph State Graph &amp; RAG Knowledge Base fully grounded.
                           </span>
                         </div>
                       </div>
 
-                      <span
-                        style={{
-                          background: '#131724',
-                          border: '1px solid #FFD166',
-                          color: '#FFD166',
-                          borderRadius: '8px',
-                          padding: '0.35rem 0.75rem',
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                        }}
-                      >
+                      <span className="agent-final-engine-badge">
                         <Cpu size={13} />
                         <span>GROQ LLAMA 3.3 (120B)</span>
                       </span>
@@ -3698,20 +3493,9 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                     {/* Markdown Report Scroll Container */}
                     <div
                       id="agent-final-report-scroll-container"
-                      className="ai-roadmap-scroll-container"
-                      style={{
-                        flex: '1 1 auto',
-                        minHeight: 0,
-                        height: '100%',
-                        padding: '1.2rem',
-                        background: '#04060A',
-                        border: '1px solid #1c2030',
-                        borderRadius: '16px',
-                        overflowY: 'scroll',
-                        overflowX: 'hidden',
-                        pointerEvents: 'auto',
-                        touchAction: 'pan-y',
-                      }}
+                      className="ai-roadmap-scroll-container agent-final-scroll-container"
+                      data-lenis-prevent="true"
+                      tabIndex={0}
                       onWheel={(e) => {
                         const el = document.getElementById('agent-final-report-scroll-container')
                         if (el) el.scrollTop += e.deltaY
@@ -3724,22 +3508,13 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                       </div>
                     </div>
 
-                    {/* Footer Actions (Solid Clean Buttons, No Gradients!) */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderTop: '1px solid #1c2030',
-                        paddingTop: '0.9rem',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                    {/* Footer Actions */}
+                    <div className="agent-final-footer">
+                      <span className="agent-final-footer-text">
                         ✦ Apply directly to your 3D interactive dashboard deck or export as PDF.
                       </span>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      <div className="agent-final-footer-btns">
                         {/* Download PDF for LangGraph Agent */}
                         <button
                           onClick={() => {
@@ -3851,12 +3626,16 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
       {/* =========================================================================
           8. FLOATING AI ASSISTANT CHAT COCKPIT (RAG + GROQ CLOUD)
           ========================================================================= */}
-      <div style={{ position: 'fixed', bottom: '20px', right: '25px', zIndex: 999 }}>
+      {/* =========================================================================
+          8. FLOATING AI ASSISTANT CHAT COCKPIT (RAG + GROQ CLOUD)
+          ========================================================================= */}
+      <div className="floating-ai-mentor-container">
         {!isAiChatOpen ? (
           <motion.div
+            className="floating-ai-mentor-trigger"
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            animate={{ y: [0, -8, 0] }}
+            animate={{ y: [0, -6, 0] }}
             transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
             onClick={() => {
               if (onOpenAiMentor) {
@@ -3865,69 +3644,26 @@ export default function StudentDashboard({ onExitDashboard, onOpenFullRoadmap, o
                 setIsAiChatOpen(true)
               }
             }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              cursor: 'pointer',
-              userSelect: 'none',
-            }}
           >
             {/* Top Speech Bubble Badge */}
-            <div
-              style={{
-                background: 'linear-gradient(135deg, rgba(13, 16, 26, 0.95) 0%, rgba(30, 20, 45, 0.95) 100%)',
-                border: '1.5px solid #FFD166',
-                borderRadius: '16px',
-                padding: '0.45rem 0.95rem',
-                color: '#FFD166',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                boxShadow: '0 8px 25px rgba(255, 209, 102, 0.35)',
-                marginBottom: '-12px',
-                zIndex: 2,
-                position: 'relative',
-              }}
-            >
+            <div className="floating-ai-mentor-badge">
               <Sparkles size={13} color="#FFD166" />
-              <span className="press-start-2p-regular" style={{ fontSize: '0.62rem' }}>ASK AI MENTOR</span>
+              <span className="press-start-2p-regular ai-mentor-badge-text">ASK AI MENTOR</span>
             </div>
 
             {/* Character Image hard.png */}
             <img
               src="/hard.png"
               alt="AI Mentor Character"
-              style={{
-                width: '130px',
-                height: '150px',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 20px rgba(255, 209, 102, 0.35))',
-                transition: 'transform 0.3s ease',
-              }}
+              className="floating-ai-mentor-img"
             />
           </motion.div>
         ) : (
           <motion.div
+            className="floating-ai-mentor-chat-window"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            style={{
-              width: '430px',
-              maxWidth: '92vw',
-              height: '570px',
-              maxHeight: '88vh',
-              background: 'rgba(7, 9, 16, 0.98)',
-              backdropFilter: 'blur(30px)',
-              border: '1.5px solid #FFD166',
-              borderRadius: '22px',
-              boxShadow: '0 25px 80px rgba(0,0,0,0.98), 0 0 50px rgba(255, 209, 102, 0.3)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
           >
             {/* Chat Header */}
             <div

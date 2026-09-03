@@ -60,10 +60,22 @@ export default function CosmicCatGuide({ active = true }) {
     }
   }, [])
 
-  // Flank offsets: Right side is 0.33 * width, Left side is pushed further out to 0.44 * width so it never overlaps the left cards
-  const isMobile = windowInfo.width < 1080
-  const rightFlankX = isMobile ? windowInfo.width * 0.28 : windowInfo.width * 0.33
-  const leftFlankX = isMobile ? windowInfo.width * 0.38 : windowInfo.width * 0.44
+  // Responsive Flank Offsets
+  const isMobile = windowInfo.width < 768
+  const isTablet = windowInfo.width >= 768 && windowInfo.width < 1180
+
+  // On mobile screens, keep flank within bounds so it stays visible without overlapping content
+  const rightFlankX = isMobile
+    ? Math.min(windowInfo.width * 0.24, 110)
+    : isTablet
+    ? windowInfo.width * 0.32
+    : Math.min(windowInfo.width * 0.34, 460)
+
+  const leftFlankX = isMobile
+    ? Math.min(windowInfo.width * 0.24, 110)
+    : isTablet
+    ? windowInfo.width * 0.36
+    : Math.min(windowInfo.width * 0.40, 520)
 
   // Continuous X gliding: Right -> Left -> Right -> Left -> Right
   const rawX = useTransform(
@@ -82,7 +94,7 @@ export default function CosmicCatGuide({ active = true }) {
       offsets.footer
     ],
     [
-      rightFlankX,      // Right at Terminal (shifted leftward inward)
+      rightFlankX,      // Right at Terminal
       rightFlankX,
       -leftFlankX,      // Left at Roadmap
       -leftFlankX,

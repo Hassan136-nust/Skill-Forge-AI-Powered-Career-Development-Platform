@@ -2,7 +2,7 @@
 
 .sdg-section-wrapper {
   width: 100%;
-  padding: 7rem 2.5rem 8rem 2.5rem;
+  padding: clamp(3.5rem, 6vw, 6rem) clamp(1rem, 3vw, 2.5rem) clamp(4rem, 6vw, 6.5rem) clamp(1rem, 3vw, 2.5rem);
   background-color: #000000;
   border-top: 1px solid #141724;
   position: relative;
@@ -10,29 +10,29 @@
 }
 
 .sdg-inner-container {
-  max-width: 1240px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .sdg-header-block {
   text-align: center;
-  max-width: 800px;
-  margin: 0 auto 4.5rem auto;
+  max-width: 720px;
+  margin: 0 auto clamp(2rem, 4vw, 3.5rem) auto;
 }
 
 /* 4 Executive SDG Impact Tiles */
 .sdg-four-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.8rem;
-  margin-bottom: 5.5rem;
+  gap: clamp(1rem, 1.8vw, 1.6rem);
+  margin-bottom: clamp(3rem, 5vw, 4.5rem);
 }
 
 .sdg-glass-tile {
   background: #080a12;
   border: 1px solid #1a1e2e;
-  border-radius: 20px;
-  padding: 2.2rem 1.8rem;
+  border-radius: 16px;
+  padding: clamp(1.4rem, 2vw, 1.8rem) clamp(1.1rem, 1.6vw, 1.4rem);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -44,18 +44,18 @@
 }
 
 .sdg-glass-tile:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   border-color: #FFD166;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 209, 102, 0.1);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 209, 102, 0.08);
 }
 
 /* Watermark Number in Background */
 .sdg-watermark-num {
   position: absolute;
-  top: 10px;
-  right: 18px;
+  top: 8px;
+  right: 14px;
   font-family: "Bungee", cursive, sans-serif;
-  font-size: 3.8rem;
+  font-size: clamp(2.8rem, 4vw, 3.4rem);
   font-weight: 400;
   color: rgba(255, 255, 255, 0.04);
   line-height: 1;
@@ -71,16 +71,16 @@
 .sdg-tile-header {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  margin-bottom: 1.4rem;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
   position: relative;
   z-index: 2;
 }
 
 .sdg-tile-icon-box {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: clamp(38px, 4vw, 44px);
+  height: clamp(38px, 4vw, 44px);
+  border-radius: 10px;
   background-color: #0d101c;
   border: 1.5px solid #222638;
   display: flex;
@@ -100,27 +100,27 @@
 
 .sdg-badge-label {
   font-family: "Bungee", cursive, sans-serif;
-  font-size: 0.82rem;
+  font-size: clamp(0.7rem, 0.85vw, 0.78rem);
   color: #FFD166;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .sdg-tile-title {
   font-family: "Bungee", cursive, sans-serif;
-  font-size: 1.05rem;
+  font-size: clamp(0.88rem, 1.1vw, 0.98rem);
   color: #FFF7E8;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   line-height: 1.35;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
   position: relative;
   z-index: 2;
 }
 
 .sdg-tile-desc {
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: clamp(0.78rem, 0.9vw, 0.84rem);
+  line-height: 1.55;
   color: #B8B3C7;
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.1rem;
   position: relative;
   z-index: 2;
 }
@@ -128,9 +128,9 @@
 .sdg-impact-points-list {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.45rem;
   border-top: 1px solid #161a29;
-  padding-top: 1.2rem;
+  padding-top: 0.9rem;
   position: relative;
   z-index: 2;
 }
@@ -138,8 +138,8 @@
 .sdg-impact-point-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
+  gap: 0.45rem;
+  font-size: clamp(0.72rem, 0.8vw, 0.76rem);
   color: #F4F1EA;
   font-weight: 500;
 }
@@ -148,11 +148,11 @@
 .arch-blueprint-card {
   background: #070910;
   border: 1.5px solid #222638;
-  border-radius: 20px;
-  padding: 2.5rem;
+  border-radius: 16px;
+  padding: clamp(1.4rem, 2.5vw, 2.2rem);
   display: flex;
   flex-direction: column;
-  gap: 1.8rem;
+  gap: 1.4rem;
   text-align: left;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
@@ -162,58 +162,58 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .arch-header-title {
   font-family: "Bungee", cursive, sans-serif;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
   color: #FFF7E8;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .arch-devops-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.68rem;
+  gap: 0.4rem;
+  font-size: clamp(0.6rem, 0.72vw, 0.65rem);
   color: #FFD166;
   background-color: #0e1222;
   border: 1px solid #222638;
-  padding: 0.35rem 0.8rem;
+  padding: 0.3rem 0.65rem;
   border-radius: 6px;
 }
 
 .arch-desc {
   color: #B8B3C7;
-  font-size: 0.92rem;
-  line-height: 1.6;
-  max-width: 900px;
+  font-size: clamp(0.82rem, 1vw, 0.9rem);
+  line-height: 1.55;
+  max-width: 860px;
 }
 
 /* Microservice Nodes Flow Diagram */
 .arch-flow-diagram {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
   background-color: #05060A;
   border: 1px solid #1c2030;
-  padding: 1.5rem;
-  border-radius: 12px;
+  padding: clamp(0.8rem, 1.5vw, 1.2rem);
+  border-radius: 10px;
 }
 
 .arch-flow-node {
   background-color: #0d101a;
   border: 1px solid #222638;
-  padding: 0.75rem 1.1rem;
-  border-radius: 8px;
+  padding: clamp(0.5rem, 0.8vw, 0.65rem) clamp(0.75rem, 1.1vw, 0.95rem);
+  border-radius: 6px;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: clamp(0.7rem, 0.82vw, 0.76rem);
   color: #F4F1EA;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   transition: all 0.2s ease;
 }
 
@@ -229,10 +229,16 @@
 
 .arch-arrow {
   color: #64748b;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1100px) {
+  .sdg-four-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
   .sdg-four-grid {
     grid-template-columns: 1fr;
   }

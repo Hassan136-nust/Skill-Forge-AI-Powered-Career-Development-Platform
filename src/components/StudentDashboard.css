@@ -1144,36 +1144,39 @@
 /* Styled Markdown Tables */
 .ai-roadmap-markdown-body table {
   width: 100% !important;
-  max-width: 100% !important;
+  min-width: 580px;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 1.5rem 0;
-  background: rgba(13, 16, 26, 0.85);
+  margin: 1.2rem 0;
+  background: rgba(13, 16, 26, 0.9);
   border: 1px solid #222638;
-  border-radius: 14px;
-  overflow: hidden;
+  border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-  table-layout: fixed;
-  word-break: break-word;
+  table-layout: auto;
+  word-break: normal;
 }
 
 .ai-roadmap-markdown-body th {
-  background: linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 107, 129, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.22) 0%, rgba(255, 107, 129, 0.18) 100%);
   color: #FFD166;
-  font-family: "Bungee", cursive, sans-serif;
-  font-size: 0.76rem;
-  padding: 1rem 1.2rem;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+  padding: 0.8rem 1rem;
   text-align: left;
   border-bottom: 2px solid #FFD166;
+  white-space: nowrap;
 }
 
 .ai-roadmap-markdown-body td {
-  padding: 1rem 1.2rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid #1c2030;
   color: #E2E8F0;
-  font-size: 0.84rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.5;
   vertical-align: top;
+  word-break: normal;
 }
 
 .ai-roadmap-markdown-body tr:last-child td {
@@ -1380,28 +1383,1260 @@
 }
 
 /* =========================================================================
-   LANGGRAPH AUTONOMOUS AGENT STATEGRAPH VISUALIZER COCKPIT
+   COMPREHENSIVE RESPONSIVE STYLES FOR TABLETS & MOBILES
    ========================================================================= */
-.agent-cockpit-modal {
-  background: radial-gradient(circle at 50% 10%, rgba(30, 20, 50, 0.95) 0%, rgba(7, 9, 16, 0.98) 100%) !important;
-  border: 1.5px solid rgba(255, 209, 102, 0.5) !important;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 60px rgba(255, 209, 102, 0.25) !important;
+
+/* Tablet Screens (<= 1180px) */
+@media (max-width: 1180px) {
+  .dashboard-main-container {
+    padding: 1.5rem 1.8rem 5rem 1.8rem;
+    gap: 1.6rem;
+  }
+
+  .dashboard-grid-2col {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .roadmap-side-by-side-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .roadmap-side-cat-companion {
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.2rem;
+  }
+
+  .cat-free-standing-img {
+    width: 120px;
+    height: 140px;
+  }
+
+  .cat-free-dialog-bubble::after {
+    display: none;
+  }
+
+  .roadmap-zigzag-deck {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+  }
 }
 
-.agent-live-dot {
-  width: 8px;
-  height: 8px;
+/* Mobile Screens (<= 768px) */
+@media (max-width: 768px) {
+  .dashboard-main-container {
+    padding: 1rem 0.9rem 4.5rem 0.9rem;
+    gap: 1.2rem;
+  }
+
+  /* 1. Header Profile Card */
+  .profile-hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.2rem 1.2rem;
+    gap: 1.2rem;
+    border-radius: 16px;
+  }
+
+  .profile-hero-left {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .profile-avatar-wrapper {
+    width: 68px;
+    height: 68px;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+
+  .profile-student-name {
+    font-size: 1.15rem;
+  }
+
+  .profile-name-row {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .profile-details-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.76rem;
+  }
+
+  .profile-role-selector-pill {
+    padding: 0.28rem 0.6rem;
+  }
+
+  .role-select-input {
+    font-size: 0.75rem;
+  }
+
+  .profile-hero-right {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .readiness-gauge-box {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.7rem 1rem;
+  }
+
+  .gauge-circle {
+    width: 52px;
+    height: 52px;
+  }
+
+  .gauge-inner {
+    width: 40px;
+    height: 40px;
+    font-size: 0.76rem;
+  }
+
+  .profile-action-btns-row {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  /* 2. Glass Panels & Grids */
+  .dashboard-glass-panel {
+    padding: 1.2rem 1.1rem;
+    border-radius: 16px;
+    gap: 1rem;
+  }
+
+  .panel-title {
+    font-size: 1rem;
+  }
+
+  .assessment-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .assessment-item-card {
+    padding: 0.85rem 0.9rem;
+  }
+
+  /* 3. Skill Gap Columns */
+  .gap-columns-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* 4. Roadmap Deck */
+  .roadmap-zigzag-stage {
+    min-height: auto;
+  }
+
+  .roadmap-zigzag-deck {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .roadmap-phase-card {
+    transform: none !important;
+  }
+
+  .roadmap-side-cat-companion {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .cat-free-standing-img {
+    width: 100px;
+    height: 120px;
+  }
+
+  .cat-free-dialog-bubble {
+    font-size: 0.72rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  /* 5. AI Chat & Inputs */
+  .ai-chat-input-bar {
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .ai-chat-input-field {
+    font-size: 0.8rem;
+  }
+
+  /* 6. Modals on Mobile */
+  .agent-cockpit-modal,
+  .full-roadmap-modal,
+  .quiz-modal-card {
+    width: 95% !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    padding: 1.2rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* 7. Action Buttons */
+  .btn-gold-action,
+  .btn-cyber-action {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.74rem;
+  }
+}
+
+/* =========================================================================
+   FLOATING AI MENTOR COMPACT & RESPONSIVE LAUNCHER
+   ========================================================================= */
+.floating-ai-mentor-container {
+  position: fixed;
+  bottom: 22px;
+  right: 25px;
+  z-index: 999;
+}
+
+.floating-ai-mentor-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.floating-ai-mentor-badge {
+  background: linear-gradient(135deg, rgba(13, 16, 26, 0.95) 0%, rgba(30, 20, 45, 0.95) 100%);
+  border: 1.5px solid #FFD166;
+  border-radius: 16px;
+  padding: 0.38rem 0.85rem;
+  color: #FFD166;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 8px 25px rgba(255, 209, 102, 0.35);
+  margin-bottom: -10px;
+  z-index: 2;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.ai-mentor-badge-text {
+  font-size: 0.58rem;
+  letter-spacing: 0.5px;
+}
+
+.floating-ai-mentor-img {
+  width: 95px;
+  height: 110px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 25px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 15px rgba(255, 209, 102, 0.3));
+  transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+
+.floating-ai-mentor-chat-window {
+  width: 430px;
+  max-width: 92vw;
+  height: 570px;
+  max-height: 88vh;
+  background: rgba(7, 9, 16, 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1.5px solid #FFD166;
+  border-radius: 22px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.98), 0 0 50px rgba(255, 209, 102, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile Screens (<= 768px) — SLEEK COMPACT FLOATING LAUNCHER */
+@media (max-width: 768px) {
+  .floating-ai-mentor-container {
+    bottom: 14px;
+    right: 14px;
+  }
+
+  .floating-ai-mentor-trigger {
+    flex-direction: row;
+    align-items: center;
+    background: rgba(7, 9, 16, 0.92);
+    border: 1.5px solid #FFD166;
+    border-radius: 30px;
+    padding: 0.3rem 0.65rem 0.3rem 0.35rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 209, 102, 0.3);
+    gap: 0.35rem;
+  }
+
+  .floating-ai-mentor-badge {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 0;
+    box-shadow: none;
+  }
+
+  .ai-mentor-badge-text {
+    font-size: 0.48rem;
+    letter-spacing: 0.3px;
+  }
+
+  .floating-ai-mentor-img {
+    width: 34px;
+    height: 38px;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+  }
+
+  .floating-ai-mentor-chat-window {
+    width: 94vw;
+    height: 82vh;
+    max-height: 85vh;
+    border-radius: 18px;
+  }
+}
+
+/* =========================================================================
+   NAVBAR HAMBURGER MENU & ROADMAP BUTTONS RESPONSIVE STYLING
+   ========================================================================= */
+
+/* Desktop Hamburger Button is Hidden */
+.dashboard-mobile-hamburger-btn {
+  display: none;
+  background: rgba(14, 16, 26, 0.85);
+  border: 1.5px solid #FFD166;
+  border-radius: 10px;
+  padding: 0.4rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.25);
+}
+
+.dashboard-mobile-hamburger-btn:hover {
+  background: rgba(255, 209, 102, 0.18);
+  transform: scale(1.05);
+}
+
+/* Mobile Animated Dropdown Drawer */
+.dashboard-mobile-drawer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(7, 9, 16, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 2px solid #FFD166;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+  z-index: 105;
+}
+
+.mobile-drawer-btn {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: rgba(13, 16, 26, 0.9);
+  border: 1px solid #222638;
+  color: #FFF7E8;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.mobile-drawer-btn:hover {
+  border-color: #FFD166;
+  background: rgba(255, 209, 102, 0.12);
+  color: #FFD166;
+}
+
+.mobile-drawer-btn.signout-btn {
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.mobile-drawer-btn.signout-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #EF4444;
+}
+
+/* Roadmap Header Actions Row */
+.roadmap-header-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.reset-default-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #33394f;
+  border-radius: 10px;
+  padding: 0.45rem 0.75rem;
+  color: #B8B3C7;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.history-action-btn {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.72rem;
+  border-color: #FFD166;
+  color: #FFD166;
+  background-color: rgba(255, 209, 102, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 10px;
+}
+
+.fast-genai-action-btn {
+  padding: 0.45rem 1rem;
+  font-size: 0.74rem;
+  border-color: rgba(0, 210, 255, 0.5);
+  color: #00D2FF;
+  background-color: rgba(0, 210, 255, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.autonomous-agent-action-btn {
+  padding: 0.45rem 1.15rem;
+  font-size: 0.76rem;
+  background: #FFD166;
+  border: 1.5px solid #FFD166;
+  color: #05060A;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(255, 209, 102, 0.25);
+  transition: all 0.2s ease;
+}
+
+/* Media Query overrides for Navbar and Roadmap Buttons on Tablets & Mobiles */
+@media (max-width: 860px) {
+  .desktop-navbar-actions {
+    display: none !important;
+  }
+
+  .dashboard-mobile-hamburger-btn {
+    display: flex;
+  }
+
+  .roadmap-header-actions-row {
+    width: 100%;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+  }
+
+  .history-action-btn,
+  .fast-genai-action-btn,
+  .autonomous-agent-action-btn,
+  .reset-default-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.68rem;
+  }
+}
+
+/* =========================================================================
+   FAST GENAI & LANGGRAPH MODAL FULL MOBILE RESPONSIVENESS
+   ========================================================================= */
+
+/* 1. Fast GenAI Modal Base Styles */
+.fast-genai-modal-card {
+  width: 1040px;
+  max-width: 94vw;
+  height: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.8rem 2.4rem;
+  background-color: #090C15;
+  border: 1.5px solid #00D2FF;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(0, 210, 255, 0.25);
+}
+
+.fast-genai-header-row {
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #1c2030;
+}
+
+.fast-genai-title {
+  font-size: 1.25rem;
+  color: #FFF7E8;
+  margin: 0;
+}
+
+.fast-genai-subtitle {
+  font-size: 0.74rem;
+  color: #B8B3C7;
+}
+
+.fast-genai-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #00D2FF;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.fast-genai-grid-stage {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2.2rem;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.fast-genai-cat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.fast-genai-cat-img {
+  width: 250px;
+  height: 270px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 35px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 30px rgba(0, 210, 255, 0.35));
+  transition: all 0.3s ease;
+}
+
+.fast-genai-cat-badge {
+  background: #070912;
+  border: 1.5px solid #00D2FF;
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.62rem;
+  color: #00D2FF;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+}
+
+.fast-genai-terminal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  height: 100%;
+}
+
+.fast-genai-terminal-title {
+  font-size: 1.15rem;
+  color: #FFF7E8;
+  margin: 0 0 0.3rem 0;
+}
+
+.fast-genai-terminal-desc {
+  font-size: 0.82rem;
+  color: #B8B3C7;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.fast-genai-terminal-box {
+  flex: 1;
+  background: #020307;
+  border: 1.5px solid #222638;
+  border-radius: 14px;
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-family: monospace;
+  box-shadow: inset 0 3px 20px rgba(0, 0, 0, 0.95);
+}
+
+/* 2. LangGraph Visualizer Modal Base Styles */
+.agent-visualizer-modal-card {
+  width: 1280px;
+  max-width: 96vw;
+  height: 92vh;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.8rem 2.4rem;
+  background-color: #090C15;
+  border: 1.5px solid #FFD166;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(255, 209, 102, 0.2);
+}
+
+.agent-visualizer-header-row {
+  margin-bottom: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #1c2030;
+}
+
+.agent-visualizer-title {
+  font-size: 1.35rem;
+  color: #FFF7E8;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.agent-visualizer-subtitle {
+  font-size: 0.78rem;
+  color: #B8B3C7;
+}
+
+.agent-visualizer-close-btn {
+  background: #131724;
+  border: 1px solid #33394f;
   border-radius: 50%;
-  background: #27C93F;
-  box-shadow: 0 0 10px #27C93F;
-  animation: pulse 1.5s infinite;
-  display: inline-block;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF7E8;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-@keyframes pulse {
-  0% { transform: scale(0.95); opacity: 0.7; }
-  50% { transform: scale(1.25); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.7; }
+.agent-visualizer-close-btn:hover {
+  background: rgba(255, 209, 102, 0.2);
+  border-color: #FFD166;
+}
+
+.agent-visualizer-stepper-track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.65rem;
+  background: #04060A;
+  border: 1px solid #1c2030;
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1.2rem;
+  overflow: hidden;
+}
+
+.agent-visualizer-step-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  borderRadius: 8px;
+  background: #090D18;
+  border: 1px solid #1c2030;
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: default;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-visualizer-step-item.is-active {
+  background: rgba(255, 209, 102, 0.15);
+  border: 1.5px solid #FFD166;
+  color: #FFD166;
+}
+
+.agent-visualizer-step-item.is-done {
+  background: rgba(39, 201, 63, 0.12);
+  border: 1.5px solid #27C93F;
+  color: #27C93F;
+}
+
+.agent-visualizer-node-stage {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2.2rem;
+  align-items: center;
+  height: 100%;
+  padding: 0.5rem 0;
+}
+
+.agent-visualizer-char-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.agent-visualizer-char-img {
+  width: 280px;
+  height: 300px;
+  max-height: 52vh;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 30px rgba(255, 209, 102, 0.35));
+  transition: all 0.3s ease;
+}
+
+.agent-visualizer-char-badge {
+  background: #070912;
+  border: 1.5px solid #FFD166;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.66rem;
+  color: #FFD166;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+}
+
+.agent-visualizer-terminal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  height: 100%;
+}
+
+.agent-visualizer-node-title {
+  font-size: 1.35rem;
+  color: #FFF7E8;
+  margin: 0 0 0.35rem 0;
+}
+
+.agent-visualizer-node-desc {
+  font-size: 0.88rem;
+  color: #B8B3C7;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.agent-visualizer-terminal-box {
+  flex: 1;
+  background: #020307;
+  border: 1.5px solid #222638;
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-family: monospace;
+  box-shadow: inset 0 3px 20px rgba(0, 0, 0, 0.95);
+}
+
+/* =========================================================================
+   MOBILE RESPONSIVENESS FOR BOTH MODALS (<= 768px)
+   ========================================================================= */
+/* 3. LangGraph Final Report Blueprint Styles */
+.agent-final-report-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.agent-final-banner {
+  background: #0c101c;
+  border: 1.5px solid #27C93F;
+  border-radius: 14px;
+  padding: 0.9rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 0.8rem;
+}
+
+.agent-final-banner-title {
+  font-size: 1.15rem;
+  color: #FFF7E8;
+  margin: 0;
+}
+
+.agent-final-banner-sub {
+  font-size: 0.76rem;
+  color: #27C93F;
+}
+
+.agent-final-engine-badge {
+  background: #131724;
+  border: 1px solid #FFD166;
+  color: #FFD166;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.agent-final-scroll-container {
+  flex: 1 1 auto;
+  min-height: 220px;
+  height: 100%;
+  padding: 1.2rem 1.4rem;
+  background: #04060A;
+  border: 1px solid #1c2030;
+  border-radius: 16px;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  pointer-events: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.agent-final-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #1c2030;
+  padding-top: 0.9rem;
+  flex-shrink: 0;
+  gap: 0.8rem;
+}
+
+.agent-final-footer-text {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.agent-final-footer-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* =========================================================================
+   MOBILE RESPONSIVENESS FOR BOTH MODALS (<= 768px)
+   ========================================================================= */
+@media (max-width: 768px) {
+  .fast-genai-modal-card,
+  .agent-visualizer-modal-card {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    padding: 1rem 0.9rem !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .fast-genai-title,
+  .agent-visualizer-title {
+    font-size: 0.98rem !important;
+    line-height: 1.2;
+  }
+
+  .fast-genai-subtitle,
+  .agent-visualizer-subtitle {
+    font-size: 0.66rem !important;
+  }
+
+  .fast-genai-grid-stage,
+  .agent-visualizer-node-stage {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.85rem !important;
+    align-items: stretch !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  .fast-genai-cat-col,
+  .agent-visualizer-char-col {
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .fast-genai-cat-img,
+  .agent-visualizer-char-img {
+    width: 70px !important;
+    height: 78px !important;
+    max-height: none !important;
+  }
+
+  .fast-genai-cat-badge,
+  .agent-visualizer-char-badge {
+    font-size: 0.5rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+
+  .fast-genai-terminal-title,
+  .agent-visualizer-node-title {
+    font-size: 0.9rem !important;
+  }
+
+  .fast-genai-terminal-desc,
+  .agent-visualizer-node-desc {
+    font-size: 0.72rem !important;
+  }
+
+  .fast-genai-terminal-box,
+  .agent-visualizer-terminal-box {
+    min-height: 160px !important;
+    max-height: 220px !important;
+    padding: 0.75rem 0.85rem !important;
+    flex: 1 1 auto !important;
+  }
+
+  .agent-visualizer-stepper-track {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 0.4rem !important;
+    padding: 0.35rem 0.45rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .agent-visualizer-step-item {
+    font-size: 0.62rem !important;
+    padding: 0.28rem 0.5rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Final Report Stage Mobile */
+  .agent-final-report-wrapper {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .agent-final-banner {
+    padding: 0.65rem 0.85rem !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .agent-final-banner-title {
+    font-size: 0.95rem !important;
+  }
+
+  .agent-final-banner-sub {
+    font-size: 0.68rem !important;
+  }
+
+  .agent-final-engine-badge {
+    font-size: 0.64rem !important;
+    padding: 0.25rem 0.55rem !important;
+  }
+
+  .agent-final-scroll-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: calc(90vh - 230px) !important;
+    padding: 0.9rem 0.85rem !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+  }
+
+  .agent-final-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+    padding-top: 0.6rem !important;
+  }
+
+  .agent-final-footer-text {
+    display: none !important;
+  }
+
+  .agent-final-footer-btns {
+    width: 100% !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .agent-final-footer-btns button {
+    flex: 1 !important;
+    padding: 0.55rem 0.8rem !important;
+    font-size: 0.72rem !important;
+    justify-content: center !important;
+  }
+}
+
+/* =========================================================================
+   GENAI CAREER ROADMAP MODAL RESPONSIVE STYLES
+   ========================================================================= */
+
+.genai-roadmap-modal-card {
+  width: 1200px;
+  max-width: 96vw;
+  height: 90vh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.6rem 2.2rem;
+  background: #090C15;
+  border: 1.5px solid #FFD166;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.98), 0 0 50px rgba(255, 209, 102, 0.2);
+}
+
+.genai-roadmap-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #1c2030;
+  gap: 0.8rem;
+}
+
+.genai-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.genai-roadmap-title {
+  font-size: 1.25rem;
+  color: #FFF7E8;
+  margin: 0;
+  letter-spacing: 0.4px;
+}
+
+.genai-roadmap-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.genai-header-right-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.genai-history-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #FFD166;
+  border-radius: 12px;
+  padding: 0.45rem 0.85rem;
+  color: #FFD166;
+  font-size: 0.74rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.genai-history-btn:hover {
+  background: rgba(255, 209, 102, 0.18);
+}
+
+.genai-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #33394f;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF7E8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.genai-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #EF4444;
+}
+
+.genai-roadmap-content-area {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: calc(90vh - 180px);
+  max-height: calc(90vh - 180px);
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.genai-history-drawer {
+  background: rgba(13, 16, 26, 0.95);
+  border: 1px solid #222638;
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+  min-width: 250px;
+  height: 100%;
+}
+
+.genai-roadmap-scroll-box {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  padding-right: 0.8rem;
+  pointer-events: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.genai-roadmap-footer {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #1c2030;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 0.8rem;
+}
+
+.genai-footer-note {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.genai-footer-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.genai-download-pdf-btn {
+  background: linear-gradient(135deg, rgba(39, 201, 63, 0.2) 0%, rgba(0, 210, 255, 0.2) 100%);
+  border: 1.5px solid #27C93F;
+  border-radius: 12px;
+  padding: 0.55rem 1.3rem;
+  color: #27C93F;
+  font-family: "Bungee", cursive, sans-serif;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(39, 201, 63, 0.25);
+  transition: all 0.2s ease;
+}
+
+.genai-close-action-btn {
+  width: auto;
+  padding: 0.55rem 1.5rem;
+  font-size: 0.82rem;
+}
+
+/* Mobile Overrides for GenAI Career Roadmap Modal */
+@media (max-width: 768px) {
+  .genai-roadmap-modal-card {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    padding: 1rem 0.9rem !important;
+  }
+
+  .genai-roadmap-header-row {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .genai-roadmap-title {
+    font-size: 0.96rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .genai-roadmap-badges {
+    gap: 0.35rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .genai-header-right-btns {
+    gap: 0.4rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .genai-history-btn {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .genai-close-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .genai-roadmap-content-area {
+    height: calc(90vh - 200px) !important;
+    max-height: calc(90vh - 200px) !important;
+  }
+
+  .genai-roadmap-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.55rem !important;
+    padding-top: 0.6rem !important;
+    margin-top: 0.6rem !important;
+  }
+
+  .genai-footer-note {
+    display: none !important;
+  }
+
+  .genai-footer-btns {
+    width: 100% !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .genai-download-pdf-btn,
+  .genai-close-action-btn {
+    flex: 1 !important;
+    padding: 0.55rem 0.6rem !important;
+    font-size: 0.72rem !important;
+    justify-content: center !important;
+  }
 }
 
 

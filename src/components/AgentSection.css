@@ -2,7 +2,7 @@
 
 .agent-section-wrapper {
   width: 100%;
-  padding: 6rem 2rem 7rem 2rem;
+  padding: clamp(3.5rem, 6vw, 6rem) clamp(1rem, 3vw, 2rem) clamp(4rem, 6vw, 6.5rem) clamp(1rem, 3vw, 2rem);
   background-color: #000000;
   border-top: 1px solid #1c1f2e;
   position: relative;
@@ -11,7 +11,7 @@
 }
 
 .agent-section-container {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -20,25 +20,25 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
 .agent-header-text {
-  max-width: 750px;
+  max-width: 720px;
 }
 
 .graph-sim-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.8rem 1.6rem;
+  gap: 0.5rem;
+  padding: clamp(0.55rem, 0.8vw, 0.7rem) clamp(1rem, 1.5vw, 1.4rem);
   border-radius: 8px;
   background-color: #FFD166;
   color: #05060A;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
+  font-size: clamp(0.75rem, 0.88vw, 0.82rem);
+  letter-spacing: 0.8px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid #FFD166;
@@ -47,14 +47,14 @@
 .graph-sim-btn:hover {
   background-color: #FFF7E8;
   border-color: #FFF7E8;
-  box-shadow: 0 0 25px rgba(255, 209, 102, 0.4);
+  box-shadow: 0 0 20px rgba(255, 209, 102, 0.4);
 }
 
 /* Main Interactive Layout: Visual Graph Canvas (Left) + Live State Inspector (Right) */
 .langgraph-main-layout {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(1.2rem, 2vw, 2rem);
   align-items: start;
 }
 
@@ -62,9 +62,9 @@
 .stategraph-canvas-card {
   background-color: #070910;
   border: 1.5px solid #222638;
-  border-radius: 18px;
-  padding: 2.2rem 1.8rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 209, 102, 0.08);
+  border-radius: 16px;
+  padding: clamp(1.2rem, 2vw, 1.8rem);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 209, 102, 0.06);
   position: relative;
   overflow: hidden;
 }
@@ -81,34 +81,34 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   position: relative;
   z-index: 5;
   border-bottom: 1px solid #1c2030;
-  padding-bottom: 1rem;
+  padding-bottom: 0.8rem;
 }
 
 .studio-title-badge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: clamp(0.72rem, 0.85vw, 0.78rem);
   color: #FFF7E8;
 }
 
 .studio-cycle-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.68rem;
+  gap: 0.4rem;
+  font-size: clamp(0.6rem, 0.72vw, 0.65rem);
   color: #FFD166;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .studio-pulse-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background-color: #27C93F;
   box-shadow: 0 0 10px #27C93F;
@@ -118,7 +118,7 @@
 .graph-nodes-flow-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
   position: relative;
   z-index: 5;
 }
@@ -127,7 +127,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 /* Individual LangGraph Node Box */
@@ -135,11 +135,11 @@
   flex: 1;
   background-color: #0d101a;
   border: 1.5px solid #222638;
-  border-radius: 12px;
-  padding: 1.1rem;
+  border-radius: 10px;
+  padding: clamp(0.75rem, 1.2vw, 0.95rem);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -148,13 +148,13 @@
 
 .graph-node-box:hover {
   border-color: #FFD166;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .graph-node-box.active-executing {
   border-color: #FFD166;
   background-color: #121728;
-  box-shadow: 0 0 25px rgba(255, 209, 102, 0.4), 0 0 0 3px rgba(255, 209, 102, 0.15);
+  box-shadow: 0 0 20px rgba(255, 209, 102, 0.4), 0 0 0 2px rgba(255, 209, 102, 0.15);
 }
 
 .graph-node-box.completed-node {
@@ -169,15 +169,15 @@
 
 .node-label-title {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: clamp(0.72rem, 0.85vw, 0.78rem);
   font-weight: 700;
   color: #FFF7E8;
 }
 
 .node-type-tag {
-  font-size: 0.6rem;
+  font-size: clamp(0.55rem, 0.68vw, 0.58rem);
   letter-spacing: 0.5px;
-  padding: 0.15rem 0.45rem;
+  padding: 0.1rem 0.35rem;
   border-radius: 4px;
   background-color: #05060A;
   border: 1px solid #222638;
@@ -185,8 +185,8 @@
 }
 
 .node-desc-small {
-  font-size: 0.76rem;
-  line-height: 1.4;
+  font-size: clamp(0.68rem, 0.8vw, 0.74rem);
+  line-height: 1.35;
   color: #B8B3C7;
 }
 
@@ -196,7 +196,7 @@
   align-items: center;
   justify-content: center;
   color: #64748b;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .graph-edge-connector.active {
@@ -207,59 +207,59 @@
 .graph-cycle-pill {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.8rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 20px;
   background-color: #0d101a;
   border: 1px solid #FFD166;
   color: #FFD166;
-  font-size: 0.65rem;
-  letter-spacing: 1px;
+  font-size: clamp(0.58rem, 0.7vw, 0.62rem);
+  letter-spacing: 0.8px;
 }
 
 /* Right Side: Live State Inspector & ChromaDB Vectors */
 .state-inspector-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
 .state-payload-card {
   background-color: #070910;
   border: 1.5px solid #222638;
-  border-radius: 18px;
-  padding: 1.8rem;
+  border-radius: 16px;
+  padding: clamp(1.2rem, 1.8vw, 1.5rem);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
   text-align: left;
 }
 
 .inspector-card-header {
   font-family: "Bungee", cursive, sans-serif;
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 1vw, 0.95rem);
   color: #FFF7E8;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .inspector-card-subtitle {
-  font-size: 0.82rem;
+  font-size: clamp(0.74rem, 0.85vw, 0.78rem);
   color: #B8B3C7;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
 }
 
 .json-state-terminal {
   background-color: #05060A;
   border: 1px solid #1c2030;
-  border-radius: 10px;
-  padding: 1.2rem;
+  border-radius: 8px;
+  padding: 1rem;
   font-family: 'JetBrains Mono', var(--font-mono);
-  font-size: 0.78rem;
-  line-height: 1.65;
+  font-size: clamp(0.7rem, 0.82vw, 0.75rem);
+  line-height: 1.55;
   color: #F4F1EA;
   overflow-x: auto;
-  max-height: 240px;
+  max-height: clamp(180px, 24vh, 220px);
 }
 
 .json-key { color: #FFD166; font-weight: 600; }
@@ -271,8 +271,8 @@
 .chromadb-store-card {
   background-color: #070910;
   border: 1.5px solid #222638;
-  border-radius: 18px;
-  padding: 1.8rem;
+  border-radius: 16px;
+  padding: clamp(1.2rem, 1.8vw, 1.5rem);
   text-align: left;
 }
 
@@ -280,36 +280,40 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.65rem 0.9rem;
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
   background-color: #0d101a;
   border: 1px solid #1c2030;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: clamp(0.7rem, 0.8vw, 0.75rem);
   color: #F4F1EA;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .chroma-file-left {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .chroma-chunks-badge {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: #FFD166;
   background-color: #05060A;
-  padding: 0.15rem 0.45rem;
+  padding: 0.1rem 0.35rem;
   border-radius: 4px;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1080px) {
   .langgraph-main-layout {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 720px) {
   .graph-flow-row {
     flex-direction: column;
+    gap: 0.6rem;
   }
   .graph-node-box {
     width: 100%;

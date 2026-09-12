@@ -2,7 +2,7 @@
 
 # 🪐 SKILLFORGE
 
-### *Autonomous AI-Grounded Career Acceleration & Diagnostic Intelligence*
+### *Autonomous AI-Grounded Career Acceleration & Diagnostic Intelligence Platform*
 
 [![Groq AI](https://img.shields.io/badge/LLM%20Engine-Groq%20Cloud%20GPT--OSS--120B-F77F00?style=for-the-badge&logo=openai&logoColor=white)](https://groq.com/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20DB-ChromaDB%20Semantic%20RAG-118AB2?style=for-the-badge&logo=databricks&logoColor=white)](https://www.trychroma.com/)

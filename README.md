@@ -1,7 +1,8 @@
 <div align="center">
 
 # 🪐 SKILLFORGE
-### *Autonomous AI-Grounded Career Acceleration & Diagnostic Intelligence*
+
+### *Autonomous AI-Grounded Career Acceleration & Diagnostic Intelligence Platform*
 
 [![Groq AI](https://img.shields.io/badge/LLM%20Engine-Groq%20Cloud%20GPT--OSS--120B-F77F00?style=for-the-badge&logo=openai&logoColor=white)](https://groq.com/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20DB-ChromaDB%20Semantic%20RAG-118AB2?style=for-the-badge&logo=databricks&logoColor=white)](https://www.trychroma.com/)
@@ -58,6 +59,7 @@
 ## 🧭 Overview & Mission
 
 University students and self-taught developers face **three critical bottlenecks** in tech career acceleration:
+
 1. **The Abstract Guidance Trap**: Generic tutorials without verified assessment of existing strengths and weaknesses.
 2. **Hallucinated Recommendations**: Standard LLMs give outdated or non-grounded curricula without verifiable sources.
 3. **Fragmented Growth Tracking**: No centralized intelligence platform bridging verified assessments, dynamic milestone roadmaps, and real-time mentor guidance.
@@ -259,13 +261,15 @@ chmod +x scripts/*.sh
 
 SkillForge is fully containerized with **Docker & Docker Compose**, enabling one-click deployment for the complete MERN stack (MongoDB 7.0, Express API backend, React Vite SPA with Nginx, and Python AI FastAPI microservice):
 
-### Architecture in Docker:
+### Architecture in Docker
+
 - **`skillforge-frontend`** (`port 5173`): React SPA built with Vite, served via optimized **Nginx** reverse proxy.
 - **`skillforge-backend`** (`port 3001`): Node.js + Express API Gateway connecting to MongoDB and Python services.
 - **`skillforge-mongodb`** (`port 27017`): MongoDB 7.0 database container with healthchecks and persistent named volume (`mongo_data`).
 - **`skillforge-python-ai`** (`port 8000`): FastAPI AI microservice with ChromaDB persistent vector storage (`chroma_data`).
 
-### Quick Start with Docker:
+### Quick Start with Docker
+
 ```bash
 # 1. Build and run all services in detached mode
 docker compose up -d --build
@@ -278,6 +282,7 @@ docker compose down
 ```
 
 Or using npm shortcut scripts:
+
 ```bash
 npm run docker:build
 npm run docker:up
@@ -291,7 +296,8 @@ npm run docker:down
 
 A comprehensive Continuous Integration & Continuous Delivery (CI/CD) workflow is configured at [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
 
-### Automated Pipeline Stages:
+### Automated Pipeline Stages
+
 1. **🔍 Lint & Syntax Validation**:
    - Sets up Node.js 20 environment with cached dependencies (`npm ci`).
    - Validates JavaScript backend files (`node --check server/server.js`).
@@ -312,6 +318,7 @@ A comprehensive Continuous Integration & Continuous Delivery (CI/CD) workflow is
 ## 🛠️ Installation & Local Setup
 
 ### 1. Prerequisites
+
 - **Node.js**: v18.0+
 - **Python**: v3.10+
 - **MongoDB**: Local MongoDB instance or free MongoDB Atlas URI
@@ -331,6 +338,7 @@ cp .env.example .env
 ```
 
 Fill in your `.env` variables:
+
 ```env
 PORT=3001
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/skillforge?retryWrites=true&w=majority
@@ -345,24 +353,30 @@ PYTHON_SERVICE_URL=http://localhost:8000
 ### 3. Launch Services
 
 #### Terminal 1: Node.js Express Gateway
+
 ```bash
 npm install
 npm run server
 ```
+
 *Express Gateway runs on `http://localhost:3001`*
 
 #### Terminal 2: Python FastAPI & ChromaDB Service
+
 ```bash
 cd python_service
 pip install -r requirements.txt
 python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
 *FastAPI microservice runs on `http://localhost:8000` (auto-indexes ChromaDB on boot)*
 
 #### Terminal 3: React + Vite Frontend
+
 ```bash
 npm run dev
 ```
+
 *Frontend runs on `http://localhost:5173`*
 
 ---
@@ -393,6 +407,6 @@ Both microservices expose production-ready health monitoring endpoints for **[Up
 
 <div align="center">
 
-*Democratizing AI-Grounded Career Acceleration Across the Universe* 
+*Democratizing AI-Grounded Career Acceleration Across the Universe*
 
 </div>

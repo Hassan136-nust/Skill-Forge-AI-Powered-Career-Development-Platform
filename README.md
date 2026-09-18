@@ -398,8 +398,6 @@ Both microservices expose production-ready health monitoring endpoints for **[Up
 
 ---
 
-## 🎯 LoopLearn Hackathon 2026 (PS-03) Alignment
-
 - **UN SDG 4 (Quality Education)**: Bridges higher education curricula with real-world industry competencies through personalized AI roadmaps and continuous diagnostic calibration.
 - **UN SDG 8 (Decent Work & Economic Growth)**: Accelerates graduate employability by identifying technical gaps early and recommending verifiable capstone project deliverables.
 

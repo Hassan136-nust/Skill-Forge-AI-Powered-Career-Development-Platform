@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🪐
+# 🪐 SKILLFORGE
 
 ### *Autonomous AI-Grounded Career Acceleration & Diagnostic Intelligence Platform*
 
